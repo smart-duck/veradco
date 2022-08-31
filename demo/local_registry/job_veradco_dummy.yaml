@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: veradcodummy
+spec:
+  template:
+    spec:
+      containers:
+      - name: veradcodummy
+        image: localhost:5001/veradco/dummy:0.1
+      restartPolicy: Never
+  backoffLimit: 4
