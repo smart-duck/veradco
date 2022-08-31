@@ -1,9 +1,9 @@
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: pod-validation
+  name: veradco-pod-validation
 webhooks:
-  - name: pod-validation.default.svc
+  - name: veradco-pod-validation.default.svc
     sideEffects: None
     admissionReviewVersions: ["v1"]
     clientConfig:
@@ -22,9 +22,9 @@ webhooks:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
-  name: deployment-validation
+  name: veradco-deployment-validation
 webhooks:
-  - name: deployment-validation.default.svc
+  - name: veradco-deployment-validation.default.svc
     sideEffects: None
     admissionReviewVersions: ["v1"]
     clientConfig:
@@ -43,9 +43,9 @@ webhooks:
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: pod-mutation
+  name: veradco-pod-mutation
 webhooks:
-  - name: pod-mutation.default.svc
+  - name: veradco-pod-mutation.default.svc
     sideEffects: None
     admissionReviewVersions: ["v1"]
     clientConfig:
