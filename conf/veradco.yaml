@@ -1,0 +1,9 @@
+plugins:
+- name: "plug1"
+  path: "/plugins/plug1.so"
+  resources:
+  - "Pod"
+  operations:
+  - "CREATE"
+  configuration: "/conf/plug1.yaml"
+  scope: "Validating"

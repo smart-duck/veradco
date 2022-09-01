@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scan-plugins
+  namespace: veradco
+spec:
+  volumes:
+  - name: plugins-volume
+    emptyDir: {}
+  containers:
+  - name: plugins-init
+    image: localhost:5001/smartduck/veradco_plugins:0.1
+    imagePullPolicy: Always
+    command: ["/bin/sh"]
+    args: ["-c", "sleep 120s"]
+    volumeMounts:
+    - name: plugins-volume
+      mountPath: "/plugs"
+  hostNetwork: true
+  dnsPolicy: Default
+  

@@ -15,6 +15,15 @@ spec:
       labels:
         app: veradco
     spec:
+      initContainers:
+      - name: plugins-init
+        image: localhost:5001/smartduck/veradco_plugins:0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["-c", "cp -R /plugins/* /plugs"]
+        volumeMounts:
+        - name: plugins-volume
+          mountPath: "/plugs"
       containers:
       - name: server
         image: localhost:5001/smartduck/veradco:0.1
@@ -30,10 +39,21 @@ spec:
         - name: tls-certs
           mountPath: /etc/certs
           readOnly: true
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+        - name: plugins-volume
+          mountPath: /plugs
+          readOnly: true
       volumes:
       - name: tls-certs
         secret:
           secretName: veradco-tls
+      - name: config-volume
+        configMap:
+          name: veradco
+      - name: plugins-volume
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

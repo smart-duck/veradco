@@ -3,6 +3,7 @@ module github.com/smart-duck/veradco
 go 1.19
 
 require (
+	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.25.0
 	k8s.io/apimachinery v0.25.0
 	k8s.io/klog/v2 v2.70.1
