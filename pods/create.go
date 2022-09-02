@@ -1,7 +1,7 @@
 package pods
 
 import (
-	"strings"
+	// "strings"
 
 	"plugin"
 
@@ -14,7 +14,7 @@ import (
 	admission "k8s.io/api/admission/v1"
 	v1 "k8s.io/api/core/v1"
 
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func validateCreate() admissioncontroller.AdmitFunc {
@@ -56,7 +56,14 @@ func validateCreate() admissioncontroller.AdmitFunc {
 			veradcoPlugin.Init("Path to config file")
 			log.Infof("Execute plugin\n")
 			// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
-			veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
+			// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
+			result, err := veradcoPlugin.Execute(pod, string(r.Operation), *r.DryRun, r)
+			if err == nil {
+				log.Infof("Plugin execution summary: %s\n", veradcoPlugin.Summary())
+			}
+
+			return result, err
+			
 		}
 
 
@@ -75,11 +82,11 @@ func validateCreate() admissioncontroller.AdmitFunc {
 
 		
 
-		for _, c := range pod.Spec.Containers {
-			if strings.HasSuffix(c.Image, ":latest") {
-				return &admissioncontroller.Result{Msg: "You cannot use the tag 'latest' in a container."}, nil
-			}
-		}
+		// for _, c := range pod.Spec.Containers {
+		// 	if strings.HasSuffix(c.Image, ":latest") {
+		// 		return &admissioncontroller.Result{Msg: "You cannot use the tag 'latest' in a container."}, nil
+		// 	}
+		// }
 
 		return &admissioncontroller.Result{Allowed: true}, nil
 	}

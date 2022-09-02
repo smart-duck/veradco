@@ -11,6 +11,7 @@ type Plugin struct {
 	Path string
 	Resources []string
 	Operations []string
+	DryRun bool
 	Configuration string
 	Scope string
 }

@@ -37,6 +37,13 @@ plugins:
   params: "Plugin created by anyone"
 ```
 
+## Setup go environment
+
+```
+go mod init github.com/smart-duck/veradco
+go mod tidy
+```
+
 ## Test with kind
 
 Local registry:
@@ -85,3 +92,8 @@ created by net/http.(*Server).Serve
 pod/webserver created
 ```
 
+# TODO
+
+To add to plugin/Execute:
+- DryRun, conf/Execute/AdmissionRequest https://pkg.go.dev/k8s.io/kubernetes/pkg/apis/admission#AdmissionRequest
+- Operation CREATE DELETE UPDATE CONNECT AdmissionRequest

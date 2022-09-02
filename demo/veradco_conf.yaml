@@ -12,5 +12,8 @@ data:
       - "Pod"
       operations:
       - "CREATE"
-      configuration: "/conf/plug1.yaml"
+      dryRun: false
+      configuration: |
+        This plugin does not have configuration
+        That's like that!
       scope: "Validating" 
