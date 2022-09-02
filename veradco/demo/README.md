@@ -5,6 +5,7 @@ TODO
 ## Bulk
 
 ```
+cd /home/lobuntu/go/src/veradco
 sudo docker build -t smartduck/veradco-golang-builder:0.1 -f ./Dockerfile.golang_builder .
 sudo veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco-golang-builder:0.1
 cd veradco/demo
@@ -30,3 +31,5 @@ kk apply -f pods/01_fail_pod_creation_test.yaml
 sudo docker images | grep $(echo douglasmakey/admissioncontroller:0.1 | cut -d':' -f 1)
  1092  sudo tests/local_registry/push_local_image_to_local_registry.sh douglasmakey/admissioncontroller:0.1
  1093  sudo tests/local_registry/push_local_image_to_local_registry.sh douglasmakey/admissioncontroller:0.2
+
+ 

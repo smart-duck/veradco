@@ -21,6 +21,9 @@ openssl genrsa -out certs/admission-tls.key 2048
 
 openssl req -new -key certs/admission-tls.key -subj "/CN=veradco.veradco.svc" -config admission-cert.conf | openssl x509 -req -CA certs/ca.crt -CAkey certs/ca.key -CAcreateserial -out certs/admission-tls.crt -extensions v3_req -extfile admission-cert.conf
 
+echo "Creating namespace veradco"
+$KUBECTL apply -f veradco_ns.yaml
+
 echo "Creating configuration ConfigMap"
 $KUBECTL apply -f veradco_conf.yaml
 

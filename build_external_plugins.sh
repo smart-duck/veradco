@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# set -x
+
 echo "Copy veradcod to /app, also plugins folder"
 cp -r /release/* /app/
 
@@ -9,7 +11,7 @@ build_folder="/go/src/ext_plugins"
 
 mkdir -p "$build_folder"
 
-external_plugins_folder="/data/external_plugins"
+external_plugins_folder="/app/external_plugins"
 
 mkdir -p "$external_plugins_folder"
 
@@ -40,5 +42,7 @@ done
 echo "List of external plugins:"
 ls $external_plugins_folder
 
-echo "Data content:"
-ls /data
+echo "app content:"
+ls -lRt /app
+
+# sleep 1000s

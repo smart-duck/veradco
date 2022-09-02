@@ -10,6 +10,14 @@ sudo kind delete cluster
 sudo kind get clusters
 ```
 
+## Export KUBECONFIG
+
+```
+sudo chmod +r /root/.kube/config
+sudo cp /root/.kube/config /tmp
+export KUBECONFIG="/tmp/config"
+```
+
 
 # Push an image
 

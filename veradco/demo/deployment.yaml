@@ -38,7 +38,9 @@ spec:
       - name: server
         image: localhost:5001/smartduck/veradco:0.1
         imagePullPolicy: Always
-        command: ["/release/veradcod"]
+        command: ["/app/veradcod"]
+        # command: ["/bin/sh"]
+        # args: ["-c", "sleep 12000s"]
         livenessProbe:
           httpGet:
             path: /healthz
