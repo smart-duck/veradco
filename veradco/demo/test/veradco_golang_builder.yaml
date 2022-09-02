@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: golang-alpine
+  name: veradco-golang-builder
   namespace: veradco
 spec:
   volumes:
@@ -9,7 +9,7 @@ spec:
     emptyDir: {}
   containers:
   - name: golang
-    image: localhost:5001/smartduck/golang-builder:0.1
+    image: localhost:5001/smartduck/veradco-golang-builder:0.1
     imagePullPolicy: Always
     command: ["/bin/sh"]
     args: ["-c", "sleep 1000s"]
