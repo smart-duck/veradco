@@ -17,17 +17,28 @@ spec:
     spec:
       initContainers:
       - name: plugins-init
-        image: localhost:5001/smartduck/veradco_plugins:0.1
+        image: localhost:5001/smartduck/veradco-golang-builder:0.1
         imagePullPolicy: Always
         command: ["/bin/sh"]
-        args: ["-c", "cp -R /plugins/* /plugs"]
+        args: ["/veradco_scripts/build_external_plugins.sh"]
+        env:
+        - name: VERADCO_CONF
+          value: "/conf/veradco.yaml"
         volumeMounts:
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+        # - name: plugins-volume
+        #   mountPath: /external_plugins
+        #   readOnly: false
         - name: plugins-volume
-          mountPath: "/plugs"
+          mountPath: /app
+          readOnly: false
       containers:
       - name: server
         image: localhost:5001/smartduck/veradco:0.1
         imagePullPolicy: Always
+        command: ["/release/veradcod"]
         livenessProbe:
           httpGet:
             path: /healthz
@@ -42,8 +53,11 @@ spec:
         - name: config-volume
           mountPath: /conf/
           readOnly: true
+        # - name: plugins-volume
+        #   mountPath: /external_plugins
+        #   readOnly: true
         - name: plugins-volume
-          mountPath: /plugs
+          mountPath: /app
           readOnly: true
       volumes:
       - name: tls-certs

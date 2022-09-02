@@ -6,81 +6,48 @@ metadata:
 data:
   veradco.yaml: |
     plugins:
-    - name: "plug1"
-      path: "/plugins/built-in-plug1.so"
+    - name: "extplug1"
+      path: "/app/external_plugins/extplug1.so"
       plug.go: |
-        package main
-
-        import (
-          // meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-          admission "k8s.io/api/admission/v1"
-          v1 "k8s.io/api/core/v1"
-          "k8s.io/apimachinery/pkg/runtime"
-          "github.com/smart-duck/veradco"
-          // log "k8s.io/klog/v2"
-          "fmt"
-          "strings"
-          "encoding/json"
-        )
-
-        var (
-          name string = "Plug1"
-        )
-
-        type Plug1 struct {
-          configFile string
-          summary string
-        }
-
-        func (plug *Plug1) Init(configFile string) {
-          plug.configFile = configFile
-          // log.Infof("Configuration file of plugin %s: %s", name, configFile)
-          plug.summary = fmt.Sprintf("Configuration file of plugin %s: %s", name, configFile)
-        }
-
-
-        func (plug *Plug1) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
-
-          plug.summary += "\n" + fmt.Sprintf("Operation: %s, dryRun: %t", operation, dryRun)
-
-          plug.summary += "\n" + fmt.Sprintf("Kind: %s, Version: %s, Group: %s", kobj.GetObjectKind().GroupVersionKind().Kind, kobj.GetObjectKind().GroupVersionKind().Version, kobj.GetObjectKind().GroupVersionKind().Group)
-
-          pod, ok := kobj.(*v1.Pod)
-          if !ok {
-            plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
-            return nil, fmt.Errorf("Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
-          } else {
-            // https://pkg.go.dev/k8s.io/kubernetes/pkg/apis/admission#AdmissionRequest
-            jsonData, err := json.Marshal(r)
-            if err != nil {
-              fmt.Printf("could not marshal json: %s\n", err)
-            }
-
-            // fmt.Printf("json data: %s\n", jsonData)
-            plug.summary += "\n" + fmt.Sprintf("json data: %s\n", jsonData)
-
-            for _, c := range pod.Spec.Containers {
-              if strings.HasSuffix(c.Image, ":latest") {
-                plug.summary += "\n" + fmt.Sprintf("Container %s is rejected", c.Name)
-                if ! dryRun {
-                  return &admissioncontroller.Result{Msg: "You cannot use the tag 'latest' in a container."}, nil
-                }
-                
-              }
-            }
-          }
-
-          plug.summary += "\n" + fmt.Sprintf("Pod %s, accepted", pod.ObjectMeta.Name)
-
-          return &admissioncontroller.Result{Allowed: true}, nil
-        }
-
-        func (plug *Plug1) Summary() string {
-          return plug.summary
-        }
-
-        // exported as symbol named "VeradcoPlugin"
-        var VeradcoPlugin Plug1
+        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
+        YXBpcy9tZXRhL3YxIgoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92MSIKCXYxICJr
+        OHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVudGltZSIKCSJn
+        aXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCS8vIGxvZyAiazhzLmlvL2tsb2cvdjIiCgki
+        Zm10IgoJInN0cmluZ3MiCgkiZW5jb2RpbmcvanNvbiIKKQoKdmFyICgKCW5hbWUgc3RyaW5nID0g
+        IlBsdWcxIgopCgp0eXBlIFBsdWcxIHN0cnVjdCB7Cgljb25maWdGaWxlIHN0cmluZwoJc3VtbWFy
+        eSBzdHJpbmcKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIEluaXQoY29uZmlnRmlsZSBzdHJpbmcpIHsK
+        CXBsdWcuY29uZmlnRmlsZSA9IGNvbmZpZ0ZpbGUKCS8vIGxvZy5JbmZvZigiQ29uZmlndXJhdGlv
+        biBmaWxlIG9mIHBsdWdpbiAlczogJXMiLCBuYW1lLCBjb25maWdGaWxlKQoJcGx1Zy5zdW1tYXJ5
+        ID0gZm10LlNwcmludGYoIkNvbmZpZ3VyYXRpb24gZmlsZSBvZiBwbHVnaW4gJXM6ICVzIiwgbmFt
+        ZSwgY29uZmlnRmlsZSkKfQoKCmZ1bmMgKHBsdWcgKlBsdWcxKSBFeGVjdXRlKGtvYmogcnVudGlt
+        ZS5PYmplY3QsIG9wZXJhdGlvbiBzdHJpbmcsIGRyeVJ1biBib29sLCByICphZG1pc3Npb24uQWRt
+        aXNzaW9uUmVxdWVzdCkgKCphZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdCwgZXJyb3IpIHsKCglw
+        bHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJPcGVyYXRpb246ICVzLCBkcnlSdW46
+        ICV0Iiwgb3BlcmF0aW9uLCBkcnlSdW4pCgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
+        aW50ZigiS2luZDogJXMsIFZlcnNpb246ICVzLCBHcm91cDogJXMiLCBrb2JqLkdldE9iamVjdEtp
+        bmQoKS5Hcm91cFZlcnNpb25LaW5kKCkuS2luZCwga29iai5HZXRPYmplY3RLaW5kKCkuR3JvdXBW
+        ZXJzaW9uS2luZCgpLlZlcnNpb24sIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktp
+        bmQoKS5Hcm91cCkKCglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sgewoJCXBsdWcu
+        c3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMgbm90
+        IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNp
+        b25LaW5kKCkuS2luZCkKCQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5ldGVzIHJlc291
+        cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmplY3RLaW5kKCku
+        R3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgl9IGVsc2UgewoJCS8vIGh0dHBzOi8vcGtnLmdvLmRl
+        di9rOHMuaW8va3ViZXJuZXRlcy9wa2cvYXBpcy9hZG1pc3Npb24jQWRtaXNzaW9uUmVxdWVzdAoJ
+        CWpzb25EYXRhLCBlcnIgOj0ganNvbi5NYXJzaGFsKHIpCgkJaWYgZXJyICE9IG5pbCB7CgkJCWZt
+        dC5QcmludGYoImNvdWxkIG5vdCBtYXJzaGFsIGpzb246ICVzXG4iLCBlcnIpCgkJfQoKCQkvLyBm
+        bXQuUHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCQlwbHVnLnN1bW1hcnkgKz0g
+        IlxuIiArIGZtdC5TcHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCgkJZm9yIF8s
+        IGMgOj0gcmFuZ2UgcG9kLlNwZWMuQ29udGFpbmVycyB7CgkJCWlmIHN0cmluZ3MuSGFzU3VmZml4
+        KGMuSW1hZ2UsICI6bGF0ZXN0IikgewoJCQkJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
+        aW50ZigiQ29udGFpbmVyICVzIGlzIHJlamVjdGVkIiwgYy5OYW1lKQoJCQkJaWYgISBkcnlSdW4g
+        ewoJCQkJCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5SZXN1bHR7TXNnOiAiWW91IGNhbm5v
+        dCB1c2UgdGhlIHRhZyAnbGF0ZXN0JyBpbiBhIGNvbnRhaW5lci4ifSwgbmlsCgkJCQl9CgkJCQkK
+        CQkJfQoJCX0KCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJQb2QgJXMs
+        IGFjY2VwdGVkIiwgcG9kLk9iamVjdE1ldGEuTmFtZSkKCglyZXR1cm4gJmFkbWlzc2lvbmNvbnRy
+        b2xsZXIuUmVzdWx0e0FsbG93ZWQ6IHRydWV9LCBuaWwKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIFN1
+        bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBz
+        eW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBWZXJhZGNvUGx1Z2luIFBsdWcx
       resources:
       - "Pod"
       operations:
@@ -89,4 +56,55 @@ data:
       configuration: |
         This plugin does not have configuration
         That's like that!
-      scope: "Validating" 
+      scope: "Validating"
+    - name: "extplug2"
+      path: "/app/external_plugins/extplug2.so"
+      plug.go: |
+        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
+        YXBpcy9tZXRhL3YxIgoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92MSIKCXYxICJr
+        OHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVudGltZSIKCSJn
+        aXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCS8vIGxvZyAiazhzLmlvL2tsb2cvdjIiCgki
+        Zm10IgoJInN0cmluZ3MiCgkiZW5jb2RpbmcvanNvbiIKKQoKdmFyICgKCW5hbWUgc3RyaW5nID0g
+        IlBsdWcxIgopCgp0eXBlIFBsdWcxIHN0cnVjdCB7Cgljb25maWdGaWxlIHN0cmluZwoJc3VtbWFy
+        eSBzdHJpbmcKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIEluaXQoY29uZmlnRmlsZSBzdHJpbmcpIHsK
+        CXBsdWcuY29uZmlnRmlsZSA9IGNvbmZpZ0ZpbGUKCS8vIGxvZy5JbmZvZigiQ29uZmlndXJhdGlv
+        biBmaWxlIG9mIHBsdWdpbiAlczogJXMiLCBuYW1lLCBjb25maWdGaWxlKQoJcGx1Zy5zdW1tYXJ5
+        ID0gZm10LlNwcmludGYoIkNvbmZpZ3VyYXRpb24gZmlsZSBvZiBwbHVnaW4gJXM6ICVzIiwgbmFt
+        ZSwgY29uZmlnRmlsZSkKfQoKCmZ1bmMgKHBsdWcgKlBsdWcxKSBFeGVjdXRlKGtvYmogcnVudGlt
+        ZS5PYmplY3QsIG9wZXJhdGlvbiBzdHJpbmcsIGRyeVJ1biBib29sLCByICphZG1pc3Npb24uQWRt
+        aXNzaW9uUmVxdWVzdCkgKCphZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdCwgZXJyb3IpIHsKCglw
+        bHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJPcGVyYXRpb246ICVzLCBkcnlSdW46
+        ICV0Iiwgb3BlcmF0aW9uLCBkcnlSdW4pCgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
+        aW50ZigiS2luZDogJXMsIFZlcnNpb246ICVzLCBHcm91cDogJXMiLCBrb2JqLkdldE9iamVjdEtp
+        bmQoKS5Hcm91cFZlcnNpb25LaW5kKCkuS2luZCwga29iai5HZXRPYmplY3RLaW5kKCkuR3JvdXBW
+        ZXJzaW9uS2luZCgpLlZlcnNpb24sIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktp
+        bmQoKS5Hcm91cCkKCglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sgewoJCXBsdWcu
+        c3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMgbm90
+        IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNp
+        b25LaW5kKCkuS2luZCkKCQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5ldGVzIHJlc291
+        cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmplY3RLaW5kKCku
+        R3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgl9IGVsc2UgewoJCS8vIGh0dHBzOi8vcGtnLmdvLmRl
+        di9rOHMuaW8va3ViZXJuZXRlcy9wa2cvYXBpcy9hZG1pc3Npb24jQWRtaXNzaW9uUmVxdWVzdAoJ
+        CWpzb25EYXRhLCBlcnIgOj0ganNvbi5NYXJzaGFsKHIpCgkJaWYgZXJyICE9IG5pbCB7CgkJCWZt
+        dC5QcmludGYoImNvdWxkIG5vdCBtYXJzaGFsIGpzb246ICVzXG4iLCBlcnIpCgkJfQoKCQkvLyBm
+        bXQuUHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCQlwbHVnLnN1bW1hcnkgKz0g
+        IlxuIiArIGZtdC5TcHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCgkJZm9yIF8s
+        IGMgOj0gcmFuZ2UgcG9kLlNwZWMuQ29udGFpbmVycyB7CgkJCWlmIHN0cmluZ3MuSGFzU3VmZml4
+        KGMuSW1hZ2UsICI6bGF0ZXN0IikgewoJCQkJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
+        aW50ZigiQ29udGFpbmVyICVzIGlzIHJlamVjdGVkIiwgYy5OYW1lKQoJCQkJaWYgISBkcnlSdW4g
+        ewoJCQkJCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5SZXN1bHR7TXNnOiAiWW91IGNhbm5v
+        dCB1c2UgdGhlIHRhZyAnbGF0ZXN0JyBpbiBhIGNvbnRhaW5lci4ifSwgbmlsCgkJCQl9CgkJCQkK
+        CQkJfQoJCX0KCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJQb2QgJXMs
+        IGFjY2VwdGVkIiwgcG9kLk9iamVjdE1ldGEuTmFtZSkKCglyZXR1cm4gJmFkbWlzc2lvbmNvbnRy
+        b2xsZXIuUmVzdWx0e0FsbG93ZWQ6IHRydWV9LCBuaWwKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIFN1
+        bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBz
+        eW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBWZXJhZGNvUGx1Z2luIFBsdWcx
+      resources:
+      - "Pod"
+      operations:
+      - "CREATE"
+      dryRun: false
+      configuration: |
+        This plugin does not have configuration
+        That's like that!
+      scope: "Validating"

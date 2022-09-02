@@ -23,6 +23,8 @@ func main() {
 	flag.StringVar(&conf, "conf", "/conf/veradco.yaml", "Configuration of veradco")
 	flag.Parse()
 
+	log.Infof("Starting veradco")
+
 	server := http.NewServer(port, conf)
 	go func() {
 		if err := server.ListenAndServeTLS(tlscert, tlskey); err != nil {

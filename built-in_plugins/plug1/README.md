@@ -10,7 +10,6 @@ go mod tidy
 
 ```
 go mod init github.com/smart-duck/veradco/plug1
-go mod tidy
 go mod edit -replace github.com/smart-duck/veradco=../../veradco
 go mod tidy
 ```

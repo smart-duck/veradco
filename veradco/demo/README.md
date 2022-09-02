@@ -5,8 +5,10 @@ TODO
 ## Bulk
 
 ```
-cd demo
-sudo docker build -t smartduck/veradco:0.1 ..
+sudo docker build -t smartduck/veradco-golang-builder:0.1 -f ./Dockerfile.golang_builder .
+sudo veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco-golang-builder:0.1
+cd veradco/demo
+sudo docker build -t smartduck/veradco:0.1 -f ../Dockerfile.golang_builder ..
 sudo local_registry/push_local_image_to_local_registry.sh smartduck/veradco:0.1
 export KUBECTL_ALIAS="sudo kubectl --context kind-kind"
 ./deploy.sh 

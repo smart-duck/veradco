@@ -34,9 +34,10 @@ func validateCreate() admissioncontroller.AdmitFunc {
 
 
 
+		log.Infof("Loading plugin  %s\n", "/external_plugins/extplug1.so")
 
 		// Try to execute plugins
-		plug, err := plugin.Open("/plugs/plug1/plug.so")
+		plug, err := plugin.Open("/app/external_plugins/extplug1.so")
 		if err != nil {
 			log.Infof("Unable to load plugin: %v\n", err)
 		}

@@ -8,4 +8,4 @@ go mod tidy
 
 mkdir -p /release
 
-go build -o /release/veradcod cmd/serverd/main.go 
+go build -o /release/veradcod cmd/serverd/main.go
