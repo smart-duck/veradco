@@ -5,6 +5,8 @@ import (
 
 	"github.com/smart-duck/veradco"
 
+	"github.com/smart-duck/veradco/cfg"
+
 	// "github.com/smart-duck/veradco/kres"
 
 	v1 "k8s.io/api/core/v1"
@@ -15,16 +17,16 @@ import (
 )
 
 // NewValidationHook creates a new instance of pods validation hook
-func NewValidationHook() admissioncontroller.Hook {
+func NewValidationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
 	return admissioncontroller.Hook{
-		Create: validateCreate(),
+		Create: validateCreate(veradcoCfg),
 	}
 }
 
 // NewMutationHook creates a new instance of pods mutation hook
-func NewMutationHook() admissioncontroller.Hook {
+func NewMutationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
 	return admissioncontroller.Hook{
-		Create: mutateCreate(),
+		Create: mutateCreate(veradcoCfg),
 	}
 }
 

@@ -1,7 +1,7 @@
 # Launch kind with local registry
 
 ```
-sudo tests/local_registry/create_kind_with_local_registry.sh
+sudo local_registry/create_kind_with_local_registry.sh
 kk cluster-info
 ```
 

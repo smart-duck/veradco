@@ -20,7 +20,7 @@ mkdir -p "$external_plugins_folder"
 for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
   name=$plugin
   path=$(cat $VERADCO_CONF | yq ".plugins[] | select(.name==\"$plugin\") | .path")
-  plug_go=$(cat $VERADCO_CONF | yq ".plugins[] | select(.name==\"$plugin\") | .\"plug.go\"")
+  plug_go=$(cat $VERADCO_CONF | yq ".plugins[] | select(.name==\"$plugin\") | .code")
   # echo "plug_go=$plug_go"
   if [ -f "$path" ]; then
     echo "File $path exists."

@@ -2,39 +2,48 @@
 
 ## Overview
 
-Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system.
+Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using third-party webhooks or the ones that are built-in.
+
+With Veradco, you take advantage of the full puissance of Mutating and Validating webhooks in a user-frinedly way. You only need to write the functional part. Plugin are written in golang, can be packaged in a ConfigMap and are built on the fly by the provided init container.
 
  ## Plugin
 
-Plugins are simple Golang plugins implementing the following interface:
+A plugin is a piece of Go code that implements the following interface:
 
 ```
 type VeradcoPlugin interface {
-	Init(params string)
-	Info() string
+        Init(configFile string)
+        Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
+        Summary() string
 }
 ```
 
 ### Loading
 
-Plugins are loaded in a docker image that is loaded via an init container. Refer to examples to see how to do. There are other ways to do it. Given the size of a plugin, it is very unlikely that you are able to put it in a config map (limited to 1 MB).
+Plugins are loaded thanks to a ConfigMap. Refer to examples to see how to do. There are other ways to do it.
 
 ## Configuration
 
-The configuration defines the plugins to use and their configuration.
+The configuration defines the plugins to use and their configuration. Here is an example of a ConfigMap.
+
+TODO update
 
 ```
-banner: "veradcoBanner"
 plugins:
-- name: "plug1"
-  path: "/home/lobuntu/go/src/test_plugin/plug1/plug.so"
-  params: "--verbose -n veradco"
-- name: "plug2"
-  path: "/home/lobuntu/go/src/test_plugin/plug2/plug.so"
-  params: "init -n veradco"
-- name: "plug_ext"
-  path: "/home/lobuntu/go/src/test_plugin/plug_ext.so"
-  params: "Plugin created by anyone"
+    - name: "extplug1"
+      path: "/app/external_plugins/extplug1.so"
+      plug.go: |
+        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
+        ...
+      resources:
+      - "Pod"
+      operations:
+      - "CREATE"
+      dryRun: false
+      configuration: |
+        This plugin does not have configuration
+        That's like that!
+      scope: "Validating"
 ```
 
 ## Setup go environment

@@ -4,9 +4,11 @@ import (
 	"github.com/smart-duck/veradco"
 
 	admission "k8s.io/api/admission/v1"
+
+	"github.com/smart-duck/veradco/cfg"
 )
 
-func validateCreate() admissioncontroller.AdmitFunc {
+func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		dp, err := parseDeployment(r.Object.Raw)
 		if err != nil {

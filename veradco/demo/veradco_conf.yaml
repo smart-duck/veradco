@@ -6,105 +6,160 @@ metadata:
 data:
   veradco.yaml: |
     plugins:
+    - name: "Basic"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/plugins/built-in-basic.so"
+      # A regular expression to define the resources on which the plugin is called
+      resources: "Pod"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|UPDATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        Basic configuration
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+
+    - name: "UserPlugin"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/external_plugins/user_plugin.so"
+      code: |
+        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
+        MSIKCXYxICJrOHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVu
+        dGltZSIKCSJnaXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCSJmbXQiCikKCnZhciAoCglu
+        YW1lIHN0cmluZyA9ICJVc2VyUGx1Z2luIgopCgp0eXBlIFVzZXJQbHVnaW4gc3RydWN0IHsKCXN1
+        bW1hcnkgc3RyaW5nCn0KCmZ1bmMgKHBsdWcgKlVzZXJQbHVnaW4pIEluaXQoY29uZmlnRmlsZSBz
+        dHJpbmcpIHsKCXBsdWcuc3VtbWFyeSA9IGZtdC5TcHJpbnRmKCJDb25maWd1cmF0aW9uIG9mIHBs
+        dWdpbiAlcyBpczogJXMiLCBuYW1lLCBjb25maWdGaWxlKQp9CgoKZnVuYyAocGx1ZyAqVXNlclBs
+        dWdpbikgRXhlY3V0ZShrb2JqIHJ1bnRpbWUuT2JqZWN0LCBvcGVyYXRpb24gc3RyaW5nLCBkcnlS
+        dW4gYm9vbCwgciAqYWRtaXNzaW9uLkFkbWlzc2lvblJlcXVlc3QpICgqYWRtaXNzaW9uY29udHJv
+        bGxlci5SZXN1bHQsIGVycm9yKSB7Cglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sg
+        ewoJCXBsdWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3Vy
+        Y2UgaXMgbm90IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5H
+        cm91cFZlcnNpb25LaW5kKCkuS2luZCkKCQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5l
+        dGVzIHJlc291cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmpl
+        Y3RLaW5kKCkuR3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgl9IGVsc2UgewoJCXBsdWcuc3VtbWFy
+        eSArPSAiXG4iICsgZm10LlNwcmludGYoIkFzIGV4cGVjdGVkIGl0IGlzIGEgcG9kOiAlcywgJXMs
+        ICVzLCAlcyIsIHBvZC5UeXBlTWV0YS5LaW5kLAoJCXBvZC5UeXBlTWV0YS5BUElWZXJzaW9uLCBw
+        b2QuT2JqZWN0TWV0YS5OYW1lLCBwb2QuT2JqZWN0TWV0YS5OYW1lc3BhY2UpCgoJCXBsdWcuc3Vt
+        bWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIk51bWJlciBvZiBjb250YWluZXJzOiAlZCIsIGxl
+        bihwb2QuU3BlYy5Db250YWluZXJzKSkKCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5T
+        cHJpbnRmKCJQb2QgJXMsIGFjY2VwdGVkIiwgcG9kLk9iamVjdE1ldGEuTmFtZSkKCglyZXR1cm4g
+        JmFkbWlzc2lvbmNvbnRyb2xsZXIuUmVzdWx0e0FsbG93ZWQ6IHRydWV9LCBuaWwKfQoKZnVuYyAo
+        cGx1ZyAqVXNlclBsdWdpbikgU3VtbWFyeSgpIHN0cmluZyB7CglyZXR1cm4gcGx1Zy5zdW1tYXJ5
+        Cn0KCi8vIGV4cG9ydGVkIGFzIHN5bWJvbCBuYW1lZCAiVmVyYWRjb1BsdWdpbiIKdmFyIFZlcmFk
+        Y29QbHVnaW4gVXNlclBsdWdpbg==
+      # A regular expression to define the resources on which the plugin is called
+      resources: "Pod"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        UserPlugin configuration
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+
     - name: "extplug1"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
       path: "/app/external_plugins/extplug1.so"
-      plug.go: |
+      # The code of the plugin converted in base 64.
+      # If the plugin has to be built, it shall be packaged in a single. The below base 64 is decoded in a single Go file.
+      # If the provided path does not point to a file, the plugin is compiled with this code.
+      code: |
         cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
         YXBpcy9tZXRhL3YxIgoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92MSIKCXYxICJr
         OHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVudGltZSIKCSJn
         aXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCS8vIGxvZyAiazhzLmlvL2tsb2cvdjIiCgki
-        Zm10IgoJInN0cmluZ3MiCgkiZW5jb2RpbmcvanNvbiIKKQoKdmFyICgKCW5hbWUgc3RyaW5nID0g
-        IlBsdWcxIgopCgp0eXBlIFBsdWcxIHN0cnVjdCB7Cgljb25maWdGaWxlIHN0cmluZwoJc3VtbWFy
-        eSBzdHJpbmcKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIEluaXQoY29uZmlnRmlsZSBzdHJpbmcpIHsK
-        CXBsdWcuY29uZmlnRmlsZSA9IGNvbmZpZ0ZpbGUKCS8vIGxvZy5JbmZvZigiQ29uZmlndXJhdGlv
-        biBmaWxlIG9mIHBsdWdpbiAlczogJXMiLCBuYW1lLCBjb25maWdGaWxlKQoJcGx1Zy5zdW1tYXJ5
-        ID0gZm10LlNwcmludGYoIkNvbmZpZ3VyYXRpb24gZmlsZSBvZiBwbHVnaW4gJXM6ICVzIiwgbmFt
-        ZSwgY29uZmlnRmlsZSkKfQoKCmZ1bmMgKHBsdWcgKlBsdWcxKSBFeGVjdXRlKGtvYmogcnVudGlt
-        ZS5PYmplY3QsIG9wZXJhdGlvbiBzdHJpbmcsIGRyeVJ1biBib29sLCByICphZG1pc3Npb24uQWRt
-        aXNzaW9uUmVxdWVzdCkgKCphZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdCwgZXJyb3IpIHsKCglw
-        bHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJPcGVyYXRpb246ICVzLCBkcnlSdW46
-        ICV0Iiwgb3BlcmF0aW9uLCBkcnlSdW4pCgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
-        aW50ZigiS2luZDogJXMsIFZlcnNpb246ICVzLCBHcm91cDogJXMiLCBrb2JqLkdldE9iamVjdEtp
-        bmQoKS5Hcm91cFZlcnNpb25LaW5kKCkuS2luZCwga29iai5HZXRPYmplY3RLaW5kKCkuR3JvdXBW
-        ZXJzaW9uS2luZCgpLlZlcnNpb24sIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktp
-        bmQoKS5Hcm91cCkKCglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sgewoJCXBsdWcu
-        c3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMgbm90
-        IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNp
-        b25LaW5kKCkuS2luZCkKCQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5ldGVzIHJlc291
-        cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmplY3RLaW5kKCku
-        R3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgl9IGVsc2UgewoJCS8vIGh0dHBzOi8vcGtnLmdvLmRl
-        di9rOHMuaW8va3ViZXJuZXRlcy9wa2cvYXBpcy9hZG1pc3Npb24jQWRtaXNzaW9uUmVxdWVzdAoJ
-        CWpzb25EYXRhLCBlcnIgOj0ganNvbi5NYXJzaGFsKHIpCgkJaWYgZXJyICE9IG5pbCB7CgkJCWZt
-        dC5QcmludGYoImNvdWxkIG5vdCBtYXJzaGFsIGpzb246ICVzXG4iLCBlcnIpCgkJfQoKCQkvLyBm
-        bXQuUHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCQlwbHVnLnN1bW1hcnkgKz0g
-        IlxuIiArIGZtdC5TcHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCgkJZm9yIF8s
-        IGMgOj0gcmFuZ2UgcG9kLlNwZWMuQ29udGFpbmVycyB7CgkJCWlmIHN0cmluZ3MuSGFzU3VmZml4
-        KGMuSW1hZ2UsICI6bGF0ZXN0IikgewoJCQkJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
-        aW50ZigiQ29udGFpbmVyICVzIGlzIHJlamVjdGVkIiwgYy5OYW1lKQoJCQkJaWYgISBkcnlSdW4g
-        ewoJCQkJCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5SZXN1bHR7TXNnOiAiWW91IGNhbm5v
-        dCB1c2UgdGhlIHRhZyAnbGF0ZXN0JyBpbiBhIGNvbnRhaW5lci4ifSwgbmlsCgkJCQl9CgkJCQkK
-        CQkJfQoJCX0KCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJQb2QgJXMs
-        IGFjY2VwdGVkIiwgcG9kLk9iamVjdE1ldGEuTmFtZSkKCglyZXR1cm4gJmFkbWlzc2lvbmNvbnRy
-        b2xsZXIuUmVzdWx0e0FsbG93ZWQ6IHRydWV9LCBuaWwKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIFN1
-        bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBz
-        eW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBWZXJhZGNvUGx1Z2luIFBsdWcx
-      resources:
-      - "Pod"
-      operations:
-      - "CREATE"
+        Zm10IgoJInN0cmluZ3MiCgkvLyAiZW5jb2RpbmcvanNvbiIKKQoKdmFyICgKCW5hbWUgc3RyaW5n
+        ID0gIlBsdWcxIgopCgp0eXBlIFBsdWcxIHN0cnVjdCB7Cgljb25maWdGaWxlIHN0cmluZwoJc3Vt
+        bWFyeSBzdHJpbmcKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIEluaXQoY29uZmlnRmlsZSBzdHJpbmcp
+        IHsKCXBsdWcuY29uZmlnRmlsZSA9IGNvbmZpZ0ZpbGUKCS8vIGxvZy5JbmZvZigiQ29uZmlndXJh
+        dGlvbiBmaWxlIG9mIHBsdWdpbiAlczogJXMiLCBuYW1lLCBjb25maWdGaWxlKQoJcGx1Zy5zdW1t
+        YXJ5ID0gZm10LlNwcmludGYoIkNvbmZpZ3VyYXRpb24gZmlsZSBvZiBwbHVnaW4gJXM6ICVzIiwg
+        bmFtZSwgY29uZmlnRmlsZSkKfQoKCmZ1bmMgKHBsdWcgKlBsdWcxKSBFeGVjdXRlKGtvYmogcnVu
+        dGltZS5PYmplY3QsIG9wZXJhdGlvbiBzdHJpbmcsIGRyeVJ1biBib29sLCByICphZG1pc3Npb24u
+        QWRtaXNzaW9uUmVxdWVzdCkgKCphZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdCwgZXJyb3IpIHsK
+        CgkvLyBwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJPcGVyYXRpb246ICVzLCBk
+        cnlSdW46ICV0Iiwgb3BlcmF0aW9uLCBkcnlSdW4pCgoJLy8gcGx1Zy5zdW1tYXJ5ICs9ICJcbiIg
+        KyBmbXQuU3ByaW50ZigiS2luZDogJXMsIFZlcnNpb246ICVzLCBHcm91cDogJXMiLCBrb2JqLkdl
+        dE9iamVjdEtpbmQoKS5Hcm91cFZlcnNpb25LaW5kKCkuS2luZCwga29iai5HZXRPYmplY3RLaW5k
+        KCkuR3JvdXBWZXJzaW9uS2luZCgpLlZlcnNpb24sIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3Vw
+        VmVyc2lvbktpbmQoKS5Hcm91cCkKCglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sg
+        ewoJCXBsdWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3Vy
+        Y2UgaXMgbm90IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5H
+        cm91cFZlcnNpb25LaW5kKCkuS2luZCkKCQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5l
+        dGVzIHJlc291cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmpl
+        Y3RLaW5kKCkuR3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgl9IGVsc2UgewoJCS8vIGh0dHBzOi8v
+        cGtnLmdvLmRldi9rOHMuaW8va3ViZXJuZXRlcy9wa2cvYXBpcy9hZG1pc3Npb24jQWRtaXNzaW9u
+        UmVxdWVzdAoJCS8vIGpzb25EYXRhLCBlcnIgOj0ganNvbi5NYXJzaGFsKHIpCgkJLy8gaWYgZXJy
+        ICE9IG5pbCB7CgkJLy8gCWZtdC5QcmludGYoImNvdWxkIG5vdCBtYXJzaGFsIGpzb246ICVzXG4i
+        LCBlcnIpCgkJLy8gfQoKCQkvLyBmbXQuUHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0
+        YSkKCQkvLyBwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJqc29uIGRhdGE6ICVz
+        XG4iLCBqc29uRGF0YSkKCgkJZm9yIF8sIGMgOj0gcmFuZ2UgcG9kLlNwZWMuQ29udGFpbmVycyB7
+        CgkJCWlmIHN0cmluZ3MuSGFzU3VmZml4KGMuSW1hZ2UsICI6bGF0ZXN0IikgewoJCQkJcGx1Zy5z
+        dW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50ZigiQ29udGFpbmVyICVzIGlzIHJlamVjdGVkIiwg
+        Yy5OYW1lKQoJCQkJaWYgISBkcnlSdW4gewoJCQkJCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxl
+        ci5SZXN1bHR7TXNnOiAiWW91IGNhbm5vdCB1c2UgdGhlIHRhZyAnbGF0ZXN0JyBpbiBhIGNvbnRh
+        aW5lci4ifSwgbmlsCgkJCQl9CgkJCQkKCQkJfQoJCX0KCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxu
+        IiArIGZtdC5TcHJpbnRmKCJQb2QgJXMsIGFjY2VwdGVkIiwgcG9kLk9iamVjdE1ldGEuTmFtZSkK
+        CglyZXR1cm4gJmFkbWlzc2lvbmNvbnRyb2xsZXIuUmVzdWx0e0FsbG93ZWQ6IHRydWV9LCBuaWwK
+        fQoKZnVuYyAocGx1ZyAqUGx1ZzEpIFN1bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3Vt
+        bWFyeQp9CgovLyBleHBvcnRlZCBhcyBzeW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBW
+        ZXJhZGNvUGx1Z2luIFBsdWcx
+      # A regular expression to define the resources on which the plugin is called
+      resources: "Pod"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      labels:
+      - key: owner
+        value: me
+      # Filter only on resources having some annotations.
+      # Both key and value are regular expressions
+      annotations:
+      - key: owner
+        value: me
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
       dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
       configuration: |
         This plugin does not have configuration
         That's like that!
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
       scope: "Validating"
-    - name: "extplug2"
-      path: "/app/external_plugins/extplug2.so"
-      plug.go: |
-        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
-        YXBpcy9tZXRhL3YxIgoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92MSIKCXYxICJr
-        OHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVudGltZSIKCSJn
-        aXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCS8vIGxvZyAiazhzLmlvL2tsb2cvdjIiCgki
-        Zm10IgoJInN0cmluZ3MiCgkiZW5jb2RpbmcvanNvbiIKKQoKdmFyICgKCW5hbWUgc3RyaW5nID0g
-        IlBsdWcxIgopCgp0eXBlIFBsdWcxIHN0cnVjdCB7Cgljb25maWdGaWxlIHN0cmluZwoJc3VtbWFy
-        eSBzdHJpbmcKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIEluaXQoY29uZmlnRmlsZSBzdHJpbmcpIHsK
-        CXBsdWcuY29uZmlnRmlsZSA9IGNvbmZpZ0ZpbGUKCS8vIGxvZy5JbmZvZigiQ29uZmlndXJhdGlv
-        biBmaWxlIG9mIHBsdWdpbiAlczogJXMiLCBuYW1lLCBjb25maWdGaWxlKQoJcGx1Zy5zdW1tYXJ5
-        ID0gZm10LlNwcmludGYoIkNvbmZpZ3VyYXRpb24gZmlsZSBvZiBwbHVnaW4gJXM6ICVzIiwgbmFt
-        ZSwgY29uZmlnRmlsZSkKfQoKCmZ1bmMgKHBsdWcgKlBsdWcxKSBFeGVjdXRlKGtvYmogcnVudGlt
-        ZS5PYmplY3QsIG9wZXJhdGlvbiBzdHJpbmcsIGRyeVJ1biBib29sLCByICphZG1pc3Npb24uQWRt
-        aXNzaW9uUmVxdWVzdCkgKCphZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdCwgZXJyb3IpIHsKCglw
-        bHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJPcGVyYXRpb246ICVzLCBkcnlSdW46
-        ICV0Iiwgb3BlcmF0aW9uLCBkcnlSdW4pCgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
-        aW50ZigiS2luZDogJXMsIFZlcnNpb246ICVzLCBHcm91cDogJXMiLCBrb2JqLkdldE9iamVjdEtp
-        bmQoKS5Hcm91cFZlcnNpb25LaW5kKCkuS2luZCwga29iai5HZXRPYmplY3RLaW5kKCkuR3JvdXBW
-        ZXJzaW9uS2luZCgpLlZlcnNpb24sIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktp
-        bmQoKS5Hcm91cCkKCglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sgewoJCXBsdWcu
-        c3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMgbm90
-        IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNp
-        b25LaW5kKCkuS2luZCkKCQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5ldGVzIHJlc291
-        cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmplY3RLaW5kKCku
-        R3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgl9IGVsc2UgewoJCS8vIGh0dHBzOi8vcGtnLmdvLmRl
-        di9rOHMuaW8va3ViZXJuZXRlcy9wa2cvYXBpcy9hZG1pc3Npb24jQWRtaXNzaW9uUmVxdWVzdAoJ
-        CWpzb25EYXRhLCBlcnIgOj0ganNvbi5NYXJzaGFsKHIpCgkJaWYgZXJyICE9IG5pbCB7CgkJCWZt
-        dC5QcmludGYoImNvdWxkIG5vdCBtYXJzaGFsIGpzb246ICVzXG4iLCBlcnIpCgkJfQoKCQkvLyBm
-        bXQuUHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCQlwbHVnLnN1bW1hcnkgKz0g
-        IlxuIiArIGZtdC5TcHJpbnRmKCJqc29uIGRhdGE6ICVzXG4iLCBqc29uRGF0YSkKCgkJZm9yIF8s
-        IGMgOj0gcmFuZ2UgcG9kLlNwZWMuQ29udGFpbmVycyB7CgkJCWlmIHN0cmluZ3MuSGFzU3VmZml4
-        KGMuSW1hZ2UsICI6bGF0ZXN0IikgewoJCQkJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3By
-        aW50ZigiQ29udGFpbmVyICVzIGlzIHJlamVjdGVkIiwgYy5OYW1lKQoJCQkJaWYgISBkcnlSdW4g
-        ewoJCQkJCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5SZXN1bHR7TXNnOiAiWW91IGNhbm5v
-        dCB1c2UgdGhlIHRhZyAnbGF0ZXN0JyBpbiBhIGNvbnRhaW5lci4ifSwgbmlsCgkJCQl9CgkJCQkK
-        CQkJfQoJCX0KCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJQb2QgJXMs
-        IGFjY2VwdGVkIiwgcG9kLk9iamVjdE1ldGEuTmFtZSkKCglyZXR1cm4gJmFkbWlzc2lvbmNvbnRy
-        b2xsZXIuUmVzdWx0e0FsbG93ZWQ6IHRydWV9LCBuaWwKfQoKZnVuYyAocGx1ZyAqUGx1ZzEpIFN1
-        bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBz
-        eW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBWZXJhZGNvUGx1Z2luIFBsdWcx
-      resources:
-      - "Pod"
-      operations:
-      - "CREATE"
-      dryRun: false
-      configuration: |
-        This plugin does not have configuration
-        That's like that!
-      scope: "Validating"
+    

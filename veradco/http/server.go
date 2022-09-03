@@ -17,18 +17,29 @@ func NewServer(port string, config string) *http.Server {
 
 	// Load conf
 	// Load conf from yaml
-	conf, err := conf.ReadConf(config)
+
+	veradcoCfg := conf.VeradcoCfg{}
+
+	err := veradcoCfg.ReadConf(config)
 	if err != nil {
 		log.Errorf("Error loading configuration %s: %v", config, err)
 		os.Exit(3)
 	} else {
-		fmt.Printf("Conf: %v\n", conf)
+		log.Infof("Configuration %s succesfully loaded\n", config)
+	}
+
+	err = veradcoCfg.LoadPlugins()
+	if err != nil {
+		log.Errorf("Error loading plugins: %v", err)
+		os.Exit(12)
+	} else {
+		log.Infof("Plugins succesfully loaded")
 	}
 
 	// Instances hooks
-	podsValidation := pods.NewValidationHook()
-	podsMutation := pods.NewMutationHook()
-	deploymentValidation := deployments.NewValidationHook()
+	podsValidation := pods.NewValidationHook(&veradcoCfg)
+	podsMutation := pods.NewMutationHook(&veradcoCfg)
+	deploymentValidation := deployments.NewValidationHook(&veradcoCfg)
 
 	// Routers
 	ah := newAdmissionHandler()

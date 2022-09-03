@@ -6,13 +6,15 @@ import (
 	"github.com/smart-duck/veradco"
 
 	v1 "k8s.io/api/apps/v1"
+
+	"github.com/smart-duck/veradco/cfg"
 )
 
 // NewValidationHook creates a new instance of deployment validation hook
-func NewValidationHook() admissioncontroller.Hook {
+func NewValidationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
 	return admissioncontroller.Hook{
-		Create: validateCreate(),
-		Delete: validateDelete(),
+		Create: validateCreate(veradcoCfg),
+		Delete: validateDelete(veradcoCfg),
 	}
 }
 

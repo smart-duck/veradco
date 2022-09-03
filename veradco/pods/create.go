@@ -3,11 +3,13 @@ package pods
 import (
 	// "strings"
 
-	"plugin"
+	// "plugin"
 
 	"github.com/smart-duck/veradco"
 
-	veradcoplugin "github.com/smart-duck/veradco/plugin"
+	"github.com/smart-duck/veradco/cfg"
+
+	// veradcoplugin "github.com/smart-duck/veradco/plugin"
 
 	log "k8s.io/klog/v2"
 
@@ -17,7 +19,7 @@ import (
 	// meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func validateCreate() admissioncontroller.AdmitFunc {
+func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
 		pod, err := parsePod(r.Object.Raw)
@@ -28,44 +30,60 @@ func validateCreate() admissioncontroller.AdmitFunc {
 
 
 
+		// Ask for relative plugins
+		plugins := veradcoCfg.GetPlugins(pod.TypeMeta.Kind, "CREATE", pod.ObjectMeta.Namespace, pod.ObjectMeta.Labels, pod.ObjectMeta.Annotations, "Validating")
 
-
-
-
-
-
-		log.Infof("Loading plugin  %s\n", "/external_plugins/extplug1.so")
-
-		// Try to execute plugins
-		plug, err := plugin.Open("/app/external_plugins/extplug1.so")
-		if err != nil {
-			log.Infof("Unable to load plugin: %v\n", err)
-		}
-
-		pluginHandler, err := plug.Lookup("VeradcoPlugin")
-		if err != nil {
-			log.Infof("Unable to find handler for plugin: %v\n", err)
-		}
-
-		var veradcoPlugin veradcoplugin.VeradcoPlugin
-
-		veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
-		if !ok {
-			log.Infof("Plugin does not implement awaited interface\n")
-		} else {
-			log.Infof("Init plugin\n")
-			veradcoPlugin.Init("Path to config file")
-			log.Infof("Execute plugin\n")
+		for _, plug := range *plugins {
+			log.Infof("Init plugin %s\n", plug.Name)
+			// log.Infof("Plug: %v\n", plug)
+			// log.Infof("[%T] %+v\n", plug.VeradcoPlugin, plug.VeradcoPlugin)
+			plug.VeradcoPlugin.Init(plug.Configuration)
+			log.Infof("Execute plugin %s\n", plug.Name)
 			// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
 			// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
-			result, err := veradcoPlugin.Execute(pod, string(r.Operation), *r.DryRun, r)
+			result, err := plug.VeradcoPlugin.Execute(pod, string(r.Operation), *r.DryRun || plug.DryRun, r)
 			if err == nil {
-				log.Infof("Plugin execution summary: %s\n", veradcoPlugin.Summary())
+				log.Infof("Plugin execution summary: %s\n", plug.VeradcoPlugin.Summary())
+				if ! result.Allowed {
+					return result, err
+				}
+			} else {
+				return result, err
 			}
-
-			return result, err
-			
 		}
+
+		// log.Infof("Loading plugin  %s\n", "/app/external_plugins/extplug1.so")
+
+		// // Try to execute plugins
+		// plug, err := plugin.Open("/app/external_plugins/extplug1.so")
+		// if err != nil {
+		// 	log.Errorf("Unable to load plugin: %v\n", err)
+		// }
+
+		// pluginHandler, err := plug.Lookup("VeradcoPlugin")
+		// if err != nil {
+		// 	log.Errorf("Unable to find handler for plugin: %v\n", err)
+		// }
+
+		// var veradcoPlugin veradcoplugin.VeradcoPlugin
+
+		// veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
+		// if !ok {
+		// 	log.Infof("Plugin does not implement awaited interface\n")
+		// } else {
+		// 	log.Infof("Init plugin\n")
+		// 	veradcoPlugin.Init("Path to config file")
+		// 	log.Infof("Execute plugin\n")
+		// 	// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
+		// 	// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
+		// 	result, err := veradcoPlugin.Execute(pod, string(r.Operation), *r.DryRun, r)
+		// 	if err == nil {
+		// 		log.Infof("Plugin execution summary: %s\n", veradcoPlugin.Summary())
+		// 	}
+
+		// 	return result, err
+			
+		// }
 
 
 
@@ -93,7 +111,7 @@ func validateCreate() admissioncontroller.AdmitFunc {
 	}
 }
 
-func mutateCreate() admissioncontroller.AdmitFunc {
+func mutateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		var operations []admissioncontroller.PatchOperation
 		pod, err := parsePod(r.Object.Raw)

@@ -9,7 +9,7 @@ import (
 	// log "k8s.io/klog/v2"
 	"fmt"
 	"strings"
-	"encoding/json"
+	// "encoding/json"
 )
 
 var (
@@ -30,9 +30,9 @@ func (plug *Plug1) Init(configFile string) {
 
 func (plug *Plug1) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
-	plug.summary += "\n" + fmt.Sprintf("Operation: %s, dryRun: %t", operation, dryRun)
+	// plug.summary += "\n" + fmt.Sprintf("Operation: %s, dryRun: %t", operation, dryRun)
 
-	plug.summary += "\n" + fmt.Sprintf("Kind: %s, Version: %s, Group: %s", kobj.GetObjectKind().GroupVersionKind().Kind, kobj.GetObjectKind().GroupVersionKind().Version, kobj.GetObjectKind().GroupVersionKind().Group)
+	// plug.summary += "\n" + fmt.Sprintf("Kind: %s, Version: %s, Group: %s", kobj.GetObjectKind().GroupVersionKind().Kind, kobj.GetObjectKind().GroupVersionKind().Version, kobj.GetObjectKind().GroupVersionKind().Group)
 
 	pod, ok := kobj.(*v1.Pod)
 	if !ok {
@@ -40,13 +40,13 @@ func (plug *Plug1) Execute(kobj runtime.Object, operation string, dryRun bool, r
 		return nil, fmt.Errorf("Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
 	} else {
 		// https://pkg.go.dev/k8s.io/kubernetes/pkg/apis/admission#AdmissionRequest
-		jsonData, err := json.Marshal(r)
-		if err != nil {
-			fmt.Printf("could not marshal json: %s\n", err)
-		}
+		// jsonData, err := json.Marshal(r)
+		// if err != nil {
+		// 	fmt.Printf("could not marshal json: %s\n", err)
+		// }
 
 		// fmt.Printf("json data: %s\n", jsonData)
-		plug.summary += "\n" + fmt.Sprintf("json data: %s\n", jsonData)
+		// plug.summary += "\n" + fmt.Sprintf("json data: %s\n", jsonData)
 
 		for _, c := range pod.Spec.Containers {
 			if strings.HasSuffix(c.Image, ":latest") {
