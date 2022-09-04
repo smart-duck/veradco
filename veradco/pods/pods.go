@@ -39,7 +39,7 @@ func NewMutationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
 // 	return &meta, nil
 // }
 
-func parsePod(object []byte) (*v1.Pod, error) {
+func ParsePod(object []byte) (*v1.Pod, error) {
 	// meta, err := kres.parseMeta(object)
 
 	// if err != nil {

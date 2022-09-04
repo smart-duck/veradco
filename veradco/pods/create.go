@@ -22,7 +22,9 @@ import (
 func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
-		pod, err := parsePod(r.Object.Raw)
+		log.Infof(">>>> validateCreate")
+
+		pod, err := ParsePod(r.Object.Raw)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
@@ -31,26 +33,32 @@ func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 
 
 		// Ask for relative plugins
-		plugins := veradcoCfg.GetPlugins(pod.TypeMeta.Kind, "CREATE", pod.ObjectMeta.Namespace, pod.ObjectMeta.Labels, pod.ObjectMeta.Annotations, "Validating")
+		// plugins, err := veradcoCfg.GetPlugins(r, pod.TypeMeta.Kind, "CREATE", pod.ObjectMeta.Namespace, pod.ObjectMeta.Labels, pod.ObjectMeta.Annotations, "Validating")
+		// plugins, err := veradcoCfg.GetPlugins(r, "Validating")
 
-		for _, plug := range *plugins {
-			log.Infof("Init plugin %s\n", plug.Name)
-			// log.Infof("Plug: %v\n", plug)
-			// log.Infof("[%T] %+v\n", plug.VeradcoPlugin, plug.VeradcoPlugin)
-			plug.VeradcoPlugin.Init(plug.Configuration)
-			log.Infof("Execute plugin %s\n", plug.Name)
-			// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
-			// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
-			result, err := plug.VeradcoPlugin.Execute(pod, string(r.Operation), *r.DryRun || plug.DryRun, r)
-			if err == nil {
-				log.Infof("Plugin execution summary: %s\n", plug.VeradcoPlugin.Summary())
-				if ! result.Allowed {
-					return result, err
-				}
-			} else {
-				return result, err
-			}
-		}
+		// if err != nil {
+		// 	log.Errorf("Failed to load plugins: %v", err)
+		// 	return &admissioncontroller.Result{Allowed: true}, nil
+		// }
+
+		// for _, plug := range *plugins {
+		// 	log.Infof(">> Init plugin %s\n", plug.Name)
+		// 	// log.Infof("Plug: %v\n", plug)
+		// 	// log.Infof("[%T] %+v\n", plug.VeradcoPlugin, plug.VeradcoPlugin)
+		// 	plug.VeradcoPlugin.Init(plug.Configuration)
+		// 	log.Infof(">> Execute plugin %s\n", plug.Name)
+		// 	// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
+		// 	// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
+		// 	result, err := plug.VeradcoPlugin.Execute(pod, string(r.Operation), *r.DryRun || plug.DryRun, r)
+		// 	if err == nil {
+		// 		log.Infof(">> Plugin execution summary: %s\n", plug.VeradcoPlugin.Summary())
+		// 		if ! result.Allowed {
+		// 			return result, err
+		// 		}
+		// 	} else {
+		// 		return result, err
+		// 	}
+		// }
 
 		// log.Infof("Loading plugin  %s\n", "/app/external_plugins/extplug1.so")
 
@@ -107,14 +115,16 @@ func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 		// 	}
 		// }
 
-		return &admissioncontroller.Result{Allowed: true}, nil
+		// return &admissioncontroller.Result{Allowed: true}, nil
+
+		return veradcoCfg.ProceedPlugins(pod, r, "Validating")
 	}
 }
 
 func mutateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		var operations []admissioncontroller.PatchOperation
-		pod, err := parsePod(r.Object.Raw)
+		pod, err := ParsePod(r.Object.Raw)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}

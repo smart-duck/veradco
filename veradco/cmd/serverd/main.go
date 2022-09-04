@@ -23,7 +23,7 @@ func main() {
 	flag.StringVar(&conf, "conf", "/conf/veradco.yaml", "Configuration of veradco")
 	flag.Parse()
 
-	log.Infof("Starting veradco")
+	log.Infof(">>>>>> Starting veradco")
 
 	server := http.NewServer(port, conf)
 	go func() {
@@ -32,14 +32,14 @@ func main() {
 		}
 	}()
 
-	log.Infof("Server running on port: %s", port)
+	log.Infof(">> Server running on port: %s", port)
 
 	// listen shutdown signal
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	log.Infof("Shutdown gracefully...")
+	log.Infof(">> Shutdown gracefully...")
 	if err := server.Shutdown(context.Background()); err != nil {
 		log.Error(err)
 	}

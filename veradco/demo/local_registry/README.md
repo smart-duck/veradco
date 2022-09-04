@@ -1,5 +1,7 @@
 # Launch kind with local registry
 
+https://kind.sigs.k8s.io/docs/user/local-registry/
+
 ```
 sudo local_registry/create_kind_with_local_registry.sh
 kk cluster-info

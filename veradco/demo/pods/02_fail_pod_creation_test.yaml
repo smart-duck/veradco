@@ -2,10 +2,6 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: webserver
-  labels:
-    nodegp: ng-1
-  annotations:
-    owner: atoto
 spec:
   containers:
     - name: webserver

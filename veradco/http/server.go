@@ -9,6 +9,7 @@ import (
 
 	"github.com/smart-duck/veradco/deployments"
 	"github.com/smart-duck/veradco/pods"
+	"github.com/smart-duck/veradco/others"
 	"github.com/smart-duck/veradco/cfg"
 )
 
@@ -18,6 +19,8 @@ func NewServer(port string, config string) *http.Server {
 	// Load conf
 	// Load conf from yaml
 
+	log.Infof(">>>> NewServer")
+
 	veradcoCfg := conf.VeradcoCfg{}
 
 	err := veradcoCfg.ReadConf(config)
@@ -25,7 +28,7 @@ func NewServer(port string, config string) *http.Server {
 		log.Errorf("Error loading configuration %s: %v", config, err)
 		os.Exit(3)
 	} else {
-		log.Infof("Configuration %s succesfully loaded\n", config)
+		log.Infof(">> Configuration %s succesfully loaded\n", config)
 	}
 
 	err = veradcoCfg.LoadPlugins()
@@ -33,13 +36,15 @@ func NewServer(port string, config string) *http.Server {
 		log.Errorf("Error loading plugins: %v", err)
 		os.Exit(12)
 	} else {
-		log.Infof("Plugins succesfully loaded")
+		log.Infof(">> Plugins succesfully loaded")
 	}
 
 	// Instances hooks
 	podsValidation := pods.NewValidationHook(&veradcoCfg)
 	podsMutation := pods.NewMutationHook(&veradcoCfg)
 	deploymentValidation := deployments.NewValidationHook(&veradcoCfg)
+
+	othersValidation := others.NewValidationHook(&veradcoCfg)
 
 	// Routers
 	ah := newAdmissionHandler()
@@ -48,6 +53,8 @@ func NewServer(port string, config string) *http.Server {
 	mux.Handle("/validate/pods", ah.Serve(podsValidation))
 	mux.Handle("/mutate/pods", ah.Serve(podsMutation))
 	mux.Handle("/validate/deployments", ah.Serve(deploymentValidation))
+
+	mux.Handle("/validate/others", ah.Serve(othersValidation))
 
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),

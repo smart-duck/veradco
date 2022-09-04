@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	admission "k8s.io/api/admission/v1"
+
+	log "k8s.io/klog/v2"
 )
 
 // Result contains the result of an admission request
@@ -42,8 +44,10 @@ func (h *Hook) Execute(r *admission.AdmissionRequest) (*Result, error) {
 
 func wrapperExecution(fn AdmitFunc, r *admission.AdmissionRequest) (*Result, error) {
 	if fn == nil {
-		return nil, fmt.Errorf("operation %s is not registered", r.Operation)
+		log.Infof(">>>> wrapperExecution: operation %s is not registered", r.Operation)
+		return nil, fmt.Errorf("operation %s is NOT registered", r.Operation)
 	}
 
+	log.Infof(">>>> wrapperExecution: operation %s is registered", r.Operation)
 	return fn(r)
 }
