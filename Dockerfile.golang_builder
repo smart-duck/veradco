@@ -4,9 +4,14 @@ FROM golang:1.19-alpine3.16
 # Assume default environement is the good one
 #  ENV CGO_ENABLED=1 GOOS=linux GCCGO=gccgo CGO_LDFLAGS="-g -O2"
  # Install gcc
- RUN apk add build-base
+#  RUN apk add build-base
+ RUN apk add gcc
+ RUN apk add musl-dev
+ RUN apk add libc-dev 
+
  RUN apk add yq
- RUN apk add util-linux
+# To get uuidgen
+#  RUN apk add util-linux
 
  # Copy veradco source code
  COPY veradco /go/src/veradco
@@ -22,6 +27,9 @@ FROM golang:1.19-alpine3.16
  RUN chmod +x /veradco_scripts/build_plugins.sh
  COPY build_external_plugins.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_external_plugins.sh
+
+ # Remove .so from /go to lightweight image
+ RUN find /go -type f -name '*.so' -delete
 
  # Build veradcod
  RUN /veradco_scripts/build_veradco.sh

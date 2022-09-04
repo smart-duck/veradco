@@ -26,7 +26,8 @@ for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
     echo "File $path exists."
   else 
     echo "File $path does not exist. Build plugin..."
-	id_plugin="$(uuidgen)"
+	# id_plugin="$(uuidgen)"
+	id_plugin="$(date '+%Y%m%d%H%M%S%N')"
 	plugin_folder="$build_folder/$id_plugin"
 	mkdir -p "$plugin_folder"
 	go_file="$plugin_folder/plug.go"
