@@ -53,8 +53,13 @@ func (plug *AddSidecar) Execute(kobj runtime.Object, operation string, dryRun bo
 	}
 
 	// Add a simple annotation using `AddPatchOperation`
-	metadata := map[string]string{"origin": "fromMutation"}
-	operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations", metadata))
+	if len(pod.ObjectMeta.Annotations) > 0 {
+		operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations/origin", "fromMutation"))
+	} else {
+		metadata := map[string]string{"origin": "fromMutation"}
+		operations = append(operations, admissioncontroller.AddPatchOperation("/metadata/annotations", metadata))
+	}
+
 	return &admissioncontroller.Result{
 		Allowed:  true,
 		PatchOps: operations,
