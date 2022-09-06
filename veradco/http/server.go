@@ -7,8 +7,9 @@ import (
 
 	log "k8s.io/klog/v2"
 
-	"github.com/smart-duck/veradco/deployments"
-	"github.com/smart-duck/veradco/pods"
+	// "github.com/smart-duck/veradco/deployments"
+	// "github.com/smart-duck/veradco/pods"
+	
 	"github.com/smart-duck/veradco/others"
 	"github.com/smart-duck/veradco/cfg"
 )
@@ -40,21 +41,23 @@ func NewServer(port string, config string) *http.Server {
 	}
 
 	// Instances hooks
-	podsValidation := pods.NewValidationHook(&veradcoCfg)
-	podsMutation := pods.NewMutationHook(&veradcoCfg)
-	deploymentValidation := deployments.NewValidationHook(&veradcoCfg)
+	// podsValidation := pods.NewValidationHook(&veradcoCfg)
+	// podsMutation := pods.NewMutationHook(&veradcoCfg)
+	// deploymentValidation := deployments.NewValidationHook(&veradcoCfg)
 
 	othersValidation := others.NewValidationHook(&veradcoCfg)
+	othersMutation := others.NewMutationHook(&veradcoCfg)
 
 	// Routers
 	ah := newAdmissionHandler()
 	mux := http.NewServeMux()
 	mux.Handle("/healthz", healthz())
-	mux.Handle("/validate/pods", ah.Serve(podsValidation))
-	mux.Handle("/mutate/pods", ah.Serve(podsMutation))
-	mux.Handle("/validate/deployments", ah.Serve(deploymentValidation))
+	// mux.Handle("/validate/pods", ah.Serve(podsValidation))
+	// mux.Handle("/mutate/pods", ah.Serve(podsMutation))
+	// mux.Handle("/validate/deployments", ah.Serve(deploymentValidation))
 
 	mux.Handle("/validate/others", ah.Serve(othersValidation))
+	mux.Handle("/mutate/others", ah.Serve(othersMutation))
 
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),

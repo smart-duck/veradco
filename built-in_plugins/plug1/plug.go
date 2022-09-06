@@ -22,14 +22,17 @@ type Plug1 struct {
 	summary string
 }
 
-func (plug *Plug1) Init(configFile string) {
+func (plug *Plug1) Init(configFile string) error {
 	plug.configFile = configFile
 	// log.Infof("Configuration file of plugin %s: %s", name, configFile)
-	plug.summary = fmt.Sprintf("Configuration file of plugin %s: %s", name, configFile)
+	// plug.summary = fmt.Sprintf("Configuration of plugin %s: %s", name, configFile)
+	return nil
 }
 
 
 func (plug *Plug1) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+
+	plug.summary = ""
 
 	// plug.summary += "\n" + fmt.Sprintf("Operation: %s, dryRun: %t", operation, dryRun)
 

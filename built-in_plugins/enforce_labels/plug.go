@@ -1,13 +1,10 @@
 package main
 
 import (
-	// meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
-	// log "k8s.io/klog/v2"
 	"fmt"
-	// "encoding/json"
 	"gopkg.in/yaml.v3"
 	"regexp"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,16 +20,20 @@ type EnforceLabels struct {
 	summary string `yaml:"-"`
 }
 
-func (plug *EnforceLabels) Init(configFile string) {
+func (plug *EnforceLabels) Init(configFile string) error {
 	// Load configuration
 	err := yaml.Unmarshal([]byte(configFile), plug)
 	if err != nil {
-		plug.summary = fmt.Sprintf("cannot unmarshal data: %v", err)
+		// plug.summary = fmt.Sprintf("Cannot unmarshal configuration: %v", err)
+		return err
 	}
+	return nil
 }
 
 
 func (plug *EnforceLabels) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+
+	plug.summary = ""
 
 	obj, ok := kobj.(*meta.PartialObjectMetadata)
 	if !ok {

@@ -35,7 +35,7 @@ A plugin is a piece of Go code that implements the following interface:
 
 ```
 type VeradcoPlugin interface {
-        Init(configFile string)
+        Init(configFile string) error
         Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
         Summary() string
 }

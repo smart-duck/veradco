@@ -7,13 +7,12 @@ import (
 
 	"github.com/smart-duck/veradco/cfg"
 
-	// "github.com/smart-duck/veradco/kres"
-
 	v1 "k8s.io/api/core/v1"
 
-	// log "k8s.io/klog/v2"
+	admission "k8s.io/api/admission/v1"
 
-	// "errors"
+	log "k8s.io/klog/v2"
+
 )
 
 // NewValidationHook creates a new instance of pods validation hook
@@ -30,31 +29,19 @@ func NewMutationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
 	}
 }
 
-// func parseMeta(object []byte) (*meta.TypeMeta, error) {
-// 	var meta meta.TypeMeta
-// 	if err := json.Unmarshal(object, &meta); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &meta, nil
-// }
-
-func ParsePod(object []byte) (*v1.Pod, error) {
-	// meta, err := kres.parseMeta(object)
-
-	// if err != nil {
-	// 	log.Infof("Error unmarshal meta: %v", err)
-	// } else {
-	// 	log.Infof("Meta: %v", meta)
-	// 	if meta.Kind != "Pod" {
-	// 		return nil, errors.New("Not a Pod")
-	// 	}
-		
-	// }
-
+func ParsePod(r *admission.AdmissionRequest) (*v1.Pod, error) {
 	var pod v1.Pod
-	if err := json.Unmarshal(object, &pod); err != nil {
-		return nil, err
+
+	if err := json.Unmarshal(r.Object.Raw, &pod); err != nil {
+
+		// Try with OldObject
+		if errOldObj := json.Unmarshal(r.OldObject.Raw, &pod); errOldObj != nil {
+
+			// Use previous error on Object
+			log.Errorf("Failed to parse (parsePod): %v", err)
+			return nil, err
+		}
+
 	}
 
 	return &pod, nil

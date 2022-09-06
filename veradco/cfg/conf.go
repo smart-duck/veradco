@@ -77,8 +77,16 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() error {
 				if !ok {
 					log.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)
 				} else {
-					plugin.VeradcoPlugin = veradcoPlugin
-					numberOfPluginsLoaded++
+
+					log.Infof(">> Init plugin %s\n", plugin.Name)
+					err := veradcoPlugin.Init(plugin.Configuration)
+
+					if err != nil {
+						log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
+					} else {
+						plugin.VeradcoPlugin = veradcoPlugin
+						numberOfPluginsLoaded++
+					}
 					// log.Infof("Plugin: %v\n", plugin)
 				}
 			}
@@ -106,8 +114,20 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 		// if err != nil {
 		// 	return nil, err
 		// }
+
+		// check scope
+		match, err := matchRegex(plugin.Scope, scope)
+		if err != nil {
+			log.Errorf("Failed to evaluate regex %s for %s: %s", plugin.Scope, r.Name, err)
+			continue
+		} else {
+			if ! *match {
+				continue
+			}
+		}
+
 		// Check Resource kind
-		match, err := matchRegex(plugin.Resources, r.Kind.Kind)
+		match, err = matchRegex(plugin.Resources, r.Kind.Kind)
 		if err != nil {
 			log.Errorf("Failed to evaluate regex %s for %s: %s", plugin.Resources, r.Name, err)
 			continue
@@ -150,7 +170,7 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 
 func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.AdmissionRequest, scope string) (*admissioncontroller.Result, error) {
 
-	plugins, err := veradcoCfg.GetPlugins(r, "Validating")
+	plugins, err := veradcoCfg.GetPlugins(r, scope)
 
 	if err != nil {
 		log.Errorf("Failed to load plugins: %v", err)
@@ -158,10 +178,6 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 	}
 
 	for _, plug := range *plugins {
-		log.Infof(">> Init plugin %s\n", plug.Name)
-		// log.Infof("Plug: %v\n", plug)
-		// log.Infof("[%T] %+v\n", plug.VeradcoPlugin, plug.VeradcoPlugin)
-		plug.VeradcoPlugin.Init(plug.Configuration)
 		log.Infof(">> Execute plugin %s\n", plug.Name)
 		// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)

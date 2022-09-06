@@ -10,7 +10,7 @@ import (
 
 func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
-		dp, err := parseDeployment(r.Object.Raw)
+		dp, err := parseDeployment(r)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}

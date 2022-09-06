@@ -16,12 +16,14 @@ type Basic struct {
 	summary string
 }
 
-func (plug *Basic) Init(configFile string) {
-	plug.summary = fmt.Sprintf("Configuration of plugin %s is: %s", name, configFile)
+func (plug *Basic) Init(configFile string) error {
+	// plug.summary = fmt.Sprintf("Configuration of plugin %s is: %s", name, configFile)
+	return nil
 }
 
 
 func (plug *Basic) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+	plug.summary = ""
 	pod, ok := kobj.(*v1.Pod)
 	if !ok {
 		plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)

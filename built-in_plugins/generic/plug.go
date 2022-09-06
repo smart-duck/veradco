@@ -10,18 +10,24 @@ import (
 
 var (
 	name string = "Generic"
+	calls int = 1
 )
 
 type Generic struct {
 	summary string
 }
 
-func (plug *Generic) Init(configFile string) {
-	plug.summary = fmt.Sprintf("Configuration of plugin %s is: %s", name, configFile)
+func (plug *Generic) Init(configFile string) error {
+	// plug.summary = fmt.Sprintf("Configuration of plugin %s is: %s", name, configFile)
+	// plug.summary += "\n" + fmt.Sprintf("[%T] %+v %p", plug, plug, plug)
+	return nil
 }
 
 
 func (plug *Generic) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+	calls++
+	plug.summary = ""
+	plug.summary += "\n" + fmt.Sprintf("Generic: call nb %d", calls)
 	other, ok := kobj.(*meta.PartialObjectMetadata)
 	if !ok {
 		plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)

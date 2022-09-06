@@ -13,40 +13,38 @@ import (
 )
 
 func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-
-	return defineOperation(admission.Create, veradcoCfg)
-
-	// return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
-
-	// 	log.Infof(">>>> others / validateCreate")
-
-	// 	var other runtime.Object
-	// 	var err error
-
-	// 	// Should be a *meta.PartialObjectMetadata
-	// 	other, err = parseOther(r.Object.Raw)
-	// 	if err != nil {
-	// 		return &admissioncontroller.Result{Msg: err.Error()}, nil
-	// 	}
-
-	// 	// Apply the plugins
-	// 	return veradcoCfg.ProceedPlugins(other, r, "Validating")
-	// }
+	return validatingOperation(admission.Create, veradcoCfg, "Validating")
 }
 
 func validateUpdate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return defineOperation(admission.Update, veradcoCfg)
+	return validatingOperation(admission.Update, veradcoCfg, "Validating")
 }
 
 func validateDelete(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return defineOperation(admission.Delete, veradcoCfg)
+	return validatingOperation(admission.Delete, veradcoCfg, "Validating")
 }
 
 func validateConnect(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return defineOperation(admission.Connect, veradcoCfg)
+	return validatingOperation(admission.Connect, veradcoCfg, "Validating")
 }
 
-func defineOperation(op admission.Operation, veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
+func mutateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
+	return validatingOperation(admission.Create, veradcoCfg, "Mutating")
+}
+
+func mutateUpdate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
+	return validatingOperation(admission.Update, veradcoCfg, "Mutating")
+}
+
+func mutateDelete(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
+	return validatingOperation(admission.Delete, veradcoCfg, "Mutating")
+}
+
+func mutateConnect(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
+	return validatingOperation(admission.Connect, veradcoCfg, "Mutating")
+}
+
+func validatingOperation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
 		log.Infof(">>>> others / %s operation, Kind: %s, Version: %s, Group: %s, Name: %s, Namespace: %s", string(op), r.Kind.Kind, r.Kind.Version, r.Kind.Group, r.Name, r.Namespace)
@@ -61,6 +59,6 @@ func defineOperation(op admission.Operation, veradcoCfg *conf.VeradcoCfg) admiss
 		}
 
 		// Apply the plugins
-		return veradcoCfg.ProceedPlugins(other, r, "Validating")
+		return veradcoCfg.ProceedPlugins(other, r, scope)
 	}
 }

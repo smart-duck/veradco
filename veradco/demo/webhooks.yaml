@@ -61,23 +61,44 @@
 #         resources: ["pods"]
 #     failurePolicy: Ignore
 # ---
+# apiVersion: admissionregistration.k8s.io/v1
+# kind: ValidatingWebhookConfiguration
+# metadata:
+#   name: veradco-other-validation
+# webhooks:
+#   - name: veradco-other-validation.default.svc
+#     sideEffects: None
+#     admissionReviewVersions: ["v1"]
+#     clientConfig:
+#       service:
+#         name: veradco
+#         namespace: veradco
+#         path: "/validate/others"
+#       caBundle: "${CA_BUNDLE}"
+#     rules:
+#       - operations: ["CREATE", "DELETE", "UPDATE", "CONNECT"]
+#         apiGroups: ["*"]
+#         apiVersions: ["*"]
+#         resources: ["pods", "deployments", "daemonsets", "statefulsets", "secrets"]
+#     failurePolicy: Ignore
+# ---
 apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
+kind: MutatingWebhookConfiguration
 metadata:
-  name: veradco-other-validation
+  name: veradco-other-mutation
 webhooks:
-  - name: veradco-other-validation.default.svc
+  - name: veradco-other-mutation.default.svc
     sideEffects: None
     admissionReviewVersions: ["v1"]
     clientConfig:
       service:
         name: veradco
         namespace: veradco
-        path: "/validate/others"
+        path: "/mutate/others"
       caBundle: "${CA_BUNDLE}"
     rules:
-      - operations: ["CREATE", "DELETE", "UPDATE", "CONNECT"]
-        apiGroups: ["*"]
-        apiVersions: ["*"]
-        resources: ["pods", "deployments", "daemonsets", "statefulsets"]
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
     failurePolicy: Ignore

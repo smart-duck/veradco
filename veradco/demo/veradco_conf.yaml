@@ -87,36 +87,95 @@ data:
     #   # "Validating|Mutating" fits to both scopes
     #   scope: "Validating"
 
-    - name: "Generic"
-      # The path of the plugin.
-      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
-      # For a built-in plugin the path is /app/plugins
-      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
-      path: "/app/plugins/built-in-generic.so"
-      # A regular expression to define the resources on which the plugin is called
-      resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
-      # A regular expression to define the operations on which the plugin is called
-      # Example: "CREATE|UPDATE"
-      # It's up to the plugin to manage different operations in its code
-      operations: "CREATE|DELETE|UPDATE|CONNECT"
-      # A regular expression to define the namespaces in the scope of the plugin
-      # Example: "kube-system|default"
-      namespaces: "(!~)kube-system|kube-public"
-      # Filter only on resources having some labels.
-      # Both key and value are regular expressions
-      labels:
-      - key: (?i)owner
-        value: (!~)(?i)me
-      # Filter only on resources having some labels.
-      # Both key and value are regular expressions
-      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
-      dryRun: true
-      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
-      configuration: |
-        Generic configuration
-      # A regular expression that define the scope of the plugin.
-      # "Validating|Mutating" fits to both scopes
-      scope: "Validating"
+    # - name: "Generic"
+    #   # The path of the plugin.
+    #   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+    #   # For a built-in plugin the path is /app/plugins
+    #   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+    #   path: "/app/plugins/built-in-generic.so"
+    #   # A regular expression to define the resources on which the plugin is called
+    #   resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
+    #   # A regular expression to define the operations on which the plugin is called
+    #   # Example: "CREATE|UPDATE"
+    #   # It's up to the plugin to manage different operations in its code
+    #   operations: "CREATE|DELETE|UPDATE|CONNECT"
+    #   # A regular expression to define the namespaces in the scope of the plugin
+    #   # Example: "kube-system|default"
+    #   namespaces: "(!~)kube-system|kube-public"
+    #   # Filter only on resources having some labels.
+    #   # Both key and value are regular expressions
+    #   labels:
+    #   - key: (?i)owner
+    #     value: (!~)(?i)me
+    #   # Filter only on resources having some labels.
+    #   # Both key and value are regular expressions
+    #   # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+    #   dryRun: true
+    #   # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+    #   configuration: |
+    #     Generic configuration
+    #   # A regular expression that define the scope of the plugin.
+    #   # "Validating|Mutating" fits to both scopes
+    #   scope: "Validating"
+
+    # - name: "GenericExt"
+    #   # The path of the plugin.
+    #   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+    #   # For a built-in plugin the path is /app/plugins
+    #   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+    #   path: "/app/external_plugins/ext-generic.so"
+    #   code: |
+    #     cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
+    #     MSIKCW1ldGEgIms4cy5pby9hcGltYWNoaW5lcnkvcGtnL2FwaXMvbWV0YS92MSIKCSJrOHMuaW8v
+    #     YXBpbWFjaGluZXJ5L3BrZy9ydW50aW1lIgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNv
+    #     IgoJImZtdCIKKQoKdmFyICgKCW5hbWUgc3RyaW5nID0gIkdlbmVyaWMiCgljYWxscyBpbnQgPSAx
+    #     CikKCnR5cGUgR2VuZXJpYyBzdHJ1Y3QgewoJc3VtbWFyeSBzdHJpbmcKfQoKZnVuYyAocGx1ZyAq
+    #     R2VuZXJpYykgSW5pdChjb25maWdGaWxlIHN0cmluZykgZXJyb3IgewoJcGx1Zy5zdW1tYXJ5ID0g
+    #     Zm10LlNwcmludGYoIkNvbmZpZ3VyYXRpb24gb2YgcGx1Z2luICVzIGlzOiAlcyIsIG5hbWUsIGNv
+    #     bmZpZ0ZpbGUpCgkvLyBwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJbJVRdICUr
+    #     diAlcCIsIHBsdWcsIHBsdWcsIHBsdWcpCglyZXR1cm4gbmlsCn0KCgpmdW5jIChwbHVnICpHZW5l
+    #     cmljKSBFeGVjdXRlKGtvYmogcnVudGltZS5PYmplY3QsIG9wZXJhdGlvbiBzdHJpbmcsIGRyeVJ1
+    #     biBib29sLCByICphZG1pc3Npb24uQWRtaXNzaW9uUmVxdWVzdCkgKCphZG1pc3Npb25jb250cm9s
+    #     bGVyLlJlc3VsdCwgZXJyb3IpIHsKCWNhbGxzKysKCXBsdWcuc3VtbWFyeSArPSAiXG4iICsgZm10
+    #     LlNwcmludGYoIkdlbmVyaWM6IGNhbGwgbmIgJWQiLCBjYWxscykKCW90aGVyLCBvayA6PSBrb2Jq
+    #     LigqbWV0YS5QYXJ0aWFsT2JqZWN0TWV0YWRhdGEpCglpZiAhb2sgewoJCXBsdWcuc3VtbWFyeSAr
+    #     PSAiXG4iICsgZm10LlNwcmludGYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMgbm90IGFzIGV4cGVj
+    #     dGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNpb25LaW5kKCkuS2luZCkK
+    #     CQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJLdWJlcm5ldGVzIHJlc291cmNlIGlzIG5vdCBhcyBl
+    #     eHBlY3RlZCAoJXMpIiwga29iai5HZXRPYmplY3RLaW5kKCkuR3JvdXBWZXJzaW9uS2luZCgpLktp
+    #     bmQpCgl9IGVsc2UgewoJCXBsdWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkdlbmVy
+    #     aWMgcmVzb3VyY2U6ICVzLCAlcywgJXMsICVzIiwgb3RoZXIuVHlwZU1ldGEuS2luZCwKCQkJb3Ro
+    #     ZXIuVHlwZU1ldGEuQVBJVmVyc2lvbiwgb3RoZXIuT2JqZWN0TWV0YS5OYW1lLCBvdGhlci5PYmpl
+    #     Y3RNZXRhLk5hbWVzcGFjZSkKCX0KCglwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRm
+    #     KCIlcyAlcywgYWNjZXB0ZWQiLCBvdGhlci5UeXBlTWV0YS5LaW5kLCBvdGhlci5PYmplY3RNZXRh
+    #     Lk5hbWUpCgoJcmV0dXJuICZhZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdHtBbGxvd2VkOiB0cnVl
+    #     fSwgbmlsCn0KCmZ1bmMgKHBsdWcgKkdlbmVyaWMpIFN1bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJu
+    #     IHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBzeW1ib2wgbmFtZWQgIlZlcmFkY29QbHVn
+    #     aW4iCnZhciBWZXJhZGNvUGx1Z2luIEdlbmVyaWM=
+    #   # A regular expression to define the resources on which the plugin is called
+    #   resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
+    #   # A regular expression to define the operations on which the plugin is called
+    #   # Example: "CREATE|UPDATE"
+    #   # It's up to the plugin to manage different operations in its code
+    #   operations: "CREATE|DELETE|UPDATE|CONNECT"
+    #   # A regular expression to define the namespaces in the scope of the plugin
+    #   # Example: "kube-system|default"
+    #   namespaces: "(!~)kube-system|kube-public"
+    #   # Filter only on resources having some labels.
+    #   # Both key and value are regular expressions
+    #   labels:
+    #   - key: (?i)owner
+    #     value: (!~)(?i)me
+    #   # Filter only on resources having some labels.
+    #   # Both key and value are regular expressions
+    #   # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+    #   dryRun: true
+    #   # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+    #   configuration: |
+    #     Generic configuration
+    #   # A regular expression that define the scope of the plugin.
+    #   # "Validating|Mutating" fits to both scopes
+    #   scope: "Validating"
 
     # - name: "extplug1"
     #   # The path of the plugin.
@@ -232,34 +291,65 @@ data:
     #   # "Validating|Mutating" fits to both scopes
     #   scope: "Validating"
 
-    # - name: "EnforceLabels"
-    #   # The path of the plugin.
-    #   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
-    #   # For a built-in plugin the path is /app/plugins
-    #   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
-    #   path: "/app/plugins/built-in-enforce_labels.so"
-    #   # A regular expression to define the resources on which the plugin is called
-    #   resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
-    #   # A regular expression to define the operations on which the plugin is called
-    #   # Example: "CREATE|UPDATE"
-    #   # It's up to the plugin to manage different operations in its code
-    #   operations: "CREATE"
-    #   # A regular expression to define the namespaces in the scope of the plugin
-    #   # Example: "kube-system|default"
-    #   namespaces: "(!~)kube-system|kube-public"
-    #   # Filter only on resources having some labels.
-    #   # Both key and value are regular expressions
-    #   # Filter only on resources having some labels.
-    #   # Both key and value are regular expressions
-    #   # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
-    #   dryRun: true
-    #   # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
-    #   configuration: |
-    #     annotations: 
-    #       owner: ^to.+
-    #     labels: 
-    #       nodegp: ^ng-.+
-    #   # A regular expression that define the scope of the plugin.
-    #   # "Validating|Mutating" fits to both scopes
-    #   scope: "Validating"
+    - name: "EnforceLabels"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/plugins/built-in-enforce_labels.so"
+      # A regular expression to define the resources on which the plugin is called
+      resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: "(!~)kube-system|kube-public"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: true
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        annotations: 
+          owner: ^to.+
+        labels: 
+          nodegp: ^ng-.+
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+
+    - name: "AddDummySidecar"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/plugins/built-in-add_dummy_sidecar.so"
+      # A regular expression to define the resources on which the plugin is called
+      resources: "Pod"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: "(!~)kube-system|kube-public"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: true
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        annotations: 
+          owner: ^to.+
+        labels: 
+          nodegp: ^ng-.+
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Mutating"
     

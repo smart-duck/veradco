@@ -23,10 +23,19 @@ func NewValidationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
 		Connect: validateConnect(veradcoCfg),
 	}
 }
+
+func NewMutationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
+	return admissioncontroller.Hook{
+		Create: mutateCreate(veradcoCfg),
+		Delete: mutateDelete(veradcoCfg),
+		Update: mutateUpdate(veradcoCfg),
+		Connect: mutateConnect(veradcoCfg),
+	}
+}
  
 func parseOther(r *admission.AdmissionRequest) (*meta.PartialObjectMetadata, error) {
 	var other meta.PartialObjectMetadata
-	// log.Infof("parseOther raw object: %v", r.Object.Raw)
+
 	if err := json.Unmarshal(r.Object.Raw, &other); err != nil {
 
 		// Try with OldObject

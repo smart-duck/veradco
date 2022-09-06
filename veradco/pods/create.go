@@ -24,7 +24,7 @@ func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 
 		log.Infof(">>>> validateCreate")
 
-		pod, err := ParsePod(r.Object.Raw)
+		pod, err := ParsePod(r)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
@@ -124,7 +124,7 @@ func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 func mutateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 		var operations []admissioncontroller.PatchOperation
-		pod, err := ParsePod(r.Object.Raw)
+		pod, err := ParsePod(r)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
