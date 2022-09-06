@@ -177,6 +177,12 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		return &admissioncontroller.Result{Allowed: true}, nil
 	}
 
+	globalResult := admissioncontroller.Result{
+		Allowed:  true,
+		Msg: "",
+		PatchOps: make([]admissioncontroller.PatchOperation, 0),
+	}
+
 	for _, plug := range *plugins {
 		log.Infof(">> Execute plugin %s\n", plug.Name)
 		// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
@@ -186,13 +192,17 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 			log.Infof(">> Plugin execution summary: %s\n", plug.VeradcoPlugin.Summary())
 			if ! result.Allowed {
 				return result, err
+			} else {
+				globalResult.Msg += result.Msg
+				globalResult.PatchOps = append(globalResult.PatchOps, result.PatchOps...)
 			}
 		} else {
 			return result, err
 		}
 	}
 	
-	return &admissioncontroller.Result{Allowed: true}, nil
+	// return &admissioncontroller.Result{Allowed: true}, nil
+	return &globalResult, nil
 
 }
 
