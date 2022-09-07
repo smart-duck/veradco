@@ -1,4 +1,4 @@
-package others
+package deployments
 
 import (
 	"github.com/smart-duck/veradco"
@@ -51,16 +51,16 @@ func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string
 
 		log.V(1).Infof(">>>> others / %s operation, Kind: %s, Version: %s, Group: %s, Name: %s, Namespace: %s", string(op), r.Kind.Kind, r.Kind.Version, r.Kind.Group, r.Name, r.Namespace)
 
-		var other runtime.Object
+		var dp runtime.Object
 		var err error
 
-		// Should be a *meta.PartialObjectMetadata
-		other, err = kres.ParseOther(r)
+		// Should be a pod
+		dp, err = kres.ParseDeployment(r)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
 
 		// Apply the plugins
-		return veradcoCfg.ProceedPlugins(other, r, scope)
+		return veradcoCfg.ProceedPlugins(dp, r, scope)
 	}
 }
