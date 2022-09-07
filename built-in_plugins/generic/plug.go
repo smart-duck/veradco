@@ -5,6 +5,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/kres"
 	"fmt"
 )
 
@@ -27,17 +28,37 @@ func (plug *Generic) Init(configFile string) error {
 func (plug *Generic) Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 	calls++
 	plug.summary = ""
-	plug.summary += "\n" + fmt.Sprintf("Generic: call nb %d", calls)
-	other, ok := kobj.(*meta.PartialObjectMetadata)
+	// plug.summary += "\n" + fmt.Sprintf("Generic: call nb %d", calls)
+	
+	var (
+		obj *meta.PartialObjectMetadata
+		ok bool
+		err error
+	)
+
+	obj, ok = kobj.(*meta.PartialObjectMetadata)
+
 	if !ok {
-		plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
-		return nil, fmt.Errorf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
-	} else {
-		plug.summary += "\n" + fmt.Sprintf("Generic resource: %s, %s, %s, %s", other.TypeMeta.Kind,
-			other.TypeMeta.APIVersion, other.ObjectMeta.Name, other.ObjectMeta.Namespace)
+
+		obj, err = kres.ParseOther(r)
+
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
-	plug.summary += "\n" + fmt.Sprintf("%s %s, accepted", other.TypeMeta.Kind, other.ObjectMeta.Name)
+	plug.summary += "\n" + fmt.Sprintf("Generic resource: %s, %s, %s, %s", obj.TypeMeta.Kind, obj.TypeMeta.APIVersion, obj.ObjectMeta.Name, obj.ObjectMeta.Namespace)
+
+	// if !ok {
+	// 	plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
+	// 	return nil, fmt.Errorf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
+	// } else {
+	// 	plug.summary += "\n" + fmt.Sprintf("Generic resource: %s, %s, %s, %s", other.TypeMeta.Kind,
+	// 		other.TypeMeta.APIVersion, other.ObjectMeta.Name, other.ObjectMeta.Namespace)
+	// }
+
+	// plug.summary += "\n" + fmt.Sprintf("%s %s, accepted", obj.TypeMeta.Kind, obj.ObjectMeta.Name)
 
 	return &admissioncontroller.Result{Allowed: true}, nil
 }

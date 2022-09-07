@@ -102,3 +102,45 @@ webhooks:
 #         apiVersions: ["v1"]
 #         resources: ["pods"]
 #     failurePolicy: Ignore
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: veradco-daemonset-validation
+webhooks:
+  - name: veradco-daemonset-validation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/validate/daemonsets"
+      caBundle: "${CA_BUNDLE}"
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["daemonsets"]
+    failurePolicy: Ignore
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: veradco-daemonset-mutation
+webhooks:
+  - name: veradco-daemonset-mutation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/mutate/daemonsets"
+      caBundle: "${CA_BUNDLE}"
+    rules:
+      - operations: ["*"]
+        apiGroups: ["*"]
+        apiVersions: ["v1"]
+        resources: ["daemonsets"]
+    failurePolicy: Ignore

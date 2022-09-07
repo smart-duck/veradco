@@ -8,6 +8,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	log "k8s.io/klog/v2"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func ParseTypeMeta(object []byte) (*meta.TypeMeta, error) {
@@ -152,4 +153,22 @@ func ParseOther(r *admission.AdmissionRequest) (*meta.PartialObjectMetadata, err
 	}
 
 	return &other, nil
+}
+
+func ParseObject(r *admission.AdmissionRequest) (runtime.Object, error) {
+	if r.Kind.Kind == "Pod" {
+		return ParsePod(r)
+	} else if r.Kind.Kind == "Deployment" {
+		return ParseDeployment(r)		
+	} else if r.Kind.Kind == "DaemonSet" {
+		return ParseDaemonSet(r)
+	} else if r.Kind.Kind == "StatefulSet" {
+		return ParseStatefulSet(r)
+	} else if r.Kind.Kind == "Job" {
+		return ParseJob(r)
+	} else if r.Kind.Kind == "CronJob" {
+		return ParseCronJob(r)
+	} else {
+		return ParseOther(r)
+	}
 }

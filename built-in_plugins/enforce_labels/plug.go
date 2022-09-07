@@ -4,10 +4,11 @@ import (
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/kres"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"regexp"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	// meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
@@ -35,11 +36,17 @@ func (plug *EnforceLabels) Execute(kobj runtime.Object, operation string, dryRun
 
 	plug.summary = ""
 
-	obj, ok := kobj.(*meta.PartialObjectMetadata)
-	if !ok {
-		plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
-		return nil, fmt.Errorf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
+	obj, err := kres.ParseOther(r)
+
+	if err != nil {
+		return nil, err
 	}
+
+	// obj, ok := kobj.(*meta.PartialObjectMetadata)
+	// if !ok {
+	// 	plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
+	// 	return nil, fmt.Errorf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
+	// }
 
 	for k := range plug.Annotations {
 		annot, exists := obj.ObjectMeta.Annotations[k]
