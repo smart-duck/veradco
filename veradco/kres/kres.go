@@ -100,8 +100,6 @@ func ParseDeployment(r *admission.AdmissionRequest) (*appsv1.Deployment, error) 
 	return &deployment, nil
 }
 
-// DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet
-
 func ParseDaemonSet(r *admission.AdmissionRequest) (*appsv1.DaemonSet, error) {
 	var daemonSet appsv1.DaemonSet
 

@@ -11,6 +11,10 @@ import (
 	"github.com/smart-duck/veradco/pods"
 
 	"github.com/smart-duck/veradco/deployments"
+
+	"github.com/smart-duck/veradco/daemonsets"
+
+	"github.com/smart-duck/veradco/statefulsets"
 	
 	"github.com/smart-duck/veradco/others"
 	"github.com/smart-duck/veradco/cfg"
@@ -53,6 +57,13 @@ func NewServer(port string, config string) *http.Server {
 	deploymentValidation := deployments.NewValidationHook(&veradcoCfg)
 	deploymentMutation := deployments.NewMutationHook(&veradcoCfg)
 
+	daemonsetValidation := daemonsets.NewValidationHook(&veradcoCfg)
+	daemonsetMutation := daemonsets.NewMutationHook(&veradcoCfg)
+
+	statefulsetValidation := statefulsets.NewValidationHook(&veradcoCfg)
+	statefulsetMutation := statefulsets.NewMutationHook(&veradcoCfg)
+
+
 	othersValidation := others.NewValidationHook(&veradcoCfg)
 	othersMutation := others.NewMutationHook(&veradcoCfg)
 
@@ -65,6 +76,12 @@ func NewServer(port string, config string) *http.Server {
 
 	mux.Handle("/validate/deployments", ah.Serve(deploymentValidation))
 	mux.Handle("/mutate/deployments", ah.Serve(deploymentMutation))
+
+	mux.Handle("/validate/daemonsets", ah.Serve(daemonsetValidation))
+	mux.Handle("/mutate/daemonsets", ah.Serve(daemonsetMutation))
+
+	mux.Handle("/validate/statefulsets", ah.Serve(statefulsetValidation))
+	mux.Handle("/mutate/statefulsets", ah.Serve(statefulsetMutation))
 
 	mux.Handle("/validate/others", ah.Serve(othersValidation))
 	mux.Handle("/mutate/others", ah.Serve(othersMutation))
