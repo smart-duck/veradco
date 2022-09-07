@@ -31,9 +31,8 @@ type Plugin struct {
 }
 
 type VeradcoCfg struct {
-	LogLevel string `yaml:"logLevel"`
 	FailOnPluginLoadingFails bool `yaml:"failOnPluginLoadingFails"`
-	RejectOnPluginError bool `yaml:"rejectOnPluginError"`
+	// RejectOnPluginError bool `yaml:"rejectOnPluginError"`Managed at k8s level failurePolicy
 	Plugins []*Plugin `yaml:"plugins"`
 }
 
@@ -59,7 +58,7 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 	return nil
 }
 
-func (veradcoCfg *VeradcoCfg) LoadPlugins() error {
+func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 	numberOfPluginsLoaded := 0
 	log.Infof(">>>> Loading plugins\n")
 	for _, plugin := range veradcoCfg.Plugins {
@@ -69,16 +68,25 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() error {
 		plug, err := goplugin.Open(plugin.Path)
 		if err != nil {
 			log.Errorf("Unable to load plugin %s: %v\n", plugin.Name, err)
+			if veradcoCfg.FailOnPluginLoadingFails {
+				return numberOfPluginsLoaded, err			
+			}
 		} else {
 			pluginHandler, err := plug.Lookup("VeradcoPlugin")
 			if err != nil {
 				log.Errorf("Unable to find handler for plugin %s: %v\n", plugin.Name, err)
+				if veradcoCfg.FailOnPluginLoadingFails {
+					return numberOfPluginsLoaded, err			
+				}
 			} else {
 				var veradcoPlugin veradcoplugin.VeradcoPlugin
 
 				veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
 				if !ok {
 					log.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)
+					if veradcoCfg.FailOnPluginLoadingFails {
+						return numberOfPluginsLoaded, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
+					}
 				} else {
 
 					log.Infof(">> Init plugin %s\n", plugin.Name)
@@ -86,6 +94,9 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() error {
 
 					if err != nil {
 						log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
+						if veradcoCfg.FailOnPluginLoadingFails {
+							return numberOfPluginsLoaded, err			
+						}
 					} else {
 						plugin.VeradcoPlugin = veradcoPlugin
 						numberOfPluginsLoaded++
@@ -98,9 +109,9 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() error {
 
 	if numberOfPluginsLoaded > 0 {
 		log.Infof(">> %d plugins loaded over %d\n", numberOfPluginsLoaded, len(veradcoCfg.Plugins))
-		return nil
+		return numberOfPluginsLoaded, nil
 	}
-	return fmt.Errorf("No plugin loaded")
+	return numberOfPluginsLoaded, fmt.Errorf("No plugin loaded")
 }
 
 // func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, kind string, operation string, namespace string, labels map[string]string, annotations map[string]string, scope string) (*[]*Plugin, error) {

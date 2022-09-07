@@ -22,7 +22,7 @@ func NewServer(port string, config string) *http.Server {
 
 	log.Infof(">>>> NewServer")
 
-	veradcoCfg := conf.VeradcoCfg{}
+	veradcoCfg := conf.VeradcoCfg{FailOnPluginLoadingFails: true}
 
 	err := veradcoCfg.ReadConf(config)
 	if err != nil {
@@ -32,12 +32,16 @@ func NewServer(port string, config string) *http.Server {
 		log.Infof(">> Configuration %s successfully loaded\n", config)
 	}
 
-	err = veradcoCfg.LoadPlugins()
+	var numberOfPluginsLoaded int
+	numberOfPluginsLoaded, err = veradcoCfg.LoadPlugins()
 	if err != nil {
 		log.Errorf("Error loading plugins: %v", err)
-		os.Exit(12)
+		if veradcoCfg.FailOnPluginLoadingFails {
+			log.Errorf("According to the configuration, exit on fail")
+			os.Exit(12)
+		}
 	} else {
-		log.Infof(">> Plugins successfully loaded")
+		log.Infof(">> %d plugins successfully loaded", numberOfPluginsLoaded)
 	}
 
 	// Instances hooks

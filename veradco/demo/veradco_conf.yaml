@@ -5,9 +5,7 @@ metadata:
   namespace: veradco
 data:
   veradco.yaml: |
-    logLevel: DEBUG
-    failOnPluginLoadingFails: false
-    rejectOnPluginError: true
+    failOnPluginLoadingFails: true
     plugins:
     # - name: "Basic"
     #   # The path of the plugin.
