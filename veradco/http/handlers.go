@@ -77,7 +77,7 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 
 		// set the patch operations for mutating admission
 		if len(result.PatchOps) > 0 {
-			log.Infof("Set patch operations: %v", result.PatchOps)
+			log.V(2).Infof("Set patch operations: %v", result.PatchOps)
 			patchBytes, err := json.Marshal(result.PatchOps)
 			if err != nil {
 				log.Error(err)
@@ -86,7 +86,7 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 			admissionResponse.Response.Patch = patchBytes
 			v1JSONPatch := admission.PatchTypeJSONPatch
 			admissionResponse.Response.PatchType = &v1JSONPatch
-			log.Infof("admissionResponse.Response.Patch: %s", string(admissionResponse.Response.Patch))
+			log.V(3).Infof("admissionResponse.Response.Patch: %s", string(admissionResponse.Response.Patch))
 		}
 
 		res, err := json.Marshal(admissionResponse)
@@ -96,7 +96,7 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 			return
 		}
 
-		log.Infof("Webhook [%s - %s] - Allowed: %t", r.URL.Path, review.Request.Operation, result.Allowed)
+		log.V(1).Infof("Webhook [%s - %s] - Allowed: %t", r.URL.Path, review.Request.Operation, result.Allowed)
 		w.WriteHeader(http.StatusOK)
 		w.Write(res)
 	}
