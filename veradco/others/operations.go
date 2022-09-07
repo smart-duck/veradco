@@ -47,7 +47,7 @@ func mutateConnect(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
 func validatingOperation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
-		log.Infof(">>>> others / %s operation, Kind: %s, Version: %s, Group: %s, Name: %s, Namespace: %s", string(op), r.Kind.Kind, r.Kind.Version, r.Kind.Group, r.Name, r.Namespace)
+		log.V(1).Infof(">>>> others / %s operation, Kind: %s, Version: %s, Group: %s, Name: %s, Namespace: %s", string(op), r.Kind.Kind, r.Kind.Version, r.Kind.Group, r.Name, r.Namespace)
 
 		var other runtime.Object
 		var err error

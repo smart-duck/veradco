@@ -31,6 +31,9 @@ type Plugin struct {
 }
 
 type VeradcoCfg struct {
+	LogLevel string `yaml:"logLevel"`
+	FailOnPluginLoadingFails bool `yaml:"failOnPluginLoadingFails"`
+	RejectOnPluginError bool `yaml:"rejectOnPluginError"`
 	Plugins []*Plugin `yaml:"plugins"`
 }
 
@@ -104,7 +107,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() error {
 func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope string) (*[]*Plugin, error) {
 	// log.Infof("Plugins: %v\n", veradcoCfg.Plugins)
 
-	log.Infof(">>>> GetPlugins called\n")
+	log.V(2).Infof(">>>> GetPlugins called\n")
 
 	result := []*Plugin{}
 
@@ -184,12 +187,12 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 	}
 
 	for _, plug := range *plugins {
-		log.Infof(">> Execute plugin %s\n", plug.Name)
+		log.V(1).Infof(">> Execute plugin %s\n", plug.Name)
 		// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
 		result, err := plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
 		if err == nil {
-			log.Infof(">> Plugin execution summary: %s\n", plug.VeradcoPlugin.Summary())
+			log.Infof(">> Plugin  %sexecution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
 			if ! result.Allowed {
 				return result, err
 			} else {
@@ -245,7 +248,7 @@ func matchRegex(regex string, value string) (*bool, error) {
 		matched = ! matched
 	}
 	
-	log.Infof(">> Evaluate regex %s on %s: %t\n", regex, value, matched)
+	log.V(3).Infof(">> Evaluate regex %s on %s: %t\n", regex, value, matched)
 
 	return &matched, nil
 

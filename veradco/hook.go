@@ -48,6 +48,6 @@ func wrapperExecution(fn AdmitFunc, r *admission.AdmissionRequest) (*Result, err
 		return nil, fmt.Errorf("operation %s is NOT registered", r.Operation)
 	}
 
-	log.Infof(">>>> wrapperExecution: operation %s is registered", r.Operation)
+	log.V(1).Infof(">>>> wrapperExecution: operation %s is registered", r.Operation)
 	return fn(r)
 }

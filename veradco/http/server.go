@@ -29,7 +29,7 @@ func NewServer(port string, config string) *http.Server {
 		log.Errorf("Error loading configuration %s: %v", config, err)
 		os.Exit(3)
 	} else {
-		log.Infof(">> Configuration %s succesfully loaded\n", config)
+		log.Infof(">> Configuration %s successfully loaded\n", config)
 	}
 
 	err = veradcoCfg.LoadPlugins()
@@ -37,7 +37,7 @@ func NewServer(port string, config string) *http.Server {
 		log.Errorf("Error loading plugins: %v", err)
 		os.Exit(12)
 	} else {
-		log.Infof(">> Plugins succesfully loaded")
+		log.Infof(">> Plugins successfully loaded")
 	}
 
 	// Instances hooks

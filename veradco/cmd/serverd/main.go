@@ -21,9 +21,15 @@ func main() {
 	flag.StringVar(&tlskey, "tlskey", "/etc/certs/tls.key", "Path to the TLS key")
 	flag.StringVar(&port, "port", "8443", "The port to listen")
 	flag.StringVar(&conf, "conf", "/conf/veradco.yaml", "Configuration of veradco")
+	log.InitFlags(nil)
 	flag.Parse()
 
 	log.Infof(">>>>>> Starting veradco")
+
+	log.V(1).Info("log verbosity 1 enabled")
+	log.V(2).Info("log verbosity 2 enabled")
+	log.V(3).Info("log verbosity 3 enabled")
+	log.V(4).Info("log verbosity 4 enabled")
 
 	server := http.NewServer(port, conf)
 	go func() {

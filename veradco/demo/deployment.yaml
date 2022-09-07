@@ -40,7 +40,7 @@ spec:
         imagePullPolicy: Always
         command: ["/app/veradcod"]
         # command: ["/bin/sh"]
-        # args: ["-c", "sleep 12000s"]
+        args: ["-v=3"]
         livenessProbe:
           httpGet:
             path: /healthz
