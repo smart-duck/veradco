@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"regexp"
 	admission "k8s.io/api/admission/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"encoding/json"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
 )
@@ -124,10 +122,6 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 
 	// Browse all plugins to filter the relevant ones
 	for _, plugin := range veradcoCfg.Plugins {
-		// obj, err := parseOther(r.Object.Raw)
-		// if err != nil {
-		// 	return nil, err
-		// }
 
 		// check scope
 		match, err := matchRegex(plugin.Scope, scope)
@@ -218,15 +212,6 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 	// return &admissioncontroller.Result{Allowed: true}, nil
 	return &globalResult, nil
 
-}
-
-func parseOther(object []byte) (*meta.PartialObjectMetadata, error) {
-	var other meta.PartialObjectMetadata
-	if err := json.Unmarshal(object, &other); err != nil {
-		return nil, err
-	}
-
-	return &other, nil
 }
 
 func matchRegex(regex string, value string) (*bool, error) {

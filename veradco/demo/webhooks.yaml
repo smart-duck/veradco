@@ -79,7 +79,7 @@ webhooks:
       - operations: ["CREATE", "DELETE", "UPDATE", "CONNECT"]
         apiGroups: ["*"]
         apiVersions: ["*"]
-        resources: ["pods", "deployments", "daemonsets", "statefulsets", "secrets"]
+        resources: ["pods", "deployments", "daemonsets", "statefulsets", "secrets", "namespaces"]
     failurePolicy: Ignore
 ---
 apiVersion: admissionregistration.k8s.io/v1

@@ -3,6 +3,8 @@ package others
 import (
 	"github.com/smart-duck/veradco"
 
+	"github.com/smart-duck/veradco/kres"
+
 	"github.com/smart-duck/veradco/cfg"
 
 	log "k8s.io/klog/v2"
@@ -53,7 +55,7 @@ func validatingOperation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, sc
 		var err error
 
 		// Should be a *meta.PartialObjectMetadata
-		other, err = parseOther(r)
+		other, err = kres.ParseOther(r)
 		if err != nil {
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
