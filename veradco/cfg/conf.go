@@ -171,7 +171,7 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 		// Check labels
 		if len(plugin.Labels) > 0 {
 
-			check := false
+			var check = false
 
 			log.V(3).Infof("Check labels to filter plugin %s", plugin.Name)
 			
@@ -186,14 +186,14 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 						check = true
 						break
 					} else {
-						matched, err := regexp.MatchString(label["value"], tmp)
+						matched, err := matchRegex(label["value"], tmp)
 						if err != nil {
 							log.Errorf("Failed to evaluate label regex %s for %s: %s", label["value"], r.Name, err)
 							check = true
 							break
 						}
-						if ! matched {
-							log.V(3).Infof("Inspect label %s for plugin %s: does NOT match", label["key"], plugin.Name)
+						if ! *matched {
+							log.V(3).Infof("Inspect label %s for plugin %s: does NOT match / value: %v / regex: %s", label["key"], plugin.Name, tmp, label["value"])
 							check = true
 							break
 						}
@@ -201,6 +201,8 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 				}
 			}
 			if check {
+				// skip plugin
+				log.V(3).Infof("skip plugin %s: does NOT match labels", plugin.Name)
 				continue
 			}
 		}
@@ -208,7 +210,7 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 		// Check annotations
 		if len(plugin.Annotations) > 0 {
 
-			check := false
+			var check = false
 
 			log.V(3).Infof("Check annotations to filter plugin %s", plugin.Name)
 
@@ -222,14 +224,14 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 						check = true
 						break
 					} else {
-						matched, err := regexp.MatchString(annotation["value"], tmp)
+						matched, err := matchRegex(annotation["value"], tmp)
 						if err != nil {
 							log.Errorf("Failed to evaluate annotation regex %s for %s: %s", annotation["value"], r.Name, err)
 							check = true
 							break
 						}
-						if ! matched {
-							log.V(3).Infof("Inspect annotation %s for plugin %s: does NOT match", annotation["key"], plugin.Name)
+						if ! *matched {
+							log.V(3).Infof("Inspect annotation %s for plugin %s: does NOT match / %v", annotation["key"], plugin.Name, tmp)
 							check = true
 							break
 						}
@@ -237,6 +239,8 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 				}
 			}
 			if check {
+				// skip plugin
+				log.V(3).Infof("skip plugin %s: does NOT match labels", plugin.Name)
 				continue
 			}
 		}

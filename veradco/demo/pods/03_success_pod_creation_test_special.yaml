@@ -5,7 +5,7 @@ metadata:
   namespace: special
   labels:
     nodegp: ng-1
-    owner: mee
+    owner: Me
   annotations:
     owner: toto
 spec:

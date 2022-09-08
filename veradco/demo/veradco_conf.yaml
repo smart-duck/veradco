@@ -107,7 +107,8 @@ data:
       # value is a regular expressions
       labels:
       - key: owner
-        value: (!~)(?i)^me$
+        # value: (?i)^me$
+        value: "(!~)(?i)^me$"
       # Filter only on resources having some labels.
       # Both key and value are regular expressions
       # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
