@@ -11,6 +11,7 @@ import (
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/kres"
 )
 
 type Plugin struct {
@@ -167,6 +168,79 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 			}
 		}
 
+		// Check labels
+		if len(plugin.Labels) > 0 {
+
+			check := false
+
+			log.V(3).Infof("Check labels to filter plugin %s", plugin.Name)
+			
+			obj, err := kres.ParseOther(r)
+
+			if err == nil {
+				for _, label := range plugin.Labels {
+					log.V(3).Infof("Inspect label %s for plugin %s", label["key"], plugin.Name)
+					tmp, exists := obj.ObjectMeta.Labels[label["key"]]
+					if ! exists {
+						log.V(3).Infof("Inspect label %s for plugin %s: does NOT exist", label["key"], plugin.Name)
+						check = true
+						break
+					} else {
+						matched, err := regexp.MatchString(label["value"], tmp)
+						if err != nil {
+							log.Errorf("Failed to evaluate label regex %s for %s: %s", label["value"], r.Name, err)
+							check = true
+							break
+						}
+						if ! matched {
+							log.V(3).Infof("Inspect label %s for plugin %s: does NOT match", label["key"], plugin.Name)
+							check = true
+							break
+						}
+					}
+				}
+			}
+			if check {
+				continue
+			}
+		}
+
+		// Check annotations
+		if len(plugin.Annotations) > 0 {
+
+			check := false
+
+			log.V(3).Infof("Check annotations to filter plugin %s", plugin.Name)
+
+			obj, err := kres.ParseOther(r)
+
+			if err == nil {
+				for _, annotation := range plugin.Annotations {
+					tmp, exists := obj.ObjectMeta.Annotations[annotation["key"]]
+					if ! exists {
+						log.V(3).Infof("Inspect annotation %s for plugin %s: does NOT exist", annotation["key"], plugin.Name)
+						check = true
+						break
+					} else {
+						matched, err := regexp.MatchString(annotation["value"], tmp)
+						if err != nil {
+							log.Errorf("Failed to evaluate annotation regex %s for %s: %s", annotation["value"], r.Name, err)
+							check = true
+							break
+						}
+						if ! matched {
+							log.V(3).Infof("Inspect annotation %s for plugin %s: does NOT match", annotation["key"], plugin.Name)
+							check = true
+							break
+						}
+					}
+				}
+			}
+			if check {
+				continue
+			}
+		}
+
 		// Add the plugin
 		result = append(result, plugin)
 	}
@@ -197,12 +271,16 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
 		result, err := plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
 		if err == nil {
-			log.Infof(">> Plugin  %sexecution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
-			if ! result.Allowed {
-				return result, err
+			log.Infof(">> Plugin %s execution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
+			if plug.DryRun {
+				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!\n", plug.Name)
 			} else {
-				globalResult.Msg += result.Msg
-				globalResult.PatchOps = append(globalResult.PatchOps, result.PatchOps...)
+				if ! result.Allowed {
+					return result, err
+				} else {
+					globalResult.Msg += result.Msg
+					globalResult.PatchOps = append(globalResult.PatchOps, result.PatchOps...)
+				}
 			}
 		} else {
 			return result, err
