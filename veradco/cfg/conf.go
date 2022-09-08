@@ -17,7 +17,7 @@ type Plugin struct {
 	Name string `yaml:"name"`
 	Path string `yaml:"path"`
 	Code string `yaml:"code,omitempty"`
-	Resources string `yaml:"resources"`
+	Kinds string `yaml:"kinds"`
 	Operations string `yaml:"operations"`
 	Namespaces string `yaml:"namespaces"`
 	Labels []map[string]string `yaml:"labels,omitempty"`
@@ -135,9 +135,9 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 		}
 
 		// Check Resource kind
-		match, err = matchRegex(plugin.Resources, r.Kind.Kind)
+		match, err = matchRegex(plugin.Kinds, r.Kind.Kind)
 		if err != nil {
-			log.Errorf("Failed to evaluate regex %s for %s: %s", plugin.Resources, r.Name, err)
+			log.Errorf("Failed to evaluate regex %s for %s: %s", plugin.Kinds, r.Name, err)
 			continue
 		} else {
 			if ! *match {

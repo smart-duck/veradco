@@ -2,6 +2,8 @@
 
 # set -x
 
+set -e
+
 echo "Copy veradcod to /app, also plugins folder"
 cp -r /release/* /app/
 

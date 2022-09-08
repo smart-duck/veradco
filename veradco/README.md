@@ -65,7 +65,7 @@ plugins:
   # Except that, it works as defined in the Golang regexp package.
   # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
   # A regular expression to define the resources on which the plugin is called
-  resources: "Pod"
+  kinds: "Pod"
   # A regular expression to define the operations on which the plugin is called
   # Example: "CREATE|UPDATE"
   # It's up to the plugin to manage different operations in its code

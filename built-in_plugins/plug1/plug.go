@@ -6,7 +6,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
-	"github.com/smart-duck/veradco/pods"
+	"github.com/smart-duck/veradco/kres"
 	// log "k8s.io/klog/v2"
 	"fmt"
 	"strings"
@@ -45,7 +45,7 @@ func (plug *Plug1) Execute(kobj runtime.Object, operation string, dryRun bool, r
 		if kobj.GetObjectKind().GroupVersionKind().Kind == "Pod" {
 			plug.summary += "\n" + fmt.Sprintf("In fact it is a pod, maybe you did not used the pods path. Trying to extract it again...")
 			var err error
-			pod, err = pods.ParsePod(r.Object.Raw)
+			pod, err = kres.ParsePod(r)
 			if err != nil {
 				plug.summary += "\n" + fmt.Sprintf("Definitly, it is not a pod!")
 				return nil, fmt.Errorf("Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)

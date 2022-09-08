@@ -16,8 +16,8 @@ data:
     #   # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
     #   # Except that, it works as defined in the Golang regexp package.
     #   # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
-    #   # A regular expression to define the resources on which the plugin is called
-    #   resources: "Pod"
+    #   # A regular expression to define the kinds on which the plugin is called
+    #   kinds: "Pod"
     #   # A regular expression to define the operations on which the plugin is called
     #   # Example: "CREATE|UPDATE"
     #   # It's up to the plugin to manage different operations in its code
@@ -68,8 +68,8 @@ data:
     #     cGx1ZyAqVXNlclBsdWdpbikgU3VtbWFyeSgpIHN0cmluZyB7CglyZXR1cm4gcGx1Zy5zdW1tYXJ5
     #     Cn0KCi8vIGV4cG9ydGVkIGFzIHN5bWJvbCBuYW1lZCAiVmVyYWRjb1BsdWdpbiIKdmFyIFZlcmFk
     #     Y29QbHVnaW4gVXNlclBsdWdpbg==
-    #   # A regular expression to define the resources on which the plugin is called
-    #   resources: "Pod"
+    #   # A regular expression to define the kinds on which the plugin is called
+    #   kinds: "Pod"
     #   # A regular expression to define the operations on which the plugin is called
     #   # Example: "CREATE|UPDATE"
     #   # It's up to the plugin to manage different operations in its code
@@ -94,8 +94,8 @@ data:
       # For a built-in plugin the path is /app/plugins
       # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
       path: "/app/plugins/built-in-generic.so"
-      # A regular expression to define the resources on which the plugin is called
-      resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
       # A regular expression to define the operations on which the plugin is called
       # Example: "CREATE|UPDATE"
       # It's up to the plugin to manage different operations in its code
@@ -153,8 +153,8 @@ data:
     #     fSwgbmlsCn0KCmZ1bmMgKHBsdWcgKkdlbmVyaWMpIFN1bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJu
     #     IHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBzeW1ib2wgbmFtZWQgIlZlcmFkY29QbHVn
     #     aW4iCnZhciBWZXJhZGNvUGx1Z2luIEdlbmVyaWM=
-    #   # A regular expression to define the resources on which the plugin is called
-    #   resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
+    #   # A regular expression to define the kinds on which the plugin is called
+    #   kinds: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
     #   # A regular expression to define the operations on which the plugin is called
     #   # Example: "CREATE|UPDATE"
     #   # It's up to the plugin to manage different operations in its code
@@ -228,8 +228,8 @@ data:
     #     fQoKZnVuYyAocGx1ZyAqUGx1ZzEpIFN1bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3Vt
     #     bWFyeQp9CgovLyBleHBvcnRlZCBhcyBzeW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBW
     #     ZXJhZGNvUGx1Z2luIFBsdWcx
-    #   # A regular expression to define the resources on which the plugin is called
-    #   resources: "Pod"
+    #   # A regular expression to define the kinds on which the plugin is called
+    #   kinds: "Pod"
     #   # A regular expression to define the operations on which the plugin is called
     #   # Example: "CREATE|UPDATE"
     #   # It's up to the plugin to manage different operations in its code
@@ -263,8 +263,8 @@ data:
     #   # For a built-in plugin the path is /app/plugins
     #   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
     #   path: "/app/plugins/built-in-plug1.so"
-    #   # A regular expression to define the resources on which the plugin is called
-    #   resources: "Pod"
+    #   # A regular expression to define the kinds on which the plugin is called
+    #   kinds: "Pod"
     #   # A regular expression to define the operations on which the plugin is called
     #   # Example: "CREATE|UPDATE"
     #   # It's up to the plugin to manage different operations in its code
@@ -298,8 +298,8 @@ data:
       # For a built-in plugin the path is /app/plugins
       # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
       path: "/app/plugins/built-in-enforce_labels.so"
-      # A regular expression to define the resources on which the plugin is called
-      resources: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "(?i)Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job"
       # A regular expression to define the operations on which the plugin is called
       # Example: "CREATE|UPDATE"
       # It's up to the plugin to manage different operations in its code
@@ -329,8 +329,8 @@ data:
       # For a built-in plugin the path is /app/plugins
       # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
       path: "/app/plugins/built-in-add_dummy_sidecar.so"
-      # A regular expression to define the resources on which the plugin is called
-      resources: "Pod"
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "Pod"
       # A regular expression to define the operations on which the plugin is called
       # Example: "CREATE|UPDATE"
       # It's up to the plugin to manage different operations in its code

@@ -3,6 +3,8 @@
 cd /go/src/veradco
 rm go.mod go.sum
 
+set -e
+
 go mod init github.com/smart-duck/veradco
 go mod tidy
 
