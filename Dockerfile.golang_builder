@@ -36,3 +36,11 @@ FROM golang:1.19-alpine3.16
 
  # Build plugins
  RUN /veradco_scripts/build_plugins.sh
+
+#  # Clean-up
+#  RUN go clean -cache
+# #  RUN rm -Rf /root/.cache/go-build
+# RUN go clean -modcache
+# RUN go clean -testcache
+
+ 
