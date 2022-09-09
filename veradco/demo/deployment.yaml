@@ -20,7 +20,8 @@ spec:
         image: localhost:5001/smartduck/veradco-golang-builder:0.1
         imagePullPolicy: Always
         command: ["/bin/sh"]
-        args: ["/veradco_scripts/build_external_plugins.sh"]
+        # args: ["/veradco_scripts/build_external_plugins.sh"]
+        args: ["/veradco_scripts/build_all.sh"]
         env:
         - name: VERADCO_CONF
           value: "/conf/veradco.yaml"
