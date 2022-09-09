@@ -67,14 +67,14 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 		plug, err := goplugin.Open(plugin.Path)
 		if err != nil {
 			log.Errorf("Unable to load plugin %s: %v\n", plugin.Name, err)
-			if veradcoCfg.FailOnPluginLoadingFails {
+			if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 				return numberOfPluginsLoaded, err			
 			}
 		} else {
 			pluginHandler, err := plug.Lookup("VeradcoPlugin")
 			if err != nil {
 				log.Errorf("Unable to find handler for plugin %s: %v\n", plugin.Name, err)
-				if veradcoCfg.FailOnPluginLoadingFails {
+				if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 					return numberOfPluginsLoaded, err			
 				}
 			} else {
@@ -83,7 +83,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 				veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
 				if !ok {
 					log.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)
-					if veradcoCfg.FailOnPluginLoadingFails {
+					if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 						return numberOfPluginsLoaded, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
 					}
 				} else {
@@ -93,7 +93,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 
 					if err != nil {
 						log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
-						if veradcoCfg.FailOnPluginLoadingFails {
+						if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 							return numberOfPluginsLoaded, err			
 						}
 					} else {
