@@ -12,6 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/smart-duck/veradco"
 	"github.com/smart-duck/veradco/kres"
+	"github.com/smart-duck/veradco/monitoring"
 )
 
 type Plugin struct {
@@ -275,6 +276,7 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
 		result, err := plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
 		if err == nil {
+			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation))
 			log.Infof(">> Plugin %s execution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
 			if plug.DryRun {
 				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!\n", plug.Name)

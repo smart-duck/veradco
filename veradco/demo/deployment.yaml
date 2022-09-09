@@ -83,3 +83,16 @@ spec:
   ports:
     - port: 443
       targetPort: 8443
+---
+# Monitoring
+apiVersion: v1
+kind: Service
+metadata:
+  name: veradco-monitoring
+  namespace: veradco
+spec:
+  selector:
+    app: veradco
+  ports:
+    - port: 8080
+      targetPort: 8080

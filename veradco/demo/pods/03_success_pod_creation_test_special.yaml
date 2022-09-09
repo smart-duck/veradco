@@ -5,10 +5,10 @@ metadata:
   namespace: special
   labels:
     nodegp: ng-1
-    owner: aMe
+    owner: Me
     test: aa
   annotations:
-    owner: toto
+    owner: atoto
 spec:
   containers:
     - name: webserver

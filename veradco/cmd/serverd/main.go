@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/smart-duck/veradco/http"
+	"github.com/smart-duck/veradco/monitoring"
 
 	log "k8s.io/klog/v2"
 )
@@ -30,6 +31,11 @@ func main() {
 	log.V(2).Info("log verbosity 2 enabled")
 	log.V(3).Info("log verbosity 3 enabled")
 	log.V(4).Info("log verbosity 4 enabled")
+
+	go func() {
+	monitoring.Init()
+	monitoring.StartMonitoringSvr()
+	}()
 
 	server := http.NewServer(port, conf)
 	go func() {
