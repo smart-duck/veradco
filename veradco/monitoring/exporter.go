@@ -22,7 +22,7 @@ var (
 			Help: "Plugin execution time.",
 			Buckets: []float64{1000000, 10000000, 100000000, 500000000, 1000000000},
 		},
-		[]string{"plugin", "scope", "dry_run", "allowed", "group", "version", "kind", "name", "namespace", "operation"},
+		[]string{"plugin", "scope", "dry_run", "allowed", "group", "version", "kind", "name", "namespace", "operation", "error"},
 	)
 
 	pluginExecutions = prometheus.NewCounterVec(
@@ -30,7 +30,7 @@ var (
 			Name: "veradco_plugins_executions",
 			Help: "Counter of plugins executions",
 		},
-		[]string{"plugin", "scope", "dry_run", "allowed", "group", "version", "kind", "name", "namespace", "operation"},
+		[]string{"plugin", "scope", "dry_run", "allowed", "group", "version", "kind", "name", "namespace", "operation", "error"},
 	)
 )
 
@@ -40,12 +40,12 @@ func Init() {
 	prometheus.MustRegister(pluginExecutions)
 }
 
-func AddOperation(plugin string, scope string, dryRun bool, allowed	bool, group string, version string, kind string, name string, namespace string, operation string) {
-	pluginExecutions.With(prometheus.Labels{"plugin": plugin, "scope": scope, "dry_run": strconv.FormatBool(dryRun), "allowed": strconv.FormatBool(allowed), "group": group, "version": version, "kind": kind, "name": name, "namespace": namespace, "operation": operation}).Inc()
+func AddOperation(plugin string, scope string, dryRun bool, allowed	bool, group string, version string, kind string, name string, namespace string, operation string, errStr string) {
+	pluginExecutions.With(prometheus.Labels{"plugin": plugin, "scope": scope, "dry_run": strconv.FormatBool(dryRun), "allowed": strconv.FormatBool(allowed), "group": group, "version": version, "kind": kind, "name": name, "namespace": namespace, "operation": operation, "error": errStr}).Inc()
 }
 
-func AddStat(plugin string, scope string, dryRun bool, allowed	bool, group string, version string, kind string, name string, namespace string, operation string, elapsed time.Duration) {
-	pluginExecTime.With(prometheus.Labels{"plugin": plugin, "scope": scope, "dry_run": strconv.FormatBool(dryRun), "allowed": strconv.FormatBool(allowed), "group": group, "version": version, "kind": kind, "name": name, "namespace": namespace, "operation": operation}).Observe(float64(elapsed))
+func AddStat(plugin string, scope string, dryRun bool, allowed	bool, group string, version string, kind string, name string, namespace string, operation string, errStr string, elapsed time.Duration) {
+	pluginExecTime.With(prometheus.Labels{"plugin": plugin, "scope": scope, "dry_run": strconv.FormatBool(dryRun), "allowed": strconv.FormatBool(allowed), "group": group, "version": version, "kind": kind, "name": name, "namespace": namespace, "operation": operation, "error": errStr}).Observe(float64(elapsed))
 }
 
 // func AddOperation(plug *conf.Plugin, r *admission.AdmissionRequest, result *admissioncontroller.Result) {

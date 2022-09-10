@@ -283,8 +283,8 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
     // time.Sleep(time.Duration(n)*time.Nanosecond)
 		elapsed := time.Since(startTime)
 		if err == nil {
-			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation))
-			monitoring.AddStat(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), elapsed)
+			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "false")
+			monitoring.AddStat(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "false", elapsed)
 			// monitoring.AddOperation(plug, r, result)
 			log.Infof(">> Plugin %s execution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
 			if plug.DryRun {
@@ -298,6 +298,8 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 				}
 			}
 		} else {
+			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, false, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "true")
+			monitoring.AddStat(plug.Name, plug.Scope, plug.DryRun, false, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "true", elapsed)
 			return result, err
 		}
 	}

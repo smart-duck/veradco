@@ -2,17 +2,23 @@
 
 ## Overview
 
-Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using third-party webhooks or the ones that are built-in.
+Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using some third-party ones or the ones that are built-in.
 
 With Veradco, you take advantage of the full power of Mutating and Validating webhooks in a simple and flexible way. You only need to write the functional part. Plugin are written in golang, can be packaged in a ConfigMap and are built on the fly by the provided init container.
 
-To help you develop your plugins, examples are provided in the veradco repositories. They cover many use cases.
+You also take advantage of the built-in monitoring that gives you statistics about plugins such as call frequency or execution time. These metrics are prefixed by veradco. You can scrape them towards Prometheus via a ServiceMonitor.
+
+To help you develop your plugins, examples are provided in the veradco repository. They cover many use cases.
 
 ## Cons
 
 ### Plugins are big
 
-Same size than veradco itself.
+Same size than veradco itself. This is the main flaw. If the docker images size is a big concern for you, you can create an init container image without building veradco binary and built-in plugins to lighten image by providing the appropriate build arg (veradco binary and plugins will be built at runtime):
+```
+docker build --build-arg BUILD=NO -t smartduck/veradco-golang-builder:0.1 -f ./Dockerfile.golang_builder .
+```
+
 
 ```
 / # ls -lhRt /release/
