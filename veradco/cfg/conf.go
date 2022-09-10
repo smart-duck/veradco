@@ -13,6 +13,8 @@ import (
 	"github.com/smart-duck/veradco"
 	"github.com/smart-duck/veradco/kres"
 	"github.com/smart-duck/veradco/monitoring"
+	"time"
+  // "math/rand"
 )
 
 type Plugin struct {
@@ -274,9 +276,16 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		log.V(1).Infof(">> Execute plugin %s\n", plug.Name)
 		// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
+		startTime := time.Now()
 		result, err := plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
+		// rand.Seed(time.Now().UnixNano())
+    // n := rand.Intn(3000000000) // n will be between 0 and 3
+    // time.Sleep(time.Duration(n)*time.Nanosecond)
+		elapsed := time.Since(startTime)
 		if err == nil {
 			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation))
+			monitoring.AddStat(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), elapsed)
+			// monitoring.AddOperation(plug, r, result)
 			log.Infof(">> Plugin %s execution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
 			if plug.DryRun {
 				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!\n", plug.Name)
