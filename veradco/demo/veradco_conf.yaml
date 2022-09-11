@@ -378,3 +378,99 @@ data:
       # A regular expression that define the scope of the plugin.
       # "Validating|Mutating" fits to both scopes
       scope: "Validating"
+
+    # - name: "RegistryCache"
+    #   # The path of the plugin.
+    #   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+    #   # For a built-in plugin the path is /app/plugins
+    #   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+    #   path: "/app/external_plugins/registry_cache.so"
+    #   code: |
+    #     cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
+    #     MSIKCXYxICJrOHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVu
+    #     dGltZSIKCSJnaXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCSJmbXQiCgkiZ29wa2cuaW4v
+    #     eWFtbC52MyIKCSJyZWdleHAiCgkvLyBtZXRhICJrOHMuaW8vYXBpbWFjaGluZXJ5L3BrZy9hcGlz
+    #     L21ldGEvdjEiCikKCnZhciAoCgluYW1lIHN0cmluZyA9ICJSZWdpc3RyeUNhY2hlIgopCgp0eXBl
+    #     IEZpbmRSZXBsYWNlIHN0cnVjdCB7CglGaW5kIHN0cmluZyBgeWFtbDoiZmluZCJgCglSZXBsYWNl
+    #     IHN0cmluZyBgeWFtbDoicmVwbGFjZSJgCn0KCnR5cGUgUmVnaXN0cnlDYWNoZSBzdHJ1Y3QgewoJ
+    #     UmVwbGFjZW1lbnRzIFtdRmluZFJlcGxhY2UgYHlhbWw6InJlcGxhY2VtZW50cyJgCglzdW1tYXJ5
+    #     IHN0cmluZyBgeWFtbDoiLSJgCn0KCmZ1bmMgKHBsdWcgKlJlZ2lzdHJ5Q2FjaGUpIEluaXQoY29u
+    #     ZmlnRmlsZSBzdHJpbmcpIGVycm9yIHsKCS8vIExvYWQgY29uZmlndXJhdGlvbgoJZXJyIDo9IHlh
+    #     bWwuVW5tYXJzaGFsKFtdYnl0ZShjb25maWdGaWxlKSwgcGx1ZykKCWlmIGVyciAhPSBuaWwgewoJ
+    #     CXJldHVybiBlcnIKCX0KCWlmIGxlbihwbHVnLlJlcGxhY2VtZW50cykgPT0gMCB7CgkJcmV0dXJu
+    #     IGZtdC5FcnJvcmYoIlJlcGxhY2VtZW50cyBsaXN0IHNoYWxsIGNvbnRhaW4gYXQgbGVhc3Qgb25l
+    #     IGVsZW1lbnQgZm9yIHBsdWdpbiAlcyIsIG5hbWUpCgl9CglyZXR1cm4gbmlsCn0KCgpmdW5jIChw
+    #     bHVnICpSZWdpc3RyeUNhY2hlKSBFeGVjdXRlKGtvYmogcnVudGltZS5PYmplY3QsIG9wZXJhdGlv
+    #     biBzdHJpbmcsIGRyeVJ1biBib29sLCByICphZG1pc3Npb24uQWRtaXNzaW9uUmVxdWVzdCkgKCph
+    #     ZG1pc3Npb25jb250cm9sbGVyLlJlc3VsdCwgZXJyb3IpIHsKCgkvLyBrb2JqIGlzIHN1cHBvc2Vk
+    #     IHRvIGJlIGEgcG9kLi4uCglwb2QsIG9rIDo9IGtvYmouKCp2MS5Qb2QpCglpZiAhb2sgewoJCXBs
+    #     dWcuc3VtbWFyeSArPSBmbXQuU3ByaW50ZigiS3ViZXJuZXRlcyByZXNvdXJjZSBpcyBub3QgYSBw
+    #     b2QgYXMgZXhwZWN0ZWQgKCVzKSIsIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktp
+    #     bmQoKS5LaW5kKQoJCXJldHVybiBuaWwsIGZtdC5FcnJvcmYoIkt1YmVybmV0ZXMgcmVzb3VyY2Ug
+    #     aXMgbm90IGEgcG9kIGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91
+    #     cFZlcnNpb25LaW5kKCkuS2luZCkKCX0KCgl2YXIgb3BlcmF0aW9ucyBbXWFkbWlzc2lvbmNvbnRy
+    #     b2xsZXIuUGF0Y2hPcGVyYXRpb24KCglwbHVnLnN1bW1hcnkgPSBmbXQuU3ByaW50ZigiRXhlY3V0
+    #     ZSBwbHVnaW4gJXMiLCBuYW1lKQoKCS8vIEJyb3dzZSBjb250YWluZXJzCglmb3IgaSwgYyA6PSBy
+    #     YW5nZSBwb2QuU3BlYy5Db250YWluZXJzIHsKCQkvLyBCcm93c2UgcmVwbGFjZW1lbnRzCgkJZm9y
+    #     IF8sIG9wIDo9IHJhbmdlIHBsdWcuUmVwbGFjZW1lbnRzIHsKCQkJZmluZCA6PSBvcC5GaW5kCgkJ
+    #     CXJlcGxhY2UgOj0gb3AuUmVwbGFjZQoJCQkKCQkJcmUgOj0gcmVnZXhwLk11c3RDb21waWxlKGZp
+    #     bmQpCgkJCWltZyA6PSBjLkltYWdlCgkJCWlmIHJlLk1hdGNoU3RyaW5nKGltZykgewoJCQkJaW1n
+    #     TmV3IDo9IHJlLlJlcGxhY2VBbGxTdHJpbmcoaW1nLCByZXBsYWNlKQoJCQkJLy8gYWRkIHJlcGxh
+    #     Y2UgcGF0Y2gKCQkJCXJlcGxhY2VPcCA6PSBhZG1pc3Npb25jb250cm9sbGVyLlJlcGxhY2VQYXRj
+    #     aE9wZXJhdGlvbihmbXQuU3ByaW50ZigiL3NwZWMvY29udGFpbmVycy8lZC9pbWFnZSIsIGkpLCBp
+    #     bWdOZXcpCgkJCQlvcGVyYXRpb25zID0gYXBwZW5kKG9wZXJhdGlvbnMsIHJlcGxhY2VPcCkKCQkJ
+    #     CXBsdWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIkFkZCByZXBhY2VtZW50IG9wZXJh
+    #     dGlvbiAldiIsIHJlcGxhY2VPcCkKCQkJCWJyZWFrCgkJCX0KCQl9Cgl9CgoJcmV0dXJuICZhZG1p
+    #     c3Npb25jb250cm9sbGVyLlJlc3VsdHsKCQlBbGxvd2VkOiAgdHJ1ZSwKCQlQYXRjaE9wczogb3Bl
+    #     cmF0aW9ucywKCX0sIG5pbAp9CgpmdW5jIChwbHVnICpSZWdpc3RyeUNhY2hlKSBTdW1tYXJ5KCkg
+    #     c3RyaW5nIHsKCXJldHVybiBwbHVnLnN1bW1hcnkKfQoKLy8gZXhwb3J0ZWQgYXMgc3ltYm9sIG5h
+    #     bWVkICJWZXJhZGNvUGx1Z2luIgp2YXIgVmVyYWRjb1BsdWdpbiBSZWdpc3RyeUNhY2hl
+    #   # A regular expression to define the kinds on which the plugin is called
+    #   kinds: "(?i)^Pod$"
+    #   # A regular expression to define the operations on which the plugin is called
+    #   # Example: "CREATE|UPDATE"
+    #   # It's up to the plugin to manage different operations in its code
+    #   operations: "CREATE|UPDATE|DELETE"
+    #   # A regular expression to define the namespaces in the scope of the plugin
+    #   # Example: "kube-system|default"
+    #   namespaces: ".*"
+    #   # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+    #   dryRun: false
+    #   # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+    #   configuration: |
+    #     replacements:
+    #     - find: "(^[^:/]+$)"
+    #       replace: "registry.hub.docker.com/library/$1:latest"
+    #     - find: "^([^:/]+:[^:/]+)$"
+    #       replace: "registry.hub.docker.com/library/$1"
+    #   # A regular expression that define the scope of the plugin.
+    #   # "Validating|Mutating" fits to both scopes
+    #   scope: "Mutating"
+
+    - name: "RegistryCache"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/plugins/built-in-registry_cache.so"
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "(?i)^Pod$"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|UPDATE|DELETE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        replacements:
+        - find: "(^[^:/]+$)"
+          replace: "registry.hub.docker.com/library/$1:latest"
+        - find: "^([^:/]+:[^:/]+)$"
+          replace: "registry.hub.docker.com/library/$1"
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Mutating"

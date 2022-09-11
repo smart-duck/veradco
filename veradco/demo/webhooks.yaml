@@ -18,6 +18,27 @@ webhooks:
         apiVersions: ["v1"]
         resources: ["pods"]
     failurePolicy: Ignore
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: veradco-pod-mutation
+webhooks:
+  - name: veradco-pod-mutation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/mutate/pods"
+      caBundle: "${CA_BUNDLE}"
+    rules:
+      - operations: ["*"]
+        apiGroups: ["*"]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    failurePolicy: Ignore
 # ---
 # apiVersion: admissionregistration.k8s.io/v1
 # kind: ValidatingWebhookConfiguration
