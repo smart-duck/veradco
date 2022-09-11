@@ -48,7 +48,7 @@ func (plug *Generic) Execute(kobj runtime.Object, operation string, dryRun bool,
 
 	}
 
-	plug.summary += "\n" + fmt.Sprintf("Generic resource: %s, %s, %s, %s", obj.TypeMeta.Kind, obj.TypeMeta.APIVersion, obj.ObjectMeta.Name, obj.ObjectMeta.Namespace)
+	plug.summary += "\n" + fmt.Sprintf("Generic resource: %s %s/%s %s ns:%s", operation, obj.TypeMeta.Kind, obj.TypeMeta.APIVersion, obj.ObjectMeta.Name, obj.ObjectMeta.Namespace)
 
 	// if !ok {
 	// 	plug.summary += "\n" + fmt.Sprintf("Kubernetes resource is not as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)

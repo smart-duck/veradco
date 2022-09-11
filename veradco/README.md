@@ -4,7 +4,7 @@
 
 Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using some third-party ones or the ones that are built-in.
 
-With Veradco, you take advantage of the full power of Mutating and Validating webhooks in a simple and flexible way. You only need to write the functional part. Plugin are written in golang, can be packaged in a ConfigMap and are built on the fly by the provided init container.
+With Veradco, you take advantage of the full power of Mutating and Validating webhooks in a simple and flexible way. You only need to write the functional part. Plugin are written in golang, can be packaged in a ConfigMap and are built on the fly by the provided init container. A big advantage is that you don't need to learn a new programming/configuration language and so, you are not stuck in a cramped and finite universe.
 
 You also take advantage of the built-in monitoring that gives you statistics about plugins such as call frequency or execution time. These metrics are prefixed by veradco. You can scrape them towards Prometheus via a ServiceMonitor.
 
@@ -35,7 +35,9 @@ total 90M
 -rw-r--r--    1 root     root       23.7M Sep  4 11:20 built-in-basic.so
 ```
 
- ## Plugin
+## Plugin
+
+### Interface
 
 A plugin is a piece of Go code that implements the following interface:
 
@@ -55,41 +57,93 @@ Plugins are loaded thanks to a ConfigMap. Refer to examples to see how to do. Th
 
 The configuration defines the plugins to use and their configuration. Here is an example of a ConfigMap.
 
-The configuation embeds some basic filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a programming language is. Filtering fileds work as regular expressions.
-
-TODO update
+The configuation embeds some basic filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming language is. Filtering fields work as regular expressions.
 
 ```
 plugins:
-- name: "Basic"
-  # The path of the plugin.
-  # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
-  # For a built-in plugin the path is /app/plugins
-  # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
-  path: "/app/plugins/built-in-basic.so"
-  # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
-  # Except that, it works as defined in the Golang regexp package.
-  # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
-  # A regular expression to define the resources on which the plugin is called
-  kinds: "Pod"
-  # A regular expression to define the operations on which the plugin is called
-  # Example: "CREATE|UPDATE"
-  # It's up to the plugin to manage different operations in its code
-  operations: "CREATE|UPDATE"
-  # A regular expression to define the namespaces in the scope of the plugin
-  # Example: "kube-system|default"
+- name: "extplug1"
+  path: "/app/external_plugins/extplug1.so"
+  code: |
+    cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
+    ...ZXJhZGNvUGx1Z2luIFBsdWcx
+  kinds: "^Pod$"
+  operations: "CREATE"
   namespaces: ".*"
-  # Filter only on resources having some labels.
-  # Both key and value are regular expressions
-  # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+  labels:
+  - key: owner
+    value: me
+  annotations:
+  - key: owner
+    value: me
   dryRun: false
-  # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
   configuration: |
-    Basic configuration
-  # A regular expression that define the scope of the plugin.
-  # "Validating|Mutating" fits to both scopes
+    This plugin does not have configuration
+    That's like that!
   scope: "Validating"
 ```
+
+### name
+
+To identify the plugin.
+
+### path
+
+The path of the plugin file (.so). If the plugin needs to be built (refer to code field below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container at webhook startup.
+For a built-in plugin the path is /app/plugins.
+For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility.
+
+### code
+
+The code of the plugin converted in base 64.
+If the plugin has to be built, it shall be packaged in a single file. The below base 64 is decoded in a single Go file.
+Only if the provided path does not point to a file, the plugin is compiled with this code.
+
+### kind
+
+A regular expression to define the kinds on which the plugin is called
+
+### operations
+
+A regular expression to define the operations on which the plugin is called
+Example: "CREATE|UPDATE"
+It's up to the plugin to manage different operations in its code.
+
+### namespaces
+
+A regular expression to define the namespaces in the scope of the plugin
+Example: "kube-system|default"
+
+### labels
+
+Filter only on resources having some labels.
+value is a regular expressions.
+
+### annotations
+
+Filter only on resources having some annotations.
+Both key and value are regular expressions.
+
+### dryRun
+
+This parameter is self explanatory and managed at veradco level. If the plugin does things outside of the scope of the webhooks, it is shall be managed in its code. 
+
+### configuration
+
+The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+
+### scope
+
+A regular expression that define the scope of the plugin.
+There are 2 scopes: Validating and Mutating.
+"Validating|Mutating" fits to both scopes.
+
+
+
+
+
+
+
+
 
 ## Setup go environment
 
@@ -108,6 +162,29 @@ kk logs $(kk get po -n veradco | grep veradco | grep -o -E "veradco-[0-9a-f]+[^ 
 
 Local registry:
 https://kind.sigs.k8s.io/docs/user/local-registry/
+
+## Run demo
+
+### Setup env + create pod test
+
+```
+sudo local_registry/create_kind_with_local_registry.sh
+source local_registry/export_kubeconfig.sh 
+~/go/bin/stern -n veradco veradco &
+kk apply -f deployments/01_namespaces.yaml 
+./deploy.sh 
+kk apply -f pods/03_success_pod_creation_test_special.yaml
+```
+
+### Test monitoring
+
+```
+kk apply -f prometheus_exporter.yaml
+kubectl port-forward service/veradco-monitoring -n veradco 8080:8080 &
+while true; do kk delete -f pods/03_success_pod_creation_test_special.yaml;kk apply -f pods/03_success_pod_creation_test_special.yaml;done
+```
+
+Then, in a browser : http://localhost:8080/metrics
 
 ## Dev
 
