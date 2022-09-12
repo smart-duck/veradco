@@ -16,7 +16,7 @@ spec:
         app: veradco
     spec:
       initContainers:
-      - name: plugins-init
+      - name: veradco-plugins-init
         image: localhost:5001/smartduck/veradco-golang-builder:0.1
         imagePullPolicy: Always
         command: ["/bin/sh"]
@@ -36,7 +36,7 @@ spec:
           mountPath: /app
           readOnly: false
       containers:
-      - name: server
+      - name: veradco-server
         image: localhost:5001/smartduck/veradco:0.1
         imagePullPolicy: Always
         command: ["/app/veradcod"]

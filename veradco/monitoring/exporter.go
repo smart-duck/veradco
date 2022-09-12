@@ -18,8 +18,8 @@ var (
 		prometheus.HistogramOpts{
 			// Namespace: "our_company",
 			// Subsystem: "blob_storage",
-			Name: "plugin_execution_time",
-			Help: "Plugin execution time.",
+			Name: "veradco_plugin_execution_time",
+			Help: "Veradco plugin execution time.",
 			Buckets: []float64{1000000, 10000000, 100000000, 500000000, 1000000000},
 		},
 		[]string{"plugin", "scope", "dry_run", "allowed", "group", "version", "kind", "name", "namespace", "operation", "error"},
@@ -28,7 +28,7 @@ var (
 	pluginExecutions = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "veradco_plugins_executions",
-			Help: "Counter of plugins executions",
+			Help: "Counter of veradco plugins executions",
 		},
 		[]string{"plugin", "scope", "dry_run", "allowed", "group", "version", "kind", "name", "namespace", "operation", "error"},
 	)

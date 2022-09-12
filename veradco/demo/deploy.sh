@@ -35,6 +35,9 @@ $KUBECTL create secret tls veradco-tls -n veradco \
 echo "Creating k8s admission deployment"
 $KUBECTL apply -f deployment.yaml
 
+# echo "Creating veradco ServiceMonitor"
+# $KUBECTL apply -f service_monitor.yaml
+
 echo "Creating k8s webhooks for demo"
 CA_BUNDLE=$(cat certs/ca.crt | base64 | tr -d '\n')
 sed -e 's@${CA_BUNDLE}@'"$CA_BUNDLE"'@g' <"webhooks.yaml" | $KUBECTL apply -f -
