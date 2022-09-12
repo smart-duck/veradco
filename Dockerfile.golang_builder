@@ -1,5 +1,5 @@
 FROM golang:1.19-alpine3.16
-ARG BUILD=YES
+ARG BUILD=ALL
 # WORKDIR /go
 # Assume default environement is the good one
 #  ENV CGO_ENABLED=1 GOOS=linux GCCGO=gccgo CGO_LDFLAGS="-g -O2"
@@ -35,10 +35,10 @@ ARG BUILD=YES
  RUN find /go -type f -name '*.so' -delete
 
  # Build veradcod
- RUN [ "$BUILD" = "YES" ] && /veradco_scripts/build_veradco.sh
+ RUN [ "$BUILD" = "ALL" ] || [ "$BUILD" = "SERVER" ] && /veradco_scripts/build_veradco.sh || true
 
  # Build plugins
- RUN [ "$BUILD" = "YES" ] && /veradco_scripts/build_plugins.sh
+ RUN [ "$BUILD" = "ALL" ] && /veradco_scripts/build_plugins.sh || true
 
 #  # Clean-up
 #  RUN go clean -cache

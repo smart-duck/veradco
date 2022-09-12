@@ -18,6 +18,14 @@ Same size than veradco itself. This is the main flaw. If the docker images size 
 ```
 docker build --build-arg BUILD=NO -t smartduck/veradco-golang-builder:0.1 -f ./Dockerfile.golang_builder .
 ```
+Build all:
+```
+docker build --build-arg BUILD=ALL -t smartduck/veradco-golang-builder:0.1 -f ./Dockerfile.golang_builder .
+```
+Build only veradco server:
+```
+docker build --build-arg BUILD=SERVER -t smartduck/veradco-golang-builder:0.1 -f ./Dockerfile.golang_builder .
+```
 
 
 ```

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_ARG=YES
+BUILD_ARG=ALL
 
 [[ "$1" != "" ]] && BUILD_ARG=$1
 
