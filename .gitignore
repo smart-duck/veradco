@@ -22,3 +22,5 @@ veradco/serverd
 veradco/veradcod
 
 debug.yaml
+
+test.sh

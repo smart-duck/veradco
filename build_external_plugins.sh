@@ -5,7 +5,7 @@
 set -e
 
 echo "Copy veradcod to /app, also plugins folder"
-cp -r /release/* /app/
+cp -fr /release/* /app/
 
 chmod +x /app/veradcod
 
