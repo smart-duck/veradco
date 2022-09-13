@@ -316,7 +316,7 @@ func matchRegex(regex string, value string) (*bool, error) {
 	
 	appliedRegex := regex
 	
-	matched, err := regexp.MatchString(`\(!~\).+`, appliedRegex)
+	matched, err := regexp.MatchString(`^\(!~\).+`, appliedRegex)
 	if err != nil {
 		log.Errorf("Evaluate regex %s on %s failed: %v\n", regex, value, err) 
 		return nil, err
