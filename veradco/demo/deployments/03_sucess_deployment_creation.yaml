@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx-deployment2
   namespace: special-system
   annotations:
     skip: "false" # set to true and apply to delete the deployment

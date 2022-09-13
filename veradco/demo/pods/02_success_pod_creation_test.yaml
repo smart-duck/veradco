@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: webserver
+  name: webserver3
   labels:
     nodegp: ng-1
   annotations:
