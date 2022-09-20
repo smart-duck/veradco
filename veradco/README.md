@@ -65,7 +65,7 @@ Plugins are loaded thanks to a ConfigMap. Refer to examples to see how to do. Th
 
 The configuration defines the plugins to use and their configuration. Here is an example of a ConfigMap.
 
-The configuation embeds some basic filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming language is. Filtering fields work as regular expressions.
+The configuation embeds some basic filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming code using Kubernetes API is. Filtering fields most of the time work as regular expressions.
 
 ```
 plugins:
@@ -96,54 +96,53 @@ To identify the plugin.
 
 ### path
 
-The path of the plugin file (.so). If the plugin needs to be built (refer to code field below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container at webhook startup.
-For a built-in plugin the path is /app/plugins.
+The path of the plugin file (.so). If the plugin needs to be built (refer to code field below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container at webhook startup.  
+For a built-in plugin the path is /app/plugins.  
 For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility.
 
 ### code
 
-The code of the plugin converted in base 64.
-If the plugin has to be built, it shall be packaged in a single file. The below base 64 is decoded in a single Go file.
-Only if the provided path does not point to a file, the plugin is compiled with this code.
+The code field contains the code of the plugin converted in base 64. If the plugin has to be built, it shall be packaged in a single file. The base 64 block is decoded in a single Go file. The plugin is compiled with this code only if the provided path does not point to an existing file.
 
 ### kind
 
-A regular expression to define the kinds on which the plugin is called
+A regular expression to define the kinds on which the plugin is called.  
+Example: "^Pod$"
 
 ### operations
 
-A regular expression to define the operations on which the plugin is called
-Example: "CREATE|UPDATE"
-It's up to the plugin to manage different operations in its code.
+A regular expression to define the operations on which the plugin is called.  
+Example: "CREATE|UPDATE"  
+It's up to the plugin to manage supported operations in its code.
 
 ### namespaces
 
-A regular expression to define the namespaces in the scope of the plugin
+A regular expression to define the namespaces in the scope of the plugin.  
 Example: "kube-system|default"
 
 ### labels
 
-Filter only on resources having some labels.
+Filter only on resources having some labels.  
 value is a regular expressions.
 
 ### annotations
 
-Filter only on resources having some annotations.
-Both key and value are regular expressions.
+Filter only on resources having some annotations.  
+value is a regular expressions.
 
 ### dryRun
 
-This parameter is self explanatory and managed at veradco level. If the plugin does things outside of the scope of the webhooks, it is shall be managed in its code. 
+This boolean parameter is self explanatory and managed upstream at veradco level. If the plugin does things outside of the scope of the webhooks, it shall be managed in its code. 
 
 ### configuration
 
-The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+The configuration of the plugin. Passed to the plugin via the Init function of the plugin. The format of the configuration is up to the plugin.
 
 ### scope
 
-A regular expression that define the scope of the plugin.
-There are 2 scopes: Validating and Mutating.
-"Validating|Mutating" fits to both scopes.
+A regular expression that defines the scope of the plugin.  
+There are 2 scopes: Validating and Mutating.  
+"Validating|Mutating" is suitable for both scopes.
 
 
 
