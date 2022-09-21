@@ -248,3 +248,13 @@ To add to plugin/Execute:
 go build -o /dev/null ../cmd/serverd/main.go
 ```
 
+# Push docker images to docker hub
+
+```
+# Connect to docker hub.
+echo $DOCKERHUBPW | sudo docker login --username smartduck --password-stdin
+# Build image.
+sudo docker build -t smartduck/veradco:0.1beta1 -f ../Dockerfile.golang_builder ..
+# Push image to docker hub.
+sudo docker push smartduck/veradco:0.1beta1
+```
