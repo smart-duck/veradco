@@ -1,0 +1,5 @@
+varReference:
+- kind: ValidatingWebhookConfiguration
+  path: webhooks/clientConfig[]/caBundle
+- kind: MutatingWebhookConfiguration
+  path: webhooks/clientConfig[]/caBundle

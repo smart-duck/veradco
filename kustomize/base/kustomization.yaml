@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: veradco
+
+# commonLabels:
+#   type: demo
+# commonAnnotations:
+#   overlay: base
+
+resources:
+# - https://github.com/xxx/xxx/releases/download/v${ADDON_VERSION}/xxx.yaml
+- namespace.yaml
+- veradco_conf.yaml
+- veradco.yaml
+- webhooks.yaml
+
+secretGenerator:
+- name: veradco-tls
+  files:
+  - certs/tls.crt
+  - certs/tls.key
+  type: "kubernetes.io/tls"
+  namespace: veradco
+
+configMapGenerator:
+- name: environment-variables
+  envs: [certs/vars.env]
+  behavior: create
+
+generatorOptions:
+  # labels: # adds labels to the generated resources
+  #   my.label: mylabel
+  # annotations: # adds annotations to the generated resources
+  #   kustomize.from: generator
+  disableNameSuffixHash: true # disables the suffix generation
+  # immutable: true # marks the resources as immutable
+
+vars:
+- name: CA_BUNDLE
+  objref:
+    kind: ConfigMap
+    name: environment-variables
+    apiVersion: v1
+  fieldref:
+    fieldpath: data.CA_BUNDLE
+
+configurations:
+- env-var-transformer.yaml

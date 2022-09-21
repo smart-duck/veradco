@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veradco
+  namespace: veradco
+  labels:
+    app: veradco
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: veradco
+  template:
+    metadata:
+      labels:
+        app: veradco
+    spec:
+      initContainers:
+      - name: veradco-plugins-init
+        image: smartduck/veradco-golang-builder:0.1
+        imagePullPolicy: Always
+        command: ["/bin/sh"]
+        args: ["/veradco_scripts/build_all.sh"]
+        env:
+        - name: VERADCO_CONF
+          value: "/conf/veradco.yaml"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+        - name: plugins-volume
+          mountPath: /app
+          readOnly: false
+      containers:
+      - name: veradco-server
+        image: smartduck/veradco:0.1
+        imagePullPolicy: Always
+        command: ["/app/veradcod"]
+        args: ["-v=0"]
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/certs
+          readOnly: true
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+        - name: plugins-volume
+          mountPath: /app
+          readOnly: true
+      volumes:
+      - name: tls-certs
+        secret:
+          secretName: veradco-tls
+      - name: config-volume
+        configMap:
+          name: veradco
+      - name: plugins-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veradco
+  namespace: veradco
+spec:
+  selector:
+    app: veradco
+  ports:
+    - port: 443
+      targetPort: 8443
+---
+# Monitoring
+apiVersion: v1
+kind: Service
+metadata:
+  name: veradco-monitoring
+  namespace: veradco
+spec:
+  selector:
+    app: veradco
+  ports:
+    - port: 8080
+      targetPort: 8080

@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veradco
+  namespace: veradco
+spec:
+  template:
+    metadata:
+      labels:
+        app: veradco
+    spec:
+      initContainers:
+      - name: veradco-plugins-init
+        image: localhost:5001/smartduck/veradco-golang-builder:0.1
+      containers:
+      - name: veradco-server
+        image: localhost:5001/smartduck/veradco:0.1

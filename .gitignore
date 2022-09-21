@@ -24,3 +24,7 @@ veradco/veradcod
 debug.yaml
 
 test.sh
+
+kustomize_poc.tgz
+kustomize/base/certs
+veradco/demo/from_kustomize.yaml

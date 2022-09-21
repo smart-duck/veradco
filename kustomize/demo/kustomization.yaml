@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# namespace: demo-veradco
+
+# namePrefix: demo-
+
+resources:
+- ../base
+
+patchesStrategicMerge:
+- veradco.yaml
+- veradco_conf.yaml
