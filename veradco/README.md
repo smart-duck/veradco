@@ -258,3 +258,11 @@ sudo docker build -t smartduck/veradco:0.1beta1 -f ../Dockerfile.golang_builder 
 # Push image to docker hub.
 sudo docker push smartduck/veradco:0.1beta1
 ```
+
+# Tag release
+
+```
+git tag -a 0.1beta1 -m "Release only for local tests."
+# git push origin 0.1beta1
+git push origin --tags
+```
