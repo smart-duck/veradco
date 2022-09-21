@@ -262,7 +262,12 @@ sudo docker push smartduck/veradco:0.1beta1
 # Tag release
 
 ```
-git tag -a 0.1beta1 -m "Release only for local tests."
+git tag -a 0.1beta1 -m "Release only for tests."
 # git push origin 0.1beta1
 git push origin --tags
+```
+
+Delete remote tag:
+```
+git push --delete origin 0.1beta1
 ```
