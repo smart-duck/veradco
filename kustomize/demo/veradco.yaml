@@ -15,3 +15,10 @@ spec:
       containers:
       - name: veradco-server
         image: localhost:5001/smartduck/veradco:0.1
+        env:
+        - name: hUSER
+          value: "HARBORuser"
+        - name: hPW
+          value: "HARBORpw"
+        - name: "HARBORPCP_DEBUG"
+          value: "debug proxy cache populator"

@@ -12,9 +12,15 @@ webhooks:
         namespace: veradco
         path: "/validate/pods"
       caBundle: "$(CA_BUNDLE)"
+    namespaceSelector:
+      matchExpressions:
+        - key: whprotect
+          operator: NotIn
+          values: ["veradco"]
     rules:
-      - operations: ["CREATE"]
+      - operations: ["CREATE", "UPDATE"]
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
+        scope: "Namespaced"
     failurePolicy: Ignore

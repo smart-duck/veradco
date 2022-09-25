@@ -28,3 +28,4 @@ test.sh
 kustomize_poc.tgz
 kustomize/base/certs
 veradco/demo/from_kustomize.yaml
+veradco/demo/tmp.base64
