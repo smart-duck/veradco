@@ -141,7 +141,13 @@ spec:
         env:
         - name: "HARBORPCP_DEBUG"
           value: "debug proxy cache populator"
+        - name: hUSER
+          value: "HARBORuser"
+        - name: hPW
+          value: "HARBORpw"
 ```
+
+Note: In debug mode, it does not matter not to define environment variables used (or define them with dummy values) to authenticate to the master registry (typically Harbor).
 
 ## Check that the plugin builds
 
