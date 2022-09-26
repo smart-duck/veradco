@@ -1,6 +1,10 @@
-# Overview
+# Overview of the plugin HarborProxyCachePopulator
 
 This plugin allows to implicitly pull docker images in harbor proxy caches. To do it, it implements the v2 registry specification to mimic docker pull.
+
+Instead of proceeding to a docker pull (using Golang Docker API), the plugin implements the v2 registry specification for various reasons:
+- Kubernetes is deprecating support for Docker as a container runtime starting with Kubernetes version 1.20. Kubernetes is about to use directly the underlying engine containerd directly (Docker is just a "middle-man" between Kubernetes and containerd).
+- Using Docker pull requires to use the Docker daemon of the node host which implies to run the Veradco pods in a privileged mode and the Docker container as root. One of the best practices while running Docker Container is to run processes with a non-root user. Moreover, Docker daemon is not necessarily installed with Kubernetes versions from 1.20.
 
 This plugin is suitable to be used in the case you have a master container registry (typically Harbor) to centralize images and slave container registries (typically ECR) used as Application registries.
 
@@ -60,10 +64,3 @@ go mod edit -replace github.com/smart-duck/veradco=../../veradco
 go mod tidy
 go build -buildmode=plugin -o /dev/null plug.go
 ```
-
-# TODO
-
-- Debug mode with long sleep: DONE
-- DEBUG env var: DONE
-- Manage dryRun in plugin: DONE
-- Queue with channels
