@@ -215,7 +215,7 @@ go build -buildmode=plugin -o /dev/null plug.go
 ## Regular expressions handling
 
 Regular expressions are handled by Verado thanks to the golang package regexp. But, Veradco introduces a special wild card that is used in the cases it is relevant:
-- regular expression act as a reverse pattern if it is prefixed by (!~). By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
+- regular expression act as a reverse pattern if it is prefixed by (!\~). By example, "(!\~)(?i)test" matches that the value does not contain "test" whatever the case is.
 
 ## Example of Veradco logs
 
