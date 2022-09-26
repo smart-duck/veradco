@@ -33,6 +33,7 @@ var (
 
 type HarborProxyCachePopulator struct {
 	ProxyCaches []ProxyCache `yaml:"proxyCaches"`
+	MaxNumberOfParallelJobs int `yaml:"maxNumberOfParallelJobs"`
 	summary string `yaml:"-"`
 	proceededImages     map[string]string `yaml:"-"`
 	proceededImagesLock sync.Mutex `yaml:"-"`
@@ -161,11 +162,11 @@ func (plug *HarborProxyCachePopulator) pullImage(url string, configuration Proxy
 	// log.Infof(">>>> configuration: %v", configuration)
 	for {
 		plug.proceededImagesLock.Lock()
-		if plug.proceededImagesNb < 1 {
+		if plug.proceededImagesNb < plug.MaxNumberOfParallelJobs {
 			break
 		}
 		plug.proceededImagesLock.Unlock()
-		log.Infof("Wait for a slot is freed to pull %s\n", url)
+		log.Infof("Wait for a slot is freed to pull %s", url)
 		log.Flush()
 		time.Sleep(5 * time.Second)
 	}
@@ -182,14 +183,14 @@ func (plug *HarborProxyCachePopulator) pullImage(url string, configuration Proxy
 		errPull = pullImageFromProxyCache(url, configuration.RegexURL, configuration.ReplacementOCI, configuration.ReplacementArch, configuration.TargetArch, configuration.TargetOS, dryRun)
 		
 		if errPull != nil {
-			log.Infof("Error pulling image: %v\n", errPull)
+			log.Infof("Error pulling image: %v", errPull)
 			log.Flush()
 			plug.proceededImagesLock.Lock()
 			defer plug.proceededImagesLock.Unlock()
 			delete(plug.proceededImages, url)
 		}
 	} else {
-		log.Infof("%s already met\n", url)
+		log.Infof("%s already met and managed", url)
 		log.Flush()
 		plug.proceededImagesLock.Unlock()
 	}
@@ -262,7 +263,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 	if len(HARBORPCP_DEBUG) > 0 {
 		rand.Seed(time.Now().UnixNano())
 		n := 5 + rand.Intn(10)
-		log.Infof(">>>>>> simulate pullImageFromProxyCache to pull %s - Wait %d seconds\n",url, n)
+		log.Infof(">>>>>> simulate pullImageFromProxyCache to pull %s - Wait %d seconds",url, n)
 		log.Flush()
     time.Sleep(time.Duration(n)*time.Second)
 		return nil
@@ -351,7 +352,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 				return errors.New(errMsg)
 			}
 		} else {
-			log.Infof("DryRun urlTargetImage: %s\n", urlTargetImage)
+			log.Infof("DryRun urlTargetImage: %s", urlTargetImage)
 			log.Flush()
 		}
 	}

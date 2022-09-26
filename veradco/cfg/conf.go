@@ -62,21 +62,21 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 
 func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 	numberOfPluginsLoaded := 0
-	log.Infof(">>>> Loading plugins\n")
+	log.Infof(">>>> Loading plugins")
 	for _, plugin := range veradcoCfg.Plugins {
-		log.Infof(">> Loading plugin  %s\n", plugin.Name)
+		log.Infof(">> Loading plugin  %s", plugin.Name)
 
 		// Try to execute plugins
 		plug, err := goplugin.Open(plugin.Path)
 		if err != nil {
-			log.Errorf("Unable to load plugin %s: %v\n", plugin.Name, err)
+			log.Errorf("Unable to load plugin %s: %v", plugin.Name, err)
 			if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 				return numberOfPluginsLoaded, err			
 			}
 		} else {
 			pluginHandler, err := plug.Lookup("VeradcoPlugin")
 			if err != nil {
-				log.Errorf("Unable to find handler for plugin %s: %v\n", plugin.Name, err)
+				log.Errorf("Unable to find handler for plugin %s: %v", plugin.Name, err)
 				if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 					return numberOfPluginsLoaded, err			
 				}
@@ -85,13 +85,13 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 
 				veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
 				if !ok {
-					log.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)
+					log.Errorf("Plugin %s does not implement awaited interface", plugin.Name)
 					if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 						return numberOfPluginsLoaded, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
 					}
 				} else {
 
-					log.Infof(">> Init plugin %s\n", plugin.Name)
+					log.Infof(">> Init plugin %s", plugin.Name)
 					err := veradcoPlugin.Init(plugin.Configuration)
 
 					if err != nil {
@@ -110,7 +110,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 	}
 
 	if numberOfPluginsLoaded > 0 {
-		log.Infof(">> %d plugins loaded over %d\n", numberOfPluginsLoaded, len(veradcoCfg.Plugins))
+		log.Infof(">> %d plugins loaded over %d", numberOfPluginsLoaded, len(veradcoCfg.Plugins))
 		return numberOfPluginsLoaded, nil
 	}
 	return numberOfPluginsLoaded, fmt.Errorf("No plugin loaded")
@@ -120,7 +120,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope string) (*[]*Plugin, error) {
 	// log.Infof("Plugins: %v\n", veradcoCfg.Plugins)
 
-	log.V(2).Infof(">>>> GetPlugins called\n")
+	log.V(2).Infof(">>>> GetPlugins called")
 
 	result := []*Plugin{}
 
@@ -252,7 +252,7 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 		result = append(result, plugin)
 	}
 
-	log.Infof(">> Number of plugins selected: %d\n", len(result))
+	log.Infof(">> Number of plugins selected: %d", len(result))
 
 	return &result, nil
 }
@@ -286,9 +286,9 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "false")
 			monitoring.AddStat(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "false", elapsed)
 			// monitoring.AddOperation(plug, r, result)
-			log.Infof(">> Plugin %s execution summary: %s\n", plug.Name, plug.VeradcoPlugin.Summary())
+			log.Infof(">> Plugin %s execution summary: %s", plug.Name, plug.VeradcoPlugin.Summary())
 			if plug.DryRun {
-				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!\n", plug.Name)
+				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!", plug.Name)
 			} else {
 				if ! result.Allowed {
 					return result, err
@@ -318,7 +318,7 @@ func matchRegex(regex string, value string) (*bool, error) {
 	
 	matched, err := regexp.MatchString(`^\(!~\).+`, appliedRegex)
 	if err != nil {
-		log.Errorf("Evaluate regex %s on %s failed: %v\n", regex, value, err) 
+		log.Errorf("Evaluate regex %s on %s failed: %v", regex, value, err) 
 		return nil, err
 	}
 
@@ -331,7 +331,7 @@ func matchRegex(regex string, value string) (*bool, error) {
 
 	matched, err = regexp.MatchString(appliedRegex, value)
 	if err != nil {
-		log.Errorf("Evaluate regex %s from %s on %s failed: %v\n", appliedRegex, regex, value, err)
+		log.Errorf("Evaluate regex %s from %s on %s failed: %v", appliedRegex, regex, value, err)
 		return nil, err
 	}
 	

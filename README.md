@@ -43,6 +43,20 @@ The repository is made of 3 main folders:
 - built-in_plugins: a collection of plugins provided with Veradco. Some plugins are simple example while some others can be useful in a real Kubernetes cluster. Each plugin is in a subfolder and has a documentation in the README.md file
 - Kustomize: some Kustomize overlays to install Veradco in a Kubernetes cluster. You can create your own Kustomize overlay from one of the provided one to deploy Veradco in your cluster in a way suitable to your environment.
 
+## Install Veradco
+
+To install Veradco, use the Kustomize configuration provided or create your own.
+
+By example, if you want to install the default installation, run:
+```
+kubectl apply -k kustomize/base
+```
+
+To create the deployment specification with kustomize command and deploy it with kubectl command:
+```
+kustomize build ../../kustomize/base | kubectl apply -f -
+```
+
 ## Docker images
 
 Veradco is made of 2 Docker images:
@@ -55,12 +69,12 @@ Veradco is provided with 11 endpoints:
 - /healthz: serves as kubelet's livenessProbe hook to monitor health of the Veradco server
 - /validate/pods: a validating webhook endpoint specialized for pods. When used, a core v1 Pod API object is directly passed to the scoped plugins.
 - /mutate/pods: a mutating webhook endpoint specialized for pods. When used, a core v1 Pod API object is directly passed to the scoped plugins.
-- /validate/deployments: a validating webhook endpoint specialized for deployments.
-- /mutate/deployments: a mutating webhook endpoint specialized for pods.
-- /validate/daemonsets: a validating webhook endpoint specialized for daemonsets.
-- /mutate/daemonsets: a mutating webhook endpoint specialized for daemonsets.
-- /validate/statefulsets: a validating webhook endpoint specialized for statefulsets.
-- /mutate/statefulsets: a mutating webhook endpoint specialized for statefulsets.
+- /validate/deployments: a validating webhook endpoint specialized for deployments. When used, a specialized API object is directly passed to the scoped plugins.
+- /mutate/deployments: a mutating webhook endpoint specialized for pods. When used, a specialized API object is directly passed to the scoped plugins.
+- /validate/daemonsets: a validating webhook endpoint specialized for daemonsets. When used, a specialized API object is directly passed to the scoped plugins.
+- /mutate/daemonsets: a mutating webhook endpoint specialized for daemonsets. When used, a specialized API object is directly passed to the scoped plugins.
+- /validate/statefulsets: a validating webhook endpoint specialized for statefulsets. When used, a specialized API object is directly passed to the scoped plugins.
+- /mutate/statefulsets: a mutating webhook endpoint specialized for statefulsets. When used, a specialized API object is directly passed to the scoped plugins.
 - /validate/others: a validating webhook endpoint non-specialized that provides to the scoped plugins a generic meta v1 Kubernetes API object "PartialObjectMetadata". The "PartialObjectMetadata" object is intended to be used by the plugin to determine if it is in its scope and then it is up to the plugin to unmarshal the specialized object from the provided admission request.
 - /mutate/others: a mutating webhook endpoint non-specialized that provides to the scoped plugins a generic meta v1 Kubernetes API object "PartialObjectMetadata". The "PartialObjectMetadata" object is intended to be used by the plugin to determine if it is in its scope and then it is up to the plugin to unmarshal the specialized object from the provided admission request.
 
@@ -68,13 +82,13 @@ Note: the "other" endpoints can seem complicated to use. Refer to examples to sp
 
 ## Plugin
 
-This part descibes what is a plugin. Each plugins is splitted in 2 parts:
-- A plugin shall implement an interface in order Veradco is able to hanle it.
-- To use a plugin, it shall be declared in the configuration. A plugin configuration defines its scope.
+This part descibes what is a plugin. Each plugin is splitted in 2 parts:
+- The plugin code that shall implement an interface in order Veradco is able to handle it.
+- To use a plugin, it shall be declared in the configuration. A plugin configuration defines its scope, its configuration, if it shall be run in dry mode and optionally the code to build it for the external ones.
 
 ### Interface to implement
 
-A plugin is a piece of Go code that implements the following interface:
+A plugin is a piece of Golang code that implements the following interface:
 ```
 type VeradcoPlugin interface {
   Init(configFile string) error
@@ -83,15 +97,11 @@ type VeradcoPlugin interface {
 }
 ```
 
-### Loading
-
-Plugins are loaded thanks to a ConfigMap. Refer to examples to see how to do. There are other ways to do it.
-
 ## Configuration
 
 The configuration defines the plugins to use and their configuration. Here is an example of a ConfigMap.
 
-The configuation embeds some basic filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming code using Kubernetes API is. Filtering fields most of the time work as regular expressions.
+The configuation embeds some filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming code using Kubernetes API is. Filtering fields most of the time work as regular expressions.
 
 ```
 plugins:
@@ -116,15 +126,28 @@ plugins:
   scope: "Validating"
 ```
 
-### name
+### Field name
 
 To identify the plugin.
 
-### path
+### Field path
 
 The path of the plugin file (.so). If the plugin needs to be built (refer to code field below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container at webhook startup.  
 For a built-in plugin the path is /app/plugins.  
 For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility.
+
+#### Built-in plugins
+
+Here is a list of built-in plugins. It could be out-of-date. To have the up-to-date list of built-in plugins, refer directly to the code (built-in_plugins folder).
+
+- built-in-add_dummy_sidecar
+- built-in-basic
+- built-in-enforce_labels
+- built-in-forbid_tag
+- built-in-generic
+- built-in-harbor_proxy_cache_populator
+- built-in-plug1
+- built-in-registry_cache
 
 ### code
 
@@ -188,3 +211,72 @@ go mod edit -replace github.com/smart-duck/veradco=[Veradco repository]/veradco
 go mod tidy
 go build -buildmode=plugin -o /dev/null plug.go
 ```
+
+## Regular expressions handling
+
+Regular expressions are handled by Verado thanks to the golang package regexp. But, Veradco introduces a special wild card that is used in the cases it is relevant:
+- regular expression act as a reverse pattern if it is prefixed by (!~). By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
+
+## Example of Veradco logs
+
+The following logs show the starting of Veradco with only one external plugin in its configuration (HarborProxyCachePopulator). We can see the building of the plugin by the init container and then the starting of Veradco server:
+```
++ veradco-d959655c6-crwrd › veradco-plugins-init
+veradco-d959655c6-crwrd veradco-plugins-init BUILD INTERNAL plugins
+veradco-d959655c6-crwrd veradco-plugins-init /go/src/built-in_plugins
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-add_dummy_sidecar
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-basic
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-enforce_labels
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-forbid_tag
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-generic
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-harbor_proxy_cache_populator
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-plug1
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-registry_cache
+veradco-d959655c6-crwrd veradco-plugins-init NO NEED TO BUILD plugin built-in-user_plugin
+veradco-d959655c6-crwrd veradco-plugins-init List of built plugins:
+veradco-d959655c6-crwrd veradco-plugins-init BUILD EXTERNAL plugins
+veradco-d959655c6-crwrd veradco-plugins-init Copy veradcod to /app, also plugins folder
+veradco-d959655c6-crwrd veradco-plugins-init File /app/external_plugins/harbor_proxy_cache_populator.so does not exist. Build plugin...
+veradco-d959655c6-crwrd veradco-plugins-init go: creating new go.mod: module github.com/smart-duck/veradco/20220926122555
+veradco-d959655c6-crwrd veradco-plugins-init go: to add module requirements and sums:
+veradco-d959655c6-crwrd veradco-plugins-init 	go mod tidy
+veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package gopkg.in/yaml.v3
+veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/api/admission/v1
+veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/api/core/v1
+veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/apimachinery/pkg/runtime
+veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/klog/v2
+veradco-d959655c6-crwrd veradco-plugins-init go: found github.com/smart-duck/veradco in github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
+veradco-d959655c6-crwrd veradco-plugins-init go: found github.com/smart-duck/veradco/kres in github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
+veradco-d959655c6-crwrd veradco-plugins-init go: found gopkg.in/yaml.v3 in gopkg.in/yaml.v3 v3.0.1
+veradco-d959655c6-crwrd veradco-plugins-init go: found k8s.io/api/admission/v1 in k8s.io/api v0.25.2
+veradco-d959655c6-crwrd veradco-plugins-init go: found k8s.io/api/core/v1 in k8s.io/api v0.25.2
+veradco-d959655c6-crwrd veradco-plugins-init go: found k8s.io/apimachinery/pkg/runtime in k8s.io/apimachinery v0.25.2
+veradco-d959655c6-crwrd veradco-plugins-init go: found k8s.io/klog/v2 in k8s.io/klog/v2 v2.80.1
+veradco-d959655c6-crwrd veradco-plugins-init List of external plugins:
+veradco-d959655c6-crwrd veradco-plugins-init harbor_proxy_cache_populator.so
+veradco-d959655c6-crwrd veradco-plugins-init app content:
+veradco-d959655c6-crwrd veradco-plugins-init /app:
+veradco-d959655c6-crwrd veradco-plugins-init total 31804
+veradco-d959655c6-crwrd veradco-plugins-init drwxr-xr-x    2 root     root          4096 Sep 26 12:26 external_plugins
+veradco-d959655c6-crwrd veradco-plugins-init drwxr-xr-x    2 root     root          4096 Sep 26 12:25 plugins
+veradco-d959655c6-crwrd veradco-plugins-init -rwxr-xr-x    1 root     root      32555368 Sep 26 12:25 veradcod
+veradco-d959655c6-crwrd veradco-plugins-init 
+veradco-d959655c6-crwrd veradco-plugins-init /app/external_plugins:
+veradco-d959655c6-crwrd veradco-plugins-init total 27420
+veradco-d959655c6-crwrd veradco-plugins-init -rw-r--r--    1 root     root      28075320 Sep 26 12:26 harbor_proxy_cache_populator.so
+veradco-d959655c6-crwrd veradco-plugins-init 
+veradco-d959655c6-crwrd veradco-plugins-init /app/plugins:
+veradco-d959655c6-crwrd veradco-plugins-init total 0
+- veradco-d959655c6-crwrd › veradco-plugins-init
++ veradco-d959655c6-crwrd › veradco-server
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.677444       1 main.go:28] >>>>>> Starting veradco
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.677724       1 server.go:29] >>>> NewServer
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.678412       1 server.go:38] >> Configuration /conf/veradco.yaml successfully loaded
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.678435       1 conf.go:65] >>>> Loading plugins
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.678447       1 conf.go:67] >> Loading plugin  HarborProxyCachePopulator
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.691763       1 conf.go:94] >> Init plugin HarborProxyCachePopulator
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692165       1 conf.go:113] >> 1 plugins loaded over 1
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692245       1 server.go:50] >> 1 plugins successfully loaded
+veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692432       1 main.go:47] >> Server running on port: 8443
+```
+

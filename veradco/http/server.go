@@ -35,7 +35,7 @@ func NewServer(port string, config string) *http.Server {
 		log.Errorf("Error loading configuration %s: %v", config, err)
 		os.Exit(3)
 	} else {
-		log.Infof(">> Configuration %s successfully loaded\n", config)
+		log.Infof(">> Configuration %s successfully loaded", config)
 	}
 
 	var numberOfPluginsLoaded int
