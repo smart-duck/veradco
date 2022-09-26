@@ -39,8 +39,8 @@ Description of the operation:
 ## Repository structure
 
 The repository is made of 3 main folders:
-- veradco: the Golang code of the Veradco Admission Controller
-- built-in_plugins: a collection of plugins provided with Veradco. Some plugins are simple example while some others can be useful in a real Kubernetes cluster. Each plugin is in a subfolder and has a documentation in the README.md file
+- veradco: the Golang code of the Veradco Admission Controller.
+- built-in_plugins: a collection of plugins provided with Veradco. Some plugins are simple example while some others can be useful in a real Kubernetes cluster. Each plugin is in a subfolder and has a documentation in the README.md file.
 - Kustomize: some Kustomize overlays to install Veradco in a Kubernetes cluster. You can create your own Kustomize overlay from one of the provided one to deploy Veradco in your cluster in a way suitable to your environment.
 
 ## Install Veradco
@@ -138,7 +138,7 @@ For a plugin you built yourself the path is as you want. We advise you to build 
 
 #### Built-in plugins
 
-Here is a list of built-in plugins. It could be out-of-date. To have the up-to-date list of built-in plugins, refer directly to the code (built-in_plugins folder).
+Here is a list of built-in plugins. It could be out-of-date. To have the up-to-date list of built-in plugins, refer directly to the code (built-in_plugins folder). Some plugins are simple example while some others can be useful in a real Kubernetes cluster. Each plugin is in a subfolder and has a documentation in the README.md file.
 
 - built-in-add_dummy_sidecar
 - built-in-basic
