@@ -89,6 +89,16 @@ A list of proxy caches to handle:
 
 To access your master registry (Harbor), you need to create a User/Password secret and define environment varariable using it in your Veradco deployment like that:
 ```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: harbor
+  namespace: veradco
+type: Opaque
+stringData:
+    hUSER: "robot_pull"
+    hPW: "cEsTunVRaiSeCReT"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
