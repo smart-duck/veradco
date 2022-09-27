@@ -12,6 +12,8 @@ This plugin is suitable to be used in the case you have a master container regis
 
 The plugin takes advantage of the registries proxy caches mechanisms (as implemented in Harbor).
 
+This is a validating webhook plugin that always accept the incoming request. It's not its purpose to accept or reject incoming requests: it asynchonously manages the implicit pull of images that are in the scope of its provided configuration.
+
 ## How it works
 
 ```
@@ -127,6 +129,12 @@ spec:
               key: hPW
 ```
 
+## Dry run mode
+
+dryRun is a parameter of each Veradco plugin. It is managed by Veradco upstream (accept, no patch) but each plugin can manage it if they do things outside an admission controller scope. As it is the case for this plugin, it manages the dryRun parameter as follow:
+- Only logs actions.
+- In case the plugin parameter "replacementArch" is defined, it executes the first step (get OCI manifest) and logs what should be done in the final/second step (get layers manifest). Otherwise, it only logs the fisrt step.
+
 ## DEBUG mode
 
 Debug mode can be use to test deployment of this plugin in your cluster. You just have to define the HARBORPCP_DEBUG environment variable as follow (the value does not matter):
@@ -168,6 +176,8 @@ go mod edit -replace github.com/smart-duck/veradco=../../veradco
 go mod tidy
 go build -buildmode=plugin -o /dev/null plug.go
 ```
+
+Note: as it is a built-in plugin, you don't need to check that it builds.
 
 ## Example of use
 
