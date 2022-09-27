@@ -14,7 +14,7 @@ webhooks:
       caBundle: "$(CA_BUNDLE)"
     namespaceSelector:
       matchExpressions:
-        - key: whprotect
+        - key: kubernetes.io/metadata.name
           operator: NotIn
           values: ["veradco"]
     rules:

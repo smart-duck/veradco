@@ -65,6 +65,8 @@ Veradco is made of 2 Docker images:
 
 ## Veradco endpoints
 
+### List of provided endpoints
+
 Veradco is provided with 11 endpoints:
 - /healthz: serves as kubelet's livenessProbe hook to monitor health of the Veradco server
 - /validate/pods: a validating webhook endpoint specialized for pods. When used, a core v1 Pod API object is directly passed to the scoped plugins.
@@ -79,6 +81,72 @@ Veradco is provided with 11 endpoints:
 - /mutate/others: a mutating webhook endpoint non-specialized that provides to the scoped plugins a generic meta v1 Kubernetes API object "PartialObjectMetadata". The "PartialObjectMetadata" object is intended to be used by the plugin to determine if it is in its scope and then it is up to the plugin to unmarshal the specialized object from the provided admission request.
 
 Note: the "other" endpoints can seem complicated to use. Refer to examples to speed up understanding.
+
+### How to define Veradco Webhooks
+
+You have to deploy the webhooks in accordance with the endpoints you want to use.
+
+Basically, if you want to use the /validate/pods endpoint, then you have to define a webhook with a rule filtering pods resources as follow:
+```
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: veradco-pod-validation
+webhooks:
+  - name: veradco-pod-validation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/validate/pods"
+      caBundle: "$(CA_BUNDLE)"
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["veradco"]
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    failurePolicy: Ignore
+```
+
+Notes:
+- the namespaceSelector used allows not to apply this webhook to the veradco namespace resources. The Kubernetes API server sets this label on all namespaces to the name of the namespace.
+- As it uses the /validate/pods endpoint, it is a ValidatingWebhookConfiguration resource.
+
+For the other specialized endpoints you have to do in the same way.
+
+Others endpoints (/validate/others, /mutate/others) are more generic and the relative webhooks have to be defined with a rule filtering resources other than the ones handled by the specialized endpoints.
+
+Here is an example of a validating webhook that uses the /validate/others endpoint:
+```
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: veradco-other-validation
+webhooks:
+  - name: veradco-other-validation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/validate/others"
+      caBundle: "${CA_BUNDLE}"
+    rules:
+      - operations: ["CREATE", "DELETE", "UPDATE", "CONNECT"]
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["secrets", "namespaces"]
+    failurePolicy: Ignore
+```
 
 ## Plugin
 
