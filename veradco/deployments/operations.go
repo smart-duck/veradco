@@ -14,39 +14,39 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func validateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Create, veradcoCfg, "Validating")
+func validateCreate(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Create, veradcoCfg, "Validating", endpoint)
 }
 
-func validateUpdate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Update, veradcoCfg, "Validating")
+func validateUpdate(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Update, veradcoCfg, "Validating", endpoint)
 }
 
-func validateDelete(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Delete, veradcoCfg, "Validating")
+func validateDelete(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Delete, veradcoCfg, "Validating", endpoint)
 }
 
-func validateConnect(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Connect, veradcoCfg, "Validating")
+func validateConnect(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Connect, veradcoCfg, "Validating", endpoint)
 }
 
-func mutateCreate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Create, veradcoCfg, "Mutating")
+func mutateCreate(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Create, veradcoCfg, "Mutating", endpoint)
 }
 
-func mutateUpdate(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Update, veradcoCfg, "Mutating")
+func mutateUpdate(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Update, veradcoCfg, "Mutating", endpoint)
 }
 
-func mutateDelete(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Delete, veradcoCfg, "Mutating")
+func mutateDelete(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Delete, veradcoCfg, "Mutating", endpoint)
 }
 
-func mutateConnect(veradcoCfg *conf.VeradcoCfg) admissioncontroller.AdmitFunc {
-	return operation(admission.Connect, veradcoCfg, "Mutating")
+func mutateConnect(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
+	return operation(admission.Connect, veradcoCfg, "Mutating", endpoint)
 }
 
-func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string) admissioncontroller.AdmitFunc {
+func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string, endpoint string) admissioncontroller.AdmitFunc {
 	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
 		log.V(1).Infof(">>>> others / %s operation, Kind: %s, Version: %s, Group: %s, Name: %s, Namespace: %s", string(op), r.Kind.Kind, r.Kind.Version, r.Kind.Group, r.Name, r.Namespace)
@@ -61,6 +61,6 @@ func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string
 		}
 
 		// Apply the plugins
-		return veradcoCfg.ProceedPlugins(dp, r, scope)
+		return veradcoCfg.ProceedPlugins(dp, r, scope, endpoint)
 	}
 }

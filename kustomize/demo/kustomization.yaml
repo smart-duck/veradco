@@ -7,9 +7,9 @@ kind: Kustomization
 
 resources:
 - ../base
+- webhooks.yaml
 
 patchesStrategicMerge:
 - veradco.yaml
 - veradco_conf.yaml
-- webhooks.yaml
 - namespace.yaml

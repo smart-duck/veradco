@@ -29,6 +29,7 @@ type Plugin struct {
 	DryRun bool `yaml:"dryRun"`
 	Configuration string `yaml:"configuration"`
 	Scope string `yaml:"scope"`
+	Endpoints string `yaml:"endpoints,omitempty"`
 	VeradcoPlugin veradcoplugin.VeradcoPlugin `yaml:"-"`
 }
 
@@ -117,7 +118,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 }
 
 // func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, kind string, operation string, namespace string, labels map[string]string, annotations map[string]string, scope string) (*[]*Plugin, error) {
-func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope string) (*[]*Plugin, error) {
+func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope string, endpoint string) (*[]*Plugin, error) {
 	// log.Infof("Plugins: %v\n", veradcoCfg.Plugins)
 
 	log.V(2).Infof(">>>> GetPlugins called")
@@ -126,6 +127,19 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 
 	// Browse all plugins to filter the relevant ones
 	for _, plugin := range veradcoCfg.Plugins {
+
+		// Check endpoint
+		if len(plugin.Endpoints) > 0 {
+			match, err := matchRegex(plugin.Endpoints, endpoint)
+			if err != nil {
+				log.Errorf("Failed to evaluate regex %s for %s: %s", plugin.Endpoints, r.Name, err)
+				continue
+			} else {
+				if ! *match {
+					continue
+				}
+			}
+		}
 
 		// check scope
 		match, err := matchRegex(plugin.Scope, scope)
@@ -257,9 +271,9 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 	return &result, nil
 }
 
-func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.AdmissionRequest, scope string) (*admissioncontroller.Result, error) {
+func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.AdmissionRequest, scope string, endpoint string) (*admissioncontroller.Result, error) {
 
-	plugins, err := veradcoCfg.GetPlugins(r, scope)
+	plugins, err := veradcoCfg.GetPlugins(r, scope, endpoint)
 
 	if err != nil {
 		log.Errorf("Failed to load plugins: %v", err)

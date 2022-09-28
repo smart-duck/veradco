@@ -13,7 +13,7 @@ resources:
 - namespace.yaml
 - veradco_conf.yaml
 - veradco.yaml
-- webhooks.yaml
+# - webhooks.yaml
 
 secretGenerator:
 - name: veradco-tls

@@ -7,21 +7,21 @@ import (
 )
 
 // NewValidationHook creates a new instance of others validation hook
-func NewValidationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
+func NewValidationHook(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.Hook {
 	return admissioncontroller.Hook{
-		Create: validateCreate(veradcoCfg),
-		Delete: validateDelete(veradcoCfg),
-		Update: validateUpdate(veradcoCfg),
-		Connect: validateConnect(veradcoCfg),
+		Create: validateCreate(veradcoCfg, endpoint),
+		Delete: validateDelete(veradcoCfg, endpoint),
+		Update: validateUpdate(veradcoCfg, endpoint),
+		Connect: validateConnect(veradcoCfg, endpoint),
 	}
 }
 
-func NewMutationHook(veradcoCfg *conf.VeradcoCfg) admissioncontroller.Hook {
+func NewMutationHook(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.Hook {
 	return admissioncontroller.Hook{
-		Create: mutateCreate(veradcoCfg),
-		Delete: mutateDelete(veradcoCfg),
-		Update: mutateUpdate(veradcoCfg),
-		Connect: mutateConnect(veradcoCfg),
+		Create: mutateCreate(veradcoCfg, endpoint),
+		Delete: mutateDelete(veradcoCfg, endpoint),
+		Update: mutateUpdate(veradcoCfg, endpoint),
+		Connect: mutateConnect(veradcoCfg, endpoint),
 	}
 }
 

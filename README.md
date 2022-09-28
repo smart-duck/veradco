@@ -47,6 +47,8 @@ The repository is made of 3 main folders:
 
 To install Veradco, use the Kustomize configuration provided or create your own.
 
+Prior to proceed to the Kustomize, you should have initialized the PKI linked with the service using the provided script generate-pki.sh . The script generates a CA and the certificate/key of the Veradco service.
+
 By example, if you want to install the default installation, run:
 ```
 kubectl apply -k kustomize/base
@@ -56,6 +58,8 @@ To create the deployment specification with kustomize command and deploy it with
 ```
 kustomize build ../../kustomize/base | kubectl apply -f -
 ```
+
+Note: It is up to you to create the webhooks via Kustomize with your own overlay or separately.
 
 ## Docker images
 
@@ -154,6 +158,12 @@ This part descibes what is a plugin. Each plugin is splitted in 2 parts:
 - The plugin code that shall implement an interface in order Veradco is able to handle it.
 - To use a plugin, it shall be declared in the configuration. A plugin configuration defines its scope, its configuration, if it shall be run in dry mode and optionally the code to build it for the external ones.
 
+### Plugins and endpoints
+
+There is a bijection between plugins and the Golang Kubernetes object that is passed to the Execute function of a plugin. So, depending on the code of the plugin, it can be executed several times. To avoid that, it is suitable to define the applicable endpoints in the plugin configuration (parameter endpoints). By example, the Generic plugin is designed to work with all endpoints.
+
+Note: in the Veradco configuration, a plugin can be declared several times with different configurations.
+
 ### Interface to implement
 
 A plugin is a piece of Golang code that implements the following interface:
@@ -192,6 +202,7 @@ plugins:
     This plugin does not have configuration
     That's like that!
   scope: "Validating"
+  endpoints: "/validate/pods"
 ```
 
 ### Field name
@@ -219,6 +230,8 @@ Here is a list of built-in plugins. It could be out-of-date. To have the up-to-d
 
 ### code
 
+This field is optional.
+
 The code field contains the code of the plugin converted in base 64. If the plugin has to be built, it shall be packaged in a single file. The base 64 block is decoded in a single Go file. The plugin is compiled with this code only if the provided path does not point to an existing file.
 
 ### kind
@@ -239,10 +252,14 @@ Example: "kube-system|default"
 
 ### labels
 
+This field is optional.
+
 Filter only on resources having some labels.  
 value is a regular expressions.
 
 ### annotations
+
+This field is optional.
 
 Filter only on resources having some annotations.  
 value is a regular expressions.
@@ -260,6 +277,13 @@ The configuration of the plugin. Passed to the plugin via the Init function of t
 A regular expression that defines the scope of the plugin.  
 There are 2 scopes: Validating and Mutating.  
 "Validating|Mutating" is suitable for both scopes.
+
+### endpoints
+
+This field is optional. If not defined, all activated endpoints are likely to be used for the plugin.
+
+A regular expression that defines the endpoints that execute the plugin.  
+"/validate/pods|/validate/others" is suitable for the 2 endpoints /validate/pods et /validate/others. In its code the plugin can restrict suitable endpoints. It can be designed for a particular endpoint: by example a plugin checking the validity of a container image can restrict its usage to the endpoint /validate/pods.
 
 ## How to develop a plugin
 
