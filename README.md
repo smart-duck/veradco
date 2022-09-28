@@ -4,6 +4,16 @@
 
 Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using some third-party ones or the ones that are built-in.
 
+[Kubernetes admission controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers)
+
+> In a nutshell, Kubernetes admission controllers are plugins that govern and enforce how the cluster is used. They can 
+> be thought of as a gatekeeper that intercept (authenticated) API requests and may change the request object or deny the request altogether.
+> The admission control process has two phases: the mutating phase is executed first, followed by the validating phase.
+
+Kubernetes admission Controller Phases:
+
+![](https://d33wubrfki0l68.cloudfront.net/af21ecd38ec67b3d81c1b762221b4ac777fcf02d/7c60e/images/blog/2019-03-21-a-guide-to-kubernetes-admission-controllers/admission-controller-phases.png)
+
 With Veradco, you take advantage of the full power of Mutating and Validating webhooks in a simple and flexible way. You only need to write the functional part. Plugin are written in golang, can be packaged in a ConfigMap and are built on the fly by the provided init container. A big advantage is that you don't need to learn a new programming/configuration language and so, you are not stuck in a cramped and finite universe.
 
 You also take advantage of the built-in monitoring that gives you statistics about plugins such as call frequency or execution time. These metrics are prefixed by veradco. You can scrape them towards Prometheus via a ServiceMonitor.
@@ -160,7 +170,7 @@ This part descibes what is a plugin. Each plugin is splitted in 2 parts:
 
 ### Plugins and endpoints
 
-There is a bijection between plugins and the Golang Kubernetes object that is passed to the Execute function of a plugin. So, depending on the code of the plugin, it can be executed several times. To avoid that, it is suitable to define the applicable endpoints in the plugin configuration (parameter endpoints). By example, the Generic plugin is designed to work with all endpoints.
+There is a bijection between plugins and the Golang Kubernetes object that is passed to the Execute function of a plugin. So, depending on the code of the plugin, it can be executed several times. To avoid that, it is suitable to define the applicable endpoints in the plugin configuration (parameter endpoints). By example, the Generic plugin is designed to work with all endpoints. If you want it to work with the endpoint "others" which is its native one, you need to define the endpoints parameter to "/validate/others" in the plugin configuration.
 
 Note: in the Veradco configuration, a plugin can be declared several times with different configurations.
 
