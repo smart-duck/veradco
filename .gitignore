@@ -29,3 +29,6 @@ kustomize_poc.tgz
 kustomize/base/certs
 veradco/demo/from_kustomize.yaml
 veradco/demo/tmp.base64
+useful/build_plugins/veradco_and_built-ins/veradcod
+useful/build_plugins/a_plugin/go.sum
+useful/build_plugins/a_plugin/go.mod

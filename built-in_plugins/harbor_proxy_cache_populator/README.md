@@ -64,7 +64,7 @@ Note: to avoid managing 2 times the same image, Veradco manages a list of alread
 ## Plugin configuration
 
 Here is an example:
-```
+```yaml
 maxNumberOfParallelJobs: 2
 proxyCaches:
 - regexURL: "^.*amazonaws.com/(proxy_[^:/]+)/([^:]+):(.+$)"
@@ -90,7 +90,7 @@ A list of proxy caches to handle:
 ## Kubernetes secret to provision
 
 To access your master registry (Harbor), you need to create a User/Password secret and define environment varariable using it in your Veradco deployment like that:
-```
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -138,7 +138,7 @@ dryRun is a parameter of each Veradco plugin. It is managed by Veradco upstream 
 ## DEBUG mode
 
 Debug mode can be use to test deployment of this plugin in your cluster. You just have to define the HARBORPCP_DEBUG environment variable as follow (the value does not matter):
-```
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -170,7 +170,7 @@ Note: In debug mode, it does not matter not to define environment variables used
 ## Check that the plugin builds
 
 As explained in the Veradco documentation, you can proceed as follow:
-```
+```sh
 go mod init github.com/smart-duck/veradco/harbor_proxy_cache_populator
 go mod edit -replace github.com/smart-duck/veradco=../../veradco
 go mod tidy

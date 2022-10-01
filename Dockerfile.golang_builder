@@ -30,6 +30,8 @@ ARG BUILD=ALL
  RUN chmod +x /veradco_scripts/build_external_plugins.sh
  COPY build_all.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_all.sh
+ COPY build_a_plugin.sh /veradco_scripts/
+ RUN chmod +x /veradco_scripts/build_a_plugin.sh
 
  # Remove .so from /go to lightweight image
  RUN find /go -type f -name '*.so' -delete

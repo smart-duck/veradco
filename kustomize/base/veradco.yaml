@@ -25,12 +25,12 @@ spec:
         - name: VERADCO_CONF
           value: "/conf/veradco.yaml"
         volumeMounts:
-        - name: config-volume
-          mountPath: /conf/
-          readOnly: true
         - name: plugins-volume
           mountPath: /app
           readOnly: false
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
       containers:
       - name: veradco-server
         image: smartduck/veradco:0.1
@@ -45,14 +45,14 @@ spec:
         ports:
         - containerPort: 8443
         volumeMounts:
+        - name: plugins-volume
+          mountPath: /app
+          readOnly: true
         - name: tls-certs
           mountPath: /etc/certs
           readOnly: true
         - name: config-volume
           mountPath: /conf/
-          readOnly: true
-        - name: plugins-volume
-          mountPath: /app
           readOnly: true
       volumes:
       - name: tls-certs

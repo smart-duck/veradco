@@ -4,6 +4,11 @@
 
 set -e
 
+[ -z "$VERADCO_CONF" ] && VERADCO_CONF="/conf/veradco.yaml"
+
+# This script needs a veradco conf unless it is used for CI build!
+[ -f "$VERADCO_CONF" ] || exit 0
+
 echo "Copy veradcod to /app, also plugins folder"
 cp -fr /release/* /app/
 
@@ -16,8 +21,6 @@ mkdir -p "$build_folder"
 external_plugins_folder="/app/external_plugins"
 
 mkdir -p "$external_plugins_folder"
-
-[ -z "$VERADCO_CONF" ] && VERADCO_CONF="/conf/veradco.yaml"
 
 for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
   name=$plugin

@@ -1,0 +1,76 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: veradco-pod-validation
+webhooks:
+  - name: veradco-pod-validation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/validate/pods"
+      caBundle: "$(CA_BUNDLE)"
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["veradco"]
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    failurePolicy: Ignore
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: veradco-other-validation
+webhooks:
+  - name: veradco-other-validation.default.svc
+    sideEffects: None
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: veradco
+        namespace: veradco
+        path: "/validate/others"
+      caBundle: "$(CA_BUNDLE)"
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["veradco"]
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    failurePolicy: Ignore
+
+
+
+# apiVersion: admissionregistration.k8s.io/v1
+# kind: ValidatingWebhookConfiguration
+# metadata:
+#   name: veradco-other-validation
+# webhooks:
+#   - name: veradco-other-validation.default.svc
+#     sideEffects: None
+#     admissionReviewVersions: ["v1"]
+#     clientConfig:
+#       service:
+#         name: veradco
+#         namespace: veradco
+#         path: "/validate/others"
+#       caBundle: "${CA_BUNDLE}"
+#     rules:
+#       - operations: ["CREATE", "DELETE", "UPDATE", "CONNECT"]
+#         apiGroups: ["*"]
+#         apiVersions: ["*"]
+#         resources: ["pods", "deployments", "daemonsets", "statefulsets", "secrets", "namespaces"]
+#     failurePolicy: Ignore

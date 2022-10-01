@@ -271,3 +271,35 @@ Delete remote tag:
 ```
 git push --delete origin 0.1beta1
 ```
+
+# Encountered difficulties
+
+## Supply and build of plugins
+
+Plugin feature of Golang is used.
+
+Plugin build issue: plugin was built with a different version of package github.com/gogo/protobuf/proto
+
+Plugin libraries are big:
+- about the size of veradco. 25-30 MB
+- not possible to store in a ConfigMap
+- Need to compile external plugins from code
+- Need to provide plugins via an init container
+
+```
+build_plugins/veradco_and_built-ins/:
+total 32M
+drwxr-xr-x 2 root root 4,0K sept. 29 09:18 plugins
+-rwxr-xr-x 1 root root  32M sept. 29 09:17 veradcod
+
+build_plugins/veradco_and_built-ins/plugins:
+total 205M
+-rw-r--r-- 1 root root 25M sept. 29 09:18 built-in-registry_cache.so
+-rw-r--r-- 1 root root 27M sept. 29 09:18 built-in-plug1.so
+-rw-r--r-- 1 root root 27M sept. 29 09:18 built-in-harbor_proxy_cache_populator.so
+-rw-r--r-- 1 root root 27M sept. 29 09:18 built-in-generic.so
+-rw-r--r-- 1 root root 25M sept. 29 09:18 built-in-forbid_tag.so
+-rw-r--r-- 1 root root 27M sept. 29 09:17 built-in-enforce_labels.so
+-rw-r--r-- 1 root root 24M sept. 29 09:17 built-in-basic.so
+-rw-r--r-- 1 root root 27M sept. 29 09:17 built-in-add_dummy_sidecar.so
+```

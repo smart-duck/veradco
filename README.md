@@ -55,27 +55,35 @@ The repository is made of 3 main folders:
 
 ## Install Veradco
 
+### Nominal installation
+
+The nominal installation install Veradco container together with its init container. It is then able to build plugins (and even veradcod) on the fly.
+
 To install Veradco, use the Kustomize configuration provided or create your own.
 
 Prior to proceed to the Kustomize, you should have initialized the PKI linked with the service using the provided script generate-pki.sh . The script generates a CA and the certificate/key of the Veradco service.
 
 By example, if you want to install the default installation, run:
-```
+```sh
 kubectl apply -k kustomize/base
 ```
 
 To create the deployment specification with kustomize command and deploy it with kubectl command:
-```
+```sh
 kustomize build ../../kustomize/base | kubectl apply -f -
 ```
 
 Note: It is up to you to create the webhooks via Kustomize with your own overlay or separately.
 
+### Custom installation
+
+It is obviously possible to create your own installation. Typically you can create an image containing all the binaries (veradcod and plugins) in your CI and use it in your CD. In this case you don't need to have the init container (heavy) but you lost the ability to build on the fly. To build the binaries you can use the init container image which is suitable for both CD and CI use: refer to the README of the folder useful/build_plugins. 
+
 ## Docker images
 
 Veradco is made of 2 Docker images:
-- An init container that is responsible to provide to Veradco container its binary and the required plugins. In its nominal version, it builds on the fly the required built-in plugins and the external ones. It then shares via a shared volume the veradcod binary and the built plugins.
-- A lightweight container that runs veradcod (the Veradco server and its monitoring server).
+- An init container that is responsible to provide to Veradco container its binary and the required plugins. In its nominal version, it builds on the fly the required built-in plugins and the external ones. It then shares via a shared volume the veradcod binary and the built plugins. This image can also be used as a CI one to build the binaries.
+- A lightweight container that runs veradcod (the Veradco server and its monitoring server). Nominally, all binaries including plugins and veradcod are provided by the init container via a shared volume.
 
 ## Veradco endpoints
 
@@ -101,7 +109,7 @@ Note: the "other" endpoints can seem complicated to use. Refer to examples to sp
 You have to deploy the webhooks in accordance with the endpoints you want to use.
 
 Basically, if you want to use the /validate/pods endpoint, then you have to define a webhook with a rule filtering pods resources as follow:
-```
+```yaml
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -139,7 +147,7 @@ For the other specialized endpoints you have to do in the same way.
 Others endpoints (/validate/others, /mutate/others) are more generic and the relative webhooks have to be defined with a rule filtering resources other than the ones handled by the specialized endpoints.
 
 Here is an example of a validating webhook that uses the /validate/others endpoint:
-```
+```yaml
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
@@ -177,7 +185,7 @@ Note: in the Veradco configuration, a plugin can be declared several times with 
 ### Interface to implement
 
 A plugin is a piece of Golang code that implements the following interface:
-```
+```go
 type VeradcoPlugin interface {
   Init(configFile string) error
   Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
@@ -191,7 +199,7 @@ The configuration defines the plugins to use and their configuration. Here is an
 
 The configuation embeds some filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming code using Kubernetes API is. Filtering fields most of the time work as regular expressions.
 
-```
+```yaml
 plugins:
 - name: "extplug1"
   path: "/app/external_plugins/extplug1.so"
@@ -306,7 +314,7 @@ A plugin is generally made of a single file called plug.go. For external plugins
 Build the plugin is useful only to check that the plugin builds. It is up to Veradco init container to build the plugins.
 
 To check that your plugin builds, you can proceed as follow:
-```
+```sh
 go mod init github.com/smart-duck/veradco/my-plugin
 # Optionally if you pulled the veradco code, you can point to it.
 go mod edit -replace github.com/smart-duck/veradco=[Veradco repository]/veradco
@@ -318,6 +326,25 @@ go build -buildmode=plugin -o /dev/null plug.go
 
 Regular expressions are handled by Verado thanks to the golang package regexp. But, Veradco introduces a special wild card that is used in the cases it is relevant:
 - regular expression act as a reverse pattern if it is prefixed by (!\~). By example, "(!\~)(?i)test" matches that the value does not contain "test" whatever the case is.
+
+## Issue handling
+
+If you are facing Veradco issues, refer to the logs of its pods.
+
+Sometime, Veradco can run in degraded mode. By example, in case it does not succeed to load all the plugins that are declared in the configuration:
+```sh
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.266961       1 main.go:28] >>>>>> Starting veradco
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.267183       1 server.go:42] >>>> NewServer
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.267943       1 server.go:51] >> Configuration /conf/veradco.yaml successfully loaded
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.268201       1 conf.go:66] >>>> Loading plugins
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.268391       1 conf.go:68] >> Loading plugin  Generic
+veradco-b69b8d445-krm2x veradco-server E0930 08:24:48.268631       1 conf.go:73] Unable to load plugin Generic: plugin.Open("/app/plugins/built-in-generic.so"): realpath failed
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.268893       1 conf.go:68] >> Loading plugin  HarborProxyCachePopulator
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.300927       1 conf.go:95] >> Init plugin HarborProxyCachePopulator
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.301115       1 conf.go:114] >> 1 plugins loaded over 2
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.301138       1 server.go:63] >> 1 plugins successfully loaded
+veradco-b69b8d445-krm2x veradco-server I0930 08:24:48.301466       1 main.go:47] >> Server running on port: 8443
+```
 
 ## Example of Veradco logs
 

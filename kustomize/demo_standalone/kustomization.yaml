@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# namespace: demo-veradco
+
+# namePrefix: demo-
+
+resources:
+- ../base
+- webhooks.yaml
+
+patchesStrategicMerge:
+- veradco.yaml
+- veradco_conf.yaml
+
+patches:
+- path: remove_init_container.json
+  target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: veradco

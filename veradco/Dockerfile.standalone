@@ -1,0 +1,30 @@
+# FROM gcr.io/distroless/base
+FROM alpine:3.16.2
+
+# Create a group and user
+RUN addgroup -g 1000 -S veradco && adduser -S veradco -G veradco -g 1000 -u 1000
+
+# Copy binaries
+RUN mkdir -p /app
+
+COPY veradcod /app/
+
+COPY plugins /app/plugins
+
+# RUN ls -lRth /app/
+
+RUN chown -R veradco:veradco /app/
+
+RUN chmod -wx /app/veradcod
+RUN chmod u+x /app/veradcod
+
+RUN chmod -R -w /app/plugins/*
+
+RUN ls -lRth /app/
+
+# Tell docker that all future commands should run as the veradco user
+USER veradco
+
+EXPOSE 8443 8080
+
+# CMD ["/app/veradcod"]
