@@ -31,6 +31,7 @@ type Plugin struct {
 	Scope string `yaml:"scope"`
 	Endpoints string `yaml:"endpoints,omitempty"`
 	VeradcoPlugin veradcoplugin.VeradcoPlugin `yaml:"-"`
+	VeradcoPluginLoaded bool `yaml:"-"`
 }
 
 type VeradcoCfg struct {
@@ -102,6 +103,7 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 						}
 					} else {
 						plugin.VeradcoPlugin = veradcoPlugin
+						plugin.VeradcoPluginLoaded = true
 						numberOfPluginsLoaded++
 					}
 					// log.Infof("Plugin: %v\n", plugin)
@@ -127,6 +129,11 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 
 	// Browse all plugins to filter the relevant ones
 	for _, plugin := range veradcoCfg.Plugins {
+
+		if ! plugin.VeradcoPluginLoaded {
+			// Plugin has not been loaded properly
+			continue
+		}
 
 		// Check endpoint
 		if len(plugin.Endpoints) > 0 {
