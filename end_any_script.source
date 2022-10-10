@@ -1,0 +1,7 @@
+# Special chown
+if [ ! -z "$TO_BUILD_CHMOD" ]; then
+  echo "Change owner of built binaries to $TO_BUILD_CHMOD"
+  chown -R $TO_BUILD_CHMOD /release/* || true
+fi
+
+echo "EXITING script $(basename $(readlink -nf $0))"

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source $(dirname $(readlink -f $0))/start_any_script.source
+
 set -e
 
 shallBuild () {
@@ -54,3 +56,5 @@ done
 
 echo "List of built plugins:"
 ls $PLUGINS_LIB_PATH
+
+source $(dirname $(readlink -f $0))/end_any_script.source

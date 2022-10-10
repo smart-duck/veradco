@@ -1,12 +1,6 @@
 #!/bin/sh
 
-# Special case copy to go src
-if [ ! -z "$TO_BUILD_FOLDER" ]; then
-  echo "Remove all from /go/src"
-  rm -Rf /go/src/*
-  echo "Copy content $TO_BUILD_FOLDER to /go/src"
-  cp -R $TO_BUILD_FOLDER/* /go/src/
-fi
+source $(dirname $(readlink -f $0))/start_any_script.source
 
 if [ ! -f /release/veradcod ]; then
   echo "BUILD veradco"
@@ -21,8 +15,4 @@ fi
 echo "BUILD EXTERNAL plugins"
 /veradco_scripts/build_external_plugins.sh
 
-# Special chown
-if [ ! -z "$TO_BUILD_CHMOD" ]; then
-  echo "Change owner of built binaries to $TO_BUILD_CHMOD"
-  chown -R $TO_BUILD_CHMOD /release/*
-fi
+source $(dirname $(readlink -f $0))/end_any_script.source

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source $(dirname $(readlink -f $0))/start_any_script.source
+
 set -e
 
 # build_folder="/go/src/build/plugin"
@@ -22,3 +24,5 @@ if [ ! -f "go.mod" ] || [ "$PRESERVE_GO_MOD" != "true" ]; then
 fi
 
 go build -buildmode=plugin -o "$build_folder/$plugin_name.so" plug.go
+
+source $(dirname $(readlink -f $0))/end_any_script.source

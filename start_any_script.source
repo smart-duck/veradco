@@ -1,0 +1,26 @@
+echo "Entering script $(basename $(readlink -nf $0))"
+
+###########################
+#####  OVERALL INIT   #####
+###########################
+if [ ! -f /tmp/TMP_VERADCO_CONTEXT_ALREADY_LOADED ]; then
+  
+  # IF THE FIRST TIME THAT THE SCRIPT IS LAUNCHED
+  if [ -n "$TO_BUILD_FOLDER" ]; then
+    echo "INIT: Remove all from /go/src"
+    rm -Rf /go/src/*
+    echo "INIT: Copy content of $TO_BUILD_FOLDER to /go/src"
+    cp -R $TO_BUILD_FOLDER/* /go/src/
+  fi
+  
+  # Already executed
+  touch /tmp/TMP_VERADCO_CONTEXT_ALREADY_LOADED
+fi
+
+
+###########################
+##### ALWAYS EXECUTED #####
+###########################
+if [ -f /tmp/TMP_VERADCO_CONTEXT_ALREADY_LOADED ]; then
+  echo "Script $(basename $(readlink -nf $0)) init"
+fi

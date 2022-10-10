@@ -1,5 +1,12 @@
 #!/bin/sh
 
+source $(dirname $(readlink -f $0))/start_any_script.source
+
+echo "Copy veradcod to /app, also plugins folder"
+cp -fr /release/* /app/
+
+chmod +x /app/veradcod
+
 # set -x
 
 set -e
@@ -8,11 +15,6 @@ set -e
 
 # This script needs a veradco conf unless it is used for CI build!
 [ -f "$VERADCO_CONF" ] || exit 0
-
-echo "Copy veradcod to /app, also plugins folder"
-cp -fr /release/* /app/
-
-chmod +x /app/veradcod
 
 build_folder="/go/src/ext_plugins"
 
@@ -52,3 +54,5 @@ echo "app content:"
 ls -lRt /app
 
 # sleep 1000s
+
+source $(dirname $(readlink -f $0))/end_any_script.source

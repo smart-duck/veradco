@@ -33,6 +33,9 @@ ARG BUILD=ALL
  COPY build_a_plugin.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_a_plugin.sh
 
+ COPY start_any_script.source /veradco_scripts/
+ COPY end_any_script.source /veradco_scripts/
+
  # Remove .so from /go to lightweight image
  RUN find /go -type f -name '*.so' -delete
 
@@ -41,6 +44,8 @@ ARG BUILD=ALL
 
  # Build plugins
  RUN [ "$BUILD" = "ALL" ] && /veradco_scripts/build_plugins.sh || true
+
+RUN rm /tmp/TMP_VERADCO_CONTEXT_ALREADY_LOADED || true
 
 #  # Clean-up
 #  RUN go clean -cache

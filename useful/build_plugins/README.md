@@ -34,7 +34,21 @@ docker run --rm \
 ```
 If TO_BUILD_FOLDER environment variable is defined, then /go/src folder is emptied and content of TO_BUILD_FOLDER folder is copied in. It prevents modification of rights in sources and also update of go.mod and go.sum files.
 
-If TO_BUILD_CHMOD is defined, at the end the follwing command is launched: chown -R $TO_BUILD_CHMOD /release/*.
+If TO_BUILD_CHMOD is defined, at the end the following command is launched: chown -R $TO_BUILD_CHMOD /release/*.
+
+From source on the host:
+```
+docker run --rm \
+  --env TO_BUILD_FOLDER="/to_build" \
+  --env TO_BUILD_CHMOD="1000:1000" \
+  --env VERADCO_CONF="/conf/veradco_conf.yaml" \
+  -v /home/lobuntu/go/src/veradco/useful/build_plugins/conf:/conf \
+  -v /home/lobuntu/go/src/veradco/useful/build_plugins/veradco_and_built-ins:/release \
+  -v /home/lobuntu/go/src/veradco/veradco:/to_build/veradco \
+  -v /home/lobuntu/go/src/veradco/built-in_plugins:/to_build/built-in_plugins \
+  smartduck/veradco-golang-builder:0.1 /bin/sh -c "/veradco_scripts/build_all.sh"
+```
+In the above example, we provided a Veradco configuration and set an environment variable that define its location. Only the plugins defined in the configuration are built.
 
 Notes:
 - If binaries are already in the target folder, the script will do nothing: empty the folder before launching.
