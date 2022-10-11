@@ -37,7 +37,7 @@ type HarborProxyCachePopulator struct {
 	summary string `yaml:"-"`
 	proceededImages     map[string]string `yaml:"-"`
 	proceededImagesLock sync.Mutex `yaml:"-"`
-	proceededImagesNb   int `yaml:"-"`
+	pullQueue chan QueuedPull `yaml:"-"`
 }
 
 type ProxyCache struct {
@@ -47,6 +47,23 @@ type ProxyCache struct {
 	TargetArch string `yaml:"targetArch"`
 	TargetOS string `yaml:"targetOS"`
 }
+
+///////////////////
+///////////////////
+// Pull Queue
+///////////////////
+///////////////////
+type QueuedPull struct {     
+	url string
+	configuration *ProxyCache
+	dryRun bool
+}
+///////////////////
+///////////////////
+// Pull Queue
+///////////////////
+///////////////////
+
 
 ///////////////////
 ///////////////////
@@ -80,6 +97,15 @@ type Platform struct {
 ///////////////////
 ///////////////////
 
+func (plug *HarborProxyCachePopulator) PullQueueConsumer() {
+	for {
+		log.Infof("Wait for a pull request")
+		log.Flush()
+		item := <- plug.pullQueue
+		plug.pullImageV2(item.url, *item.configuration, item.dryRun)
+	}
+}
+
 func (plug *HarborProxyCachePopulator) Init(configFile string) error {
 	// Create map of already successfully proceeded images
 	plug.proceededImages = make(map[string]string)
@@ -90,6 +116,12 @@ func (plug *HarborProxyCachePopulator) Init(configFile string) error {
 	}
 	if len(plug.ProxyCaches) == 0 {
 		return fmt.Errorf("ProxyCaches list shall contain at least one element for plugin %s", name)
+	}
+	// Pull queue channel
+	plug.pullQueue = make(chan QueuedPull)
+
+	for i := 0; i < plug.MaxNumberOfParallelJobs; i++ {
+		go plug.PullQueueConsumer()
 	}
 	return nil
 }
@@ -129,7 +161,9 @@ func (plug *HarborProxyCachePopulator) Execute(kobj runtime.Object, operation st
 		
 		if pProxyCache != nil {
 			plug.summary += "\n" + fmt.Sprintf("Check that image %s is in the proxy cache", c.Image)
-			go plug.pullImage(c.Image, *pProxyCache, dryRun)
+			// Put in queue
+			plug.pullQueue <- QueuedPull{url: c.Image, configuration: pProxyCache, dryRun: dryRun}
+			// go plug.pullImage(c.Image, *pProxyCache, dryRun)
 		}
 	}
 
@@ -139,7 +173,9 @@ func (plug *HarborProxyCachePopulator) Execute(kobj runtime.Object, operation st
 		
 		if pProxyCache != nil {
 			plug.summary += "\n" + fmt.Sprintf("Check that image %s is in the proxy cache", c.Image)
-			go plug.pullImage(c.Image, *pProxyCache, dryRun)
+			// Put in the Queue channel
+			plug.pullQueue <- QueuedPull{url: c.Image, configuration: pProxyCache, dryRun: dryRun}
+			// go plug.pullImage(c.Image, *pProxyCache, dryRun)
 		}
 	}
 
@@ -157,25 +193,10 @@ func (plug *HarborProxyCachePopulator) retrieveConfigurationIfAny(url string) *P
 	return nil
 }
 
-func (plug *HarborProxyCachePopulator) pullImage(url string, configuration ProxyCache, dryRun bool) {
-	// log.Infof(">>>> URL: %s", url)
-	// log.Infof(">>>> configuration: %v", configuration)
-	for {
-		plug.proceededImagesLock.Lock()
-		if plug.proceededImagesNb < plug.MaxNumberOfParallelJobs {
-			break
-		}
-		plug.proceededImagesLock.Unlock()
-		log.Infof("Wait for a slot is freed to pull %s", url)
-		log.Flush()
-		time.Sleep(5 * time.Second)
-	}
-	plug.proceededImagesNb++
-	defer func() {
-		plug.proceededImagesLock.Lock()
-		defer plug.proceededImagesLock.Unlock()
-		plug.proceededImagesNb--
-	}()
+func (plug *HarborProxyCachePopulator) pullImageV2(url string, configuration ProxyCache, dryRun bool) {
+
+	plug.proceededImagesLock.Lock()
+
 	if _, ok := plug.proceededImages[url]; !ok {
 		plug.proceededImages[url] = "proceeded"
 		plug.proceededImagesLock.Unlock()
@@ -184,15 +205,15 @@ func (plug *HarborProxyCachePopulator) pullImage(url string, configuration Proxy
 		
 		if errPull != nil {
 			log.Infof("Error pulling image: %v", errPull)
-			log.Flush()
 			plug.proceededImagesLock.Lock()
 			defer plug.proceededImagesLock.Unlock()
 			delete(plug.proceededImages, url)
+			log.Flush()
 		}
 	} else {
 		log.Infof("%s already met and managed", url)
-		log.Flush()
 		plug.proceededImagesLock.Unlock()
+		log.Flush()
 	}
 }
 

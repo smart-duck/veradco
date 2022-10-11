@@ -15,6 +15,7 @@ spec:
       containers:
       - name: veradco-server
         image: localhost:5001/smartduck/veradco:0.1
+        args: ["-v=0"]
         env:
         - name: hUSER
           value: "HARBORuser"
