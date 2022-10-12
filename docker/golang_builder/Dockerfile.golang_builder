@@ -22,19 +22,19 @@ ARG BUILD=ALL
 
  # Copy scripts
  RUN mkdir -p /veradco_scripts
- COPY build_veradco.sh /veradco_scripts/
+ COPY docker/golang_builder/build_veradco.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_veradco.sh
- COPY build_plugins.sh /veradco_scripts/
+ COPY docker/golang_builder/build_plugins.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_plugins.sh
- COPY build_external_plugins.sh /veradco_scripts/
+ COPY docker/golang_builder/build_external_plugins.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_external_plugins.sh
- COPY build_all.sh /veradco_scripts/
+ COPY docker/golang_builder/build_all.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_all.sh
- COPY build_a_plugin.sh /veradco_scripts/
+ COPY docker/golang_builder/build_a_plugin.sh /veradco_scripts/
  RUN chmod +x /veradco_scripts/build_a_plugin.sh
 
- COPY start_any_script.source /veradco_scripts/
- COPY end_any_script.source /veradco_scripts/
+ COPY docker/golang_builder/start_any_script.source /veradco_scripts/
+ COPY docker/golang_builder/end_any_script.source /veradco_scripts/
 
  # Remove .so from /go to lightweight image
  RUN find /go -type f -name '*.so' -delete

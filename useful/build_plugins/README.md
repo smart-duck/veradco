@@ -46,7 +46,7 @@ docker run --rm \
   -v /home/lobuntu/go/src/veradco/useful/build_plugins/veradco_and_built-ins:/release \
   -v /home/lobuntu/go/src/veradco/veradco:/to_build/veradco \
   -v /home/lobuntu/go/src/veradco/built-in_plugins:/to_build/built-in_plugins \
-  smartduck/veradco-golang-builder:0.1 /bin/sh -c "/veradco_scripts/build_all.sh"
+  smartduck/veradco-golang-builder:v0.1.0 /bin/sh -c "/veradco_scripts/build_all.sh"
 ```
 In the above example, we provided a Veradco configuration and set an environment variable that define its location. Only the plugins defined in the configuration are built.
 
@@ -61,10 +61,10 @@ Notes:
 To do it, use the docker file Dockerfile.standalone.
 
 ```
-sudo docker build -t smartduck/veradco-standalone:0.1 -f ~/go/src/veradco/veradco/Dockerfile.standalone ~/go/src/veradco/useful/build_plugins/veradco_and_built-ins/
+docker build -t smartduck/veradco-standalone:v0.1.0 -f ./docker/standalone/Dockerfile.standalone ./useful/build_plugins/veradco_and_built-ins/
 ```
 
 Push to local registry for tests:
 ```
-sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco-standalone:0.1
+sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco-standalone:v0.1.0
 ```
