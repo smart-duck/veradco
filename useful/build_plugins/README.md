@@ -61,7 +61,7 @@ Notes:
 To do it, use the docker file Dockerfile.standalone.
 
 ```
-docker build -t smartduck/veradco-standalone:v0.1.0 -f ./docker/standalone/Dockerfile.standalone ./useful/build_plugins/veradco_and_built-ins/
+docker build --no-cache -t smartduck/veradco-standalone:v0.1.0 -f ./docker/standalone/Dockerfile.standalone ./useful/build_plugins/veradco_and_built-ins/
 ```
 
 Push to local registry for tests:

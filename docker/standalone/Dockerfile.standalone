@@ -1,3 +1,20 @@
+FROM alpine:3.16.2 AS secu
+
+WORKDIR /app
+
+COPY veradcod /app/
+
+COPY plugins /app/plugins
+
+# RUN chown -R 1000:1000 /app/
+
+RUN chmod -R -wx /app/veradcod
+RUN chmod u+x /app/veradcod
+
+# RUN chmod -w /app/plugins
+RUN chmod -R -w /app/plugins/*
+
+
 # FROM gcr.io/distroless/base
 FROM alpine:3.16.2
 
@@ -9,18 +26,15 @@ RUN addgroup -g 1000 -S veradco && adduser -S veradco -G veradco -g 1000 -u 1000
 # Copy binaries
 RUN mkdir -p /app
 
-COPY veradcod /app/
+RUN chown -R 1000:1000 /app
 
-COPY plugins /app/plugins
+COPY --chown=1000:1000 --from=secu /app/veradcod /app/
+
+COPY --chown=1000:1000 --from=secu /app/plugins /app/plugins
 
 # RUN ls -lRth /app/
 
-RUN chown -R veradco:veradco /app/
 
-RUN chmod -wx /app/veradcod
-RUN chmod u+x /app/veradcod
-
-RUN chmod -R -w /app/plugins/*
 
 RUN ls -lRth /app/
 
