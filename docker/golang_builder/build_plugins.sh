@@ -13,7 +13,11 @@ shallBuild () {
     PLUGPATH=$(echo "$1" | sed "s#/release/#/app/#")
     IS_IN_CONF=$(cat $VERADCO_CONF | yq ".plugins[] | select(.path==\"$PLUGPATH\") | .name")
     SHALL_BUILD="YES"
-    [ "$IS_IN_CONF" != "" ] || SHALL_BUILD="NO"
+    if [ "$IS_IN_CONF" = "" ]; then
+      PLUGPATH="$1"
+      IS_IN_CONF=$(cat $VERADCO_CONF | yq ".plugins[] | select(.path==\"$PLUGPATH\") | .name")
+      [ "$IS_IN_CONF" != "" ] || SHALL_BUILD="NO"
+    fi
   fi
 }
 

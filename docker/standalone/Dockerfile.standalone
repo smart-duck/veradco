@@ -2,17 +2,22 @@ FROM alpine:3.16.2 AS secu
 
 WORKDIR /app
 
-COPY veradcod /app/
+COPY . /app/
 
-COPY plugins /app/plugins
+# COPY veradcod /app/
+
+# COPY plugins /app/plugins
 
 # RUN chown -R 1000:1000 /app/
 
-RUN chmod -R -wx /app/veradcod
-RUN chmod u+x /app/veradcod
+RUN chmod -R a-w /app/*
+RUN chmod u+x /app/veradcod || true
 
-# RUN chmod -w /app/plugins
-RUN chmod -R -w /app/plugins/*
+# RUN chmod -R a-wx /app/veradcod
+# RUN chmod u+x /app/veradcod
+
+# # RUN chmod -w /app/plugins
+# RUN chmod -R a-w /app/plugins/*
 
 
 # FROM gcr.io/distroless/base
@@ -28,9 +33,11 @@ RUN mkdir -p /app
 
 RUN chown -R 1000:1000 /app
 
-COPY --chown=1000:1000 --from=secu /app/veradcod /app/
+COPY --chown=1000:1000 --from=secu /app /app
 
-COPY --chown=1000:1000 --from=secu /app/plugins /app/plugins
+# COPY --chown=1000:1000 --from=secu /app/veradcod /app/
+
+# COPY --chown=1000:1000 --from=secu /app/plugins /app/plugins
 
 # RUN ls -lRth /app/
 

@@ -2,11 +2,6 @@
 
 source $(dirname $(readlink -f $0))/start_any_script.source
 
-echo "Copy veradcod to /app, also plugins folder"
-cp -fr /release/* /app/
-
-chmod +x /app/veradcod
-
 # set -x
 
 set -e
@@ -20,7 +15,7 @@ build_folder="/go/src/ext_plugins"
 
 mkdir -p "$build_folder"
 
-external_plugins_folder="/app/external_plugins"
+external_plugins_folder="/release/external_plugins"
 
 mkdir -p "$external_plugins_folder"
 
@@ -48,10 +43,10 @@ for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
 done
 
 echo "List of external plugins:"
-ls $external_plugins_folder
+ls -l $external_plugins_folder
 
-echo "app content:"
-ls -lRt /app
+# echo "app content:"
+# ls -lRt /app
 
 # sleep 1000s
 

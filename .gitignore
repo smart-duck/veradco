@@ -32,3 +32,5 @@ veradco/demo/tmp.base64
 useful/build_plugins/veradco_and_built-ins/veradcod
 useful/build_plugins/a_plugin/go.sum
 useful/build_plugins/a_plugin/go.mod
+
+docker/standalone/release

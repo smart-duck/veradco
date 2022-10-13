@@ -1,43 +1,50 @@
+FROM alpine:3.16.2 AS secu
+WORKDIR /prepared
+
+# Copy sources
+COPY veradco /prepared/veradco
+COPY built-in_plugins /prepared/built-in_plugins
+
+# Remove .so from sources to lightweight image
+RUN find /prepared -type f -name '*.so' -delete
+
+RUN mkdir -p /prepared/veradco_scripts
+COPY docker/golang_builder/build_veradco.sh /prepared/veradco_scripts/
+RUN chmod +x /prepared/veradco_scripts/build_veradco.sh
+COPY docker/golang_builder/build_plugins.sh /prepared/veradco_scripts/
+RUN chmod +x /prepared/veradco_scripts/build_plugins.sh
+COPY docker/golang_builder/build_external_plugins.sh /prepared/veradco_scripts/
+RUN chmod +x /prepared/veradco_scripts/build_external_plugins.sh
+COPY docker/golang_builder/build_all.sh /prepared/veradco_scripts/
+RUN chmod +x /prepared/veradco_scripts/build_all.sh
+COPY docker/golang_builder/build_a_plugin.sh /prepared/veradco_scripts/
+RUN chmod +x /prepared/veradco_scripts/build_a_plugin.sh
+
+COPY docker/golang_builder/start_any_script.source /prepared/veradco_scripts/
+COPY docker/golang_builder/end_any_script.source /prepared/veradco_scripts/
+
+RUN chmod -R a-wx /prepared
+
+RUN chmod -R a+x /prepared/veradco_scripts
+
+
 FROM golang:1.19-alpine3.16
 ARG BUILD=ALL
 # WORKDIR /go
 # Assume default environement is the good one
 #  ENV CGO_ENABLED=1 GOOS=linux GCCGO=gccgo CGO_LDFLAGS="-g -O2"
- # Install gcc
-#  RUN apk add build-base
- RUN apk add gcc
- RUN apk add musl-dev
- RUN apk add libc-dev 
 
-#  RUN go install github.com/mikefarah/yq/v4@latest
- RUN apk add yq
-# To get uuidgen
-#  RUN apk add util-linux
+ # Install gcc
+ RUN apk add gcc && apk add musl-dev && apk add libc-dev && apk add yq
 
  # Copy veradco source code
- COPY veradco /go/src/veradco
+ COPY --from=secu /prepared/veradco /go/src/veradco
  
  # Copy plugins source code
- COPY built-in_plugins /go/src/built-in_plugins
+ COPY --from=secu /prepared/built-in_plugins /go/src/built-in_plugins
 
  # Copy scripts
- RUN mkdir -p /veradco_scripts
- COPY docker/golang_builder/build_veradco.sh /veradco_scripts/
- RUN chmod +x /veradco_scripts/build_veradco.sh
- COPY docker/golang_builder/build_plugins.sh /veradco_scripts/
- RUN chmod +x /veradco_scripts/build_plugins.sh
- COPY docker/golang_builder/build_external_plugins.sh /veradco_scripts/
- RUN chmod +x /veradco_scripts/build_external_plugins.sh
- COPY docker/golang_builder/build_all.sh /veradco_scripts/
- RUN chmod +x /veradco_scripts/build_all.sh
- COPY docker/golang_builder/build_a_plugin.sh /veradco_scripts/
- RUN chmod +x /veradco_scripts/build_a_plugin.sh
-
- COPY docker/golang_builder/start_any_script.source /veradco_scripts/
- COPY docker/golang_builder/end_any_script.source /veradco_scripts/
-
- # Remove .so from /go to lightweight image
- RUN find /go -type f -name '*.so' -delete
+ COPY --from=secu /prepared/veradco_scripts /veradco_scripts
 
  # Build veradcod
  RUN [ "$BUILD" = "ALL" ] || [ "$BUILD" = "SERVER" ] && /veradco_scripts/build_veradco.sh || true
@@ -45,7 +52,9 @@ ARG BUILD=ALL
  # Build plugins
  RUN [ "$BUILD" = "ALL" ] && /veradco_scripts/build_plugins.sh || true
 
-RUN rm /tmp/TMP_VERADCO_CONTEXT_ALREADY_LOADED || true
+ RUN rm /tmp/TMP_VERADCO_CONTEXT_ALREADY_LOADED || true
+
+ RUN ls -lRth /veradco_scripts/
 
 #  # Clean-up
 #  RUN go clean -cache

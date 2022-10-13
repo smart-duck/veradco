@@ -121,6 +121,39 @@ data:
       # "Validating|Mutating" fits to both scopes
       scope: "Validating"
 
+    - name: "Generic2"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/plugins/built-in-generic.so"
+      endpoints: "/validate/others"
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "(?i)^(Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job)$"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|DELETE|UPDATE|CONNECT"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: "(!~)kube-system|kube-public"
+      # Filter only on resources having some labels.
+      # value is a regular expressions
+      # labels:
+      # - key: owner
+      #   # value: (?i)^me$
+      #   value: "(!~)(?i)^me$"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: true
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        This plugin does not have configuration
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+
     # - name: "EnforceLabels"
     #   # The path of the plugin.
     #   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
@@ -185,199 +218,81 @@ data:
     #   # "Validating|Mutating" fits to both scopes
     #   scope: "Validating"
 
+    - name: "GenericExternal"
+      # The path of the plugin.
+      # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+      # For a built-in plugin the path is /app/plugins
+      # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+      path: "/app/external_plugins/generic.so"
+      code: |
+        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
+        MSIKCW1ldGEgIms4cy5pby9hcGltYWNoaW5lcnkvcGtnL2FwaXMvbWV0YS92MSIKCSJrOHMuaW8v
+        YXBpbWFjaGluZXJ5L3BrZy9ydW50aW1lIgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNv
+        IgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNvL2tyZXMiCgkiZm10IgopCgp2YXIgKAoJ
+        bmFtZSBzdHJpbmcgPSAiR2VuZXJpYyIKCWNhbGxzIGludCA9IDEKKQoKdHlwZSBHZW5lcmljIHN0
+        cnVjdCB7CglzdW1tYXJ5IHN0cmluZwp9CgpmdW5jIChwbHVnICpHZW5lcmljKSBJbml0KGNvbmZp
+        Z0ZpbGUgc3RyaW5nKSBlcnJvciB7CgkvLyBwbHVnLnN1bW1hcnkgPSBmbXQuU3ByaW50ZigiQ29u
+        ZmlndXJhdGlvbiBvZiBwbHVnaW4gJXMgaXM6ICVzIiwgbmFtZSwgY29uZmlnRmlsZSkKCS8vIHBs
+        dWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIlslVF0gJSt2ICVwIiwgcGx1ZywgcGx1
+        ZywgcGx1ZykKCXJldHVybiBuaWwKfQoKCmZ1bmMgKHBsdWcgKkdlbmVyaWMpIEV4ZWN1dGUoa29i
+        aiBydW50aW1lLk9iamVjdCwgb3BlcmF0aW9uIHN0cmluZywgZHJ5UnVuIGJvb2wsIHIgKmFkbWlz
+        c2lvbi5BZG1pc3Npb25SZXF1ZXN0KSAoKmFkbWlzc2lvbmNvbnRyb2xsZXIuUmVzdWx0LCBlcnJv
+        cikgewoJY2FsbHMrKwoJcGx1Zy5zdW1tYXJ5ID0gIiIKCS8vIHBsdWcuc3VtbWFyeSArPSAiXG4i
+        ICsgZm10LlNwcmludGYoIkdlbmVyaWM6IGNhbGwgbmIgJWQiLCBjYWxscykKCQoJdmFyICgKCQlv
+        YmogKm1ldGEuUGFydGlhbE9iamVjdE1ldGFkYXRhCgkJb2sgYm9vbAoJCWVyciBlcnJvcgoJKQoK
+        CW9iaiwgb2sgPSBrb2JqLigqbWV0YS5QYXJ0aWFsT2JqZWN0TWV0YWRhdGEpCgoJaWYgIW9rIHsK
+        CgkJb2JqLCBlcnIgPSBrcmVzLlBhcnNlT3RoZXIocikKCgkJaWYgZXJyICE9IG5pbCB7CgkJCXJl
+        dHVybiBuaWwsIGVycgoJCX0KCgl9CgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50
+        ZigiR2VuZXJpYyByZXNvdXJjZTogJXMgJXMvJXMgJXMgbnM6JXMiLCBvcGVyYXRpb24sIG9iai5U
+        eXBlTWV0YS5LaW5kLCBvYmouVHlwZU1ldGEuQVBJVmVyc2lvbiwgb2JqLk9iamVjdE1ldGEuTmFt
+        ZSwgb2JqLk9iamVjdE1ldGEuTmFtZXNwYWNlKQoKCS8vIGlmICFvayB7CgkvLyAJcGx1Zy5zdW1t
+        YXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50ZigiS3ViZXJuZXRlcyByZXNvdXJjZSBpcyBub3QgYXMg
+        ZXhwZWN0ZWQgKCVzKSIsIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktpbmQoKS5L
+        aW5kKQoJLy8gCXJldHVybiBuaWwsIGZtdC5FcnJvcmYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMg
+        bm90IGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNpb25L
+        aW5kKCkuS2luZCkKCS8vIH0gZWxzZSB7CgkvLyAJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQu
+        U3ByaW50ZigiR2VuZXJpYyByZXNvdXJjZTogJXMsICVzLCAlcywgJXMiLCBvdGhlci5UeXBlTWV0
+        YS5LaW5kLAoJLy8gCQlvdGhlci5UeXBlTWV0YS5BUElWZXJzaW9uLCBvdGhlci5PYmplY3RNZXRh
+        Lk5hbWUsIG90aGVyLk9iamVjdE1ldGEuTmFtZXNwYWNlKQoJLy8gfQoKCS8vIHBsdWcuc3VtbWFy
+        eSArPSAiXG4iICsgZm10LlNwcmludGYoIiVzICVzLCBhY2NlcHRlZCIsIG9iai5UeXBlTWV0YS5L
+        aW5kLCBvYmouT2JqZWN0TWV0YS5OYW1lKQoKCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5S
+        ZXN1bHR7QWxsb3dlZDogdHJ1ZX0sIG5pbAp9CgpmdW5jIChwbHVnICpHZW5lcmljKSBTdW1tYXJ5
+        KCkgc3RyaW5nIHsKCXJldHVybiBwbHVnLnN1bW1hcnkKfQoKLy8gZXhwb3J0ZWQgYXMgc3ltYm9s
+        IG5hbWVkICJWZXJhZGNvUGx1Z2luIgp2YXIgVmVyYWRjb1BsdWdpbiBHZW5lcmlj
+      endpoints: "/validate/others"
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "(?i)^(Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job)$"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|DELETE|UPDATE|CONNECT"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: "(!~)kube-system|kube-public"
+      # Filter only on resources having some labels.
+      # value is a regular expressions
+      # labels:
+      # - key: owner
+      #   # value: (?i)^me$
+      #   value: "(!~)(?i)^me$"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: true
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        This plugin does not have configuration
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+
     - name: "HarborProxyCachePopulator"
       # The path of the plugin.
       # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
       # For a built-in plugin the path is /app/plugins
       # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
       endpoints: "/validate/pods"
-      path: "/app/external_plugins/harbor_proxy_cache_populator.so"
-      code: |
-        cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
-        MSIKCXYxICJrOHMuaW8vYXBpL2NvcmUvdjEiCgkiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvcnVu
-        dGltZSIKCSJnaXRodWIuY29tL3NtYXJ0LWR1Y2svdmVyYWRjbyIKCSJnaXRodWIuY29tL3NtYXJ0
-        LWR1Y2svdmVyYWRjby9rcmVzIgoJImZtdCIKCSJnb3BrZy5pbi95YW1sLnYzIgoJInJlZ2V4cCIK
-        CSJzeW5jIgoJInRpbWUiCgkibWF0aC9yYW5kIgoKCSJuZXQvaHR0cCIKCSJjcnlwdG8vdGxzIgoJ
-        ImVycm9ycyIKCSJvcyIKCSJlbmNvZGluZy9qc29uIgoJInN0cmluZ3MiCgoJImlvIgoKCWxvZyAi
-        azhzLmlvL2tsb2cvdjIiCgoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cvYXBpcy9t
-        ZXRhL3YxIgopCgp2YXIgKAoJbmFtZSBzdHJpbmcgPSAiSGFyYm9yUHJveHlDYWNoZVBvcHVsYXRv
-        ciIKKQoKdHlwZSBIYXJib3JQcm94eUNhY2hlUG9wdWxhdG9yIHN0cnVjdCB7CglQcm94eUNhY2hl
-        cyBbXVByb3h5Q2FjaGUgYHlhbWw6InByb3h5Q2FjaGVzImAKCU1heE51bWJlck9mUGFyYWxsZWxK
-        b2JzIGludCBgeWFtbDoibWF4TnVtYmVyT2ZQYXJhbGxlbEpvYnMiYAoJc3VtbWFyeSBzdHJpbmcg
-        YHlhbWw6Ii0iYAoJcHJvY2VlZGVkSW1hZ2VzICAgICBtYXBbc3RyaW5nXXN0cmluZyBgeWFtbDoi
-        LSJgCglwcm9jZWVkZWRJbWFnZXNMb2NrIHN5bmMuTXV0ZXggYHlhbWw6Ii0iYAoJcHVsbFF1ZXVl
-        IGNoYW4gUXVldWVkUHVsbCBgeWFtbDoiLSJgCn0KCnR5cGUgUHJveHlDYWNoZSBzdHJ1Y3QgewoJ
-        UmVnZXhVUkwgc3RyaW5nIGB5YW1sOiJyZWdleFVSTCJgCglSZXBsYWNlbWVudE9DSSBzdHJpbmcg
-        YHlhbWw6InJlcGxhY2VtZW50T0NJImAKCVJlcGxhY2VtZW50QXJjaCBzdHJpbmcgYHlhbWw6InJl
-        cGxhY2VtZW50QXJjaCxvbWl0ZW1wdHkiYAoJVGFyZ2V0QXJjaCBzdHJpbmcgYHlhbWw6InRhcmdl
-        dEFyY2giYAoJVGFyZ2V0T1Mgc3RyaW5nIGB5YW1sOiJ0YXJnZXRPUyJgCn0KCi8vLy8vLy8vLy8v
-        Ly8vLy8vLy8KLy8vLy8vLy8vLy8vLy8vLy8vLwovLyBQdWxsIFF1ZXVlCi8vLy8vLy8vLy8vLy8v
-        Ly8vLy8KLy8vLy8vLy8vLy8vLy8vLy8vLwp0eXBlIFF1ZXVlZFB1bGwgc3RydWN0IHsgICAgIAoJ
-        dXJsIHN0cmluZwoJY29uZmlndXJhdGlvbiAqUHJveHlDYWNoZQoJZHJ5UnVuIGJvb2wKfQovLy8v
-        Ly8vLy8vLy8vLy8vLy8vCi8vLy8vLy8vLy8vLy8vLy8vLy8KLy8gUHVsbCBRdWV1ZQovLy8vLy8v
-        Ly8vLy8vLy8vLy8vCi8vLy8vLy8vLy8vLy8vLy8vLy8KCgovLy8vLy8vLy8vLy8vLy8vLy8vCi8v
-        Ly8vLy8vLy8vLy8vLy8vLy8KLy8vLy8vLy8vLy8vLy8vLy8vLwovLyBGb3IgT0NJIGpzb24KLy8v
-        Ly8vLy8vLy8vLy8vLy8vLwovLy8vLy8vLy8vLy8vLy8vLy8vCi8vLy8vLy8vLy8vLy8vLy8vLy8K
-        dHlwZSBPQ0lNYW5pZmVzdCBzdHJ1Y3QgeyAgICAgCglNZWRpYVR5cGUgc3RyaW5nIGBqc29uOiJt
-        ZWRpYVR5cGUiYAoJU2NoZW1hVmVyc2lvbiBpbnQgYGpzb246InNjaGVtYVZlcnNpb24iYAoJTWFu
-        aWZlc3RzIFtdRGlnZXN0UGxhdGZvcm0gYGpzb246Im1hbmlmZXN0cyJgCn0KCnR5cGUgRGlnZXN0
-        UGxhdGZvcm0gc3RydWN0IHsgICAgIAoJRGlnZXN0IHN0cmluZyBganNvbjoiZGlnZXN0ImAKCU1l
-        ZGlhVHlwZSBzdHJpbmcgYGpzb246Im1lZGlhVHlwZSJgCglTaXplIGludCBganNvbjoic2l6ZSJg
-        CglQbGF0Zm9ybSBQbGF0Zm9ybSBganNvbjoicGxhdGZvcm0iYAp9Cgp0eXBlIFBsYXRmb3JtIHN0
-        cnVjdCB7ICAgICAKCUFyY2hpdGVjdHVyZSBzdHJpbmcgYGpzb246ImFyY2hpdGVjdHVyZSJgCglP
-        UyBzdHJpbmcgYGpzb246Im9zImAKfQovLy8vLy8vLy8vLy8vLy8vLy8vCi8vLy8vLy8vLy8vLy8v
-        Ly8vLy8KLy8vLy8vLy8vLy8vLy8vLy8vLwovLyBGb3IgT0NJIGpzb24KLy8vLy8vLy8vLy8vLy8v
-        Ly8vLwovLy8vLy8vLy8vLy8vLy8vLy8vCi8vLy8vLy8vLy8vLy8vLy8vLy8KCmZ1bmMgKHBsdWcg
-        KkhhcmJvclByb3h5Q2FjaGVQb3B1bGF0b3IpIFB1bGxRdWV1ZUNvbnN1bWVyKCkgewoJZm9yIHsK
-        CQlsb2cuSW5mb2YoIldhaXQgZm9yIGEgcHVsbCByZXF1ZXN0IikKCQlsb2cuRmx1c2goKQoJCWl0
-        ZW0gOj0gPC0gcGx1Zy5wdWxsUXVldWUKCQlwbHVnLnB1bGxJbWFnZVYyKGl0ZW0udXJsLCAqaXRl
-        bS5jb25maWd1cmF0aW9uLCBpdGVtLmRyeVJ1bikKCX0KfQoKZnVuYyAocGx1ZyAqSGFyYm9yUHJv
-        eHlDYWNoZVBvcHVsYXRvcikgSW5pdChjb25maWdGaWxlIHN0cmluZykgZXJyb3IgewoJLy8gQ3Jl
-        YXRlIG1hcCBvZiBhbHJlYWR5IHN1Y2Nlc3NmdWxseSBwcm9jZWVkZWQgaW1hZ2VzCglwbHVnLnBy
-        b2NlZWRlZEltYWdlcyA9IG1ha2UobWFwW3N0cmluZ11zdHJpbmcpCgkvLyBMb2FkIGNvbmZpZ3Vy
-        YXRpb24KCWVyciA6PSB5YW1sLlVubWFyc2hhbChbXWJ5dGUoY29uZmlnRmlsZSksIHBsdWcpCglp
-        ZiBlcnIgIT0gbmlsIHsKCQlyZXR1cm4gZXJyCgl9CglpZiBsZW4ocGx1Zy5Qcm94eUNhY2hlcykg
-        PT0gMCB7CgkJcmV0dXJuIGZtdC5FcnJvcmYoIlByb3h5Q2FjaGVzIGxpc3Qgc2hhbGwgY29udGFp
-        biBhdCBsZWFzdCBvbmUgZWxlbWVudCBmb3IgcGx1Z2luICVzIiwgbmFtZSkKCX0KCS8vIFB1bGwg
-        cXVldWUgY2hhbm5lbAoJcGx1Zy5wdWxsUXVldWUgPSBtYWtlKGNoYW4gUXVldWVkUHVsbCkKCglm
-        b3IgaSA6PSAwOyBpIDwgcGx1Zy5NYXhOdW1iZXJPZlBhcmFsbGVsSm9iczsgaSsrIHsKCQlnbyBw
-        bHVnLlB1bGxRdWV1ZUNvbnN1bWVyKCkKCX0KCXJldHVybiBuaWwKfQoKZnVuYyAocGx1ZyAqSGFy
-        Ym9yUHJveHlDYWNoZVBvcHVsYXRvcikgRXhlY3V0ZShrb2JqIHJ1bnRpbWUuT2JqZWN0LCBvcGVy
-        YXRpb24gc3RyaW5nLCBkcnlSdW4gYm9vbCwgciAqYWRtaXNzaW9uLkFkbWlzc2lvblJlcXVlc3Qp
-        ICgqYWRtaXNzaW9uY29udHJvbGxlci5SZXN1bHQsIGVycm9yKSB7CgoJLy8gQm90aCBlbnZpcm9u
-        bWVudCB2YXJpYWJsZXMgaFVTRVIgYW5kIGhQVyBzaGFsbCBiZSBkZWZpbmVkISEhCglfLCBva1Vz
-        ZXIgOj0gb3MuTG9va3VwRW52KCJoVVNFUiIpCglfLCBva1B3IDo9IG9zLkxvb2t1cEVudigiaFBX
-        IikKCglpZiAhIG9rVXNlciB8fCAhIG9rUHcgewoJCXBsdWcuc3VtbWFyeSA9IGZtdC5TcHJpbnRm
-        KCJoVVNFUiBhbmQgaFBXIGVudmlyb25tZW50IHZhcmlhYmxlcyBzaGFsbCBiZSBkZWZpbmVkIikK
-        CQlyZXR1cm4gbmlsLCBmbXQuRXJyb3JmKCJFcnJvcjogJXMiLCBwbHVnLnN1bW1hcnkpCgl9CgoJ
-        Ly8ga29iaiBpcyBzdXBwb3NlZCB0byBiZSBhIHBvZC4uLgoJcG9kLCBvayA6PSBrb2JqLigqdjEu
-        UG9kKQoJaWYgIW9rIHsKCQlwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJLdWJl
-        cm5ldGVzIHJlc291cmNlIGlzIG5vdCBhIHBvZCBhcyBleHBlY3RlZCAoJXMpIiwga29iai5HZXRP
-        YmplY3RLaW5kKCkuR3JvdXBWZXJzaW9uS2luZCgpLktpbmQpCgkJCgkJaWYga29iai5HZXRPYmpl
-        Y3RLaW5kKCkuR3JvdXBWZXJzaW9uS2luZCgpLktpbmQgPT0gIlBvZCIgewoJCQlwbHVnLnN1bW1h
-        cnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJJbiBmYWN0IGl0IGlzIGEgcG9kLCBtYXliZSB5b3Ug
-        ZGlkIG5vdCB1c2VkIHRoZSBwb2RzIHBhdGguIFRyeWluZyB0byBleHRyYWN0IGl0IGFnYWluLi4u
-        IikKCQkJdmFyIGVyciBlcnJvcgoJCQlwb2QsIGVyciA9IGtyZXMuUGFyc2VQb2QocikKCQkJaWYg
-        ZXJyICE9IG5pbCB7CgkJCQlwbHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJEZWZp
-        bml0bHksIGl0IGlzIG5vdCBhIHBvZCEiKQoJCQkJcmV0dXJuIG5pbCwgZm10LkVycm9yZigiS3Vi
-        ZXJuZXRlcyByZXNvdXJjZSBpcyBub3QgYSBwb2QgYXMgZXhwZWN0ZWQgKCVzKSIsIGtvYmouR2V0
-        T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktpbmQoKS5LaW5kKQoJCQl9CgkJfQoJfQoKCXBsdWcu
-        c3VtbWFyeSA9IGZtdC5TcHJpbnRmKCJFeGVjdXRlIHBsdWdpbiAlcyIsIG5hbWUpCgoJLy8gQnJv
-        d3NlIEluaXQgY29udGFpbmVycwoJZm9yIF8sIGMgOj0gcmFuZ2UgcG9kLlNwZWMuSW5pdENvbnRh
-        aW5lcnMgewoJCXBQcm94eUNhY2hlIDo9IHBsdWcucmV0cmlldmVDb25maWd1cmF0aW9uSWZBbnko
-        Yy5JbWFnZSkKCQkKCQlpZiBwUHJveHlDYWNoZSAhPSBuaWwgewoJCQlwbHVnLnN1bW1hcnkgKz0g
-        IlxuIiArIGZtdC5TcHJpbnRmKCJDaGVjayB0aGF0IGltYWdlICVzIGlzIGluIHRoZSBwcm94eSBj
-        YWNoZSIsIGMuSW1hZ2UpCgkJCS8vIFB1dCBpbiBxdWV1ZQoJCQlwbHVnLnB1bGxRdWV1ZSA8LSBR
-        dWV1ZWRQdWxse3VybDogYy5JbWFnZSwgY29uZmlndXJhdGlvbjogcFByb3h5Q2FjaGUsIGRyeVJ1
-        bjogZHJ5UnVufQoJCQkvLyBnbyBwbHVnLnB1bGxJbWFnZShjLkltYWdlLCAqcFByb3h5Q2FjaGUs
-        IGRyeVJ1bikKCQl9Cgl9CgoJLy8gQnJvd3NlIGNvbnRhaW5lcnMKCWZvciBfLCBjIDo9IHJhbmdl
-        IHBvZC5TcGVjLkNvbnRhaW5lcnMgewoJCXBQcm94eUNhY2hlIDo9IHBsdWcucmV0cmlldmVDb25m
-        aWd1cmF0aW9uSWZBbnkoYy5JbWFnZSkKCQkKCQlpZiBwUHJveHlDYWNoZSAhPSBuaWwgewoJCQlw
-        bHVnLnN1bW1hcnkgKz0gIlxuIiArIGZtdC5TcHJpbnRmKCJDaGVjayB0aGF0IGltYWdlICVzIGlz
-        IGluIHRoZSBwcm94eSBjYWNoZSIsIGMuSW1hZ2UpCgkJCS8vIFB1dCBpbiB0aGUgUXVldWUgY2hh
-        bm5lbAoJCQlwbHVnLnB1bGxRdWV1ZSA8LSBRdWV1ZWRQdWxse3VybDogYy5JbWFnZSwgY29uZmln
-        dXJhdGlvbjogcFByb3h5Q2FjaGUsIGRyeVJ1bjogZHJ5UnVufQoJCQkvLyBnbyBwbHVnLnB1bGxJ
-        bWFnZShjLkltYWdlLCAqcFByb3h5Q2FjaGUsIGRyeVJ1bikKCQl9Cgl9CgoJcmV0dXJuICZhZG1p
-        c3Npb25jb250cm9sbGVyLlJlc3VsdHtBbGxvd2VkOiB0cnVlfSwgbmlsCn0KCmZ1bmMgKHBsdWcg
-        KkhhcmJvclByb3h5Q2FjaGVQb3B1bGF0b3IpIHJldHJpZXZlQ29uZmlndXJhdGlvbklmQW55KHVy
-        bCBzdHJpbmcpICpQcm94eUNhY2hlIHsKCWZvciBfLCBwcm94eUNhY2hlIDo9IHJhbmdlIHBsdWcu
-        UHJveHlDYWNoZXMgewoJCXJlIDo9IHJlZ2V4cC5NdXN0Q29tcGlsZShwcm94eUNhY2hlLlJlZ2V4
-        VVJMKQoKCQlpZiByZS5NYXRjaFN0cmluZyh1cmwpIHsKCQkJcmV0dXJuICZwcm94eUNhY2hlCgkJ
-        fQoJfQoJcmV0dXJuIG5pbAp9CgpmdW5jIChwbHVnICpIYXJib3JQcm94eUNhY2hlUG9wdWxhdG9y
-        KSBwdWxsSW1hZ2VWMih1cmwgc3RyaW5nLCBjb25maWd1cmF0aW9uIFByb3h5Q2FjaGUsIGRyeVJ1
-        biBib29sKSB7CgoJcGx1Zy5wcm9jZWVkZWRJbWFnZXNMb2NrLkxvY2soKQoKCWlmIF8sIG9rIDo9
-        IHBsdWcucHJvY2VlZGVkSW1hZ2VzW3VybF07ICFvayB7CgkJcGx1Zy5wcm9jZWVkZWRJbWFnZXNb
-        dXJsXSA9ICJwcm9jZWVkZWQiCgkJcGx1Zy5wcm9jZWVkZWRJbWFnZXNMb2NrLlVubG9jaygpCgkJ
-        dmFyIGVyclB1bGwgZXJyb3IgPSBuaWwKCQllcnJQdWxsID0gcHVsbEltYWdlRnJvbVByb3h5Q2Fj
-        aGUodXJsLCBjb25maWd1cmF0aW9uLlJlZ2V4VVJMLCBjb25maWd1cmF0aW9uLlJlcGxhY2VtZW50
-        T0NJLCBjb25maWd1cmF0aW9uLlJlcGxhY2VtZW50QXJjaCwgY29uZmlndXJhdGlvbi5UYXJnZXRB
-        cmNoLCBjb25maWd1cmF0aW9uLlRhcmdldE9TLCBkcnlSdW4pCgkJCgkJaWYgZXJyUHVsbCAhPSBu
-        aWwgewoJCQlsb2cuSW5mb2YoIkVycm9yIHB1bGxpbmcgaW1hZ2U6ICV2IiwgZXJyUHVsbCkKCQkJ
-        cGx1Zy5wcm9jZWVkZWRJbWFnZXNMb2NrLkxvY2soKQoJCQlkZWZlciBwbHVnLnByb2NlZWRlZElt
-        YWdlc0xvY2suVW5sb2NrKCkKCQkJZGVsZXRlKHBsdWcucHJvY2VlZGVkSW1hZ2VzLCB1cmwpCgkJ
-        CWxvZy5GbHVzaCgpCgkJfQoJfSBlbHNlIHsKCQlsb2cuSW5mb2YoIiVzIGFscmVhZHkgbWV0IGFu
-        ZCBtYW5hZ2VkIiwgdXJsKQoJCXBsdWcucHJvY2VlZGVkSW1hZ2VzTG9jay5VbmxvY2soKQoJCWxv
-        Zy5GbHVzaCgpCgl9Cn0KCmZ1bmMgKHBsdWcgKkhhcmJvclByb3h5Q2FjaGVQb3B1bGF0b3IpIFN1
-        bW1hcnkoKSBzdHJpbmcgewoJcmV0dXJuIHBsdWcuc3VtbWFyeQp9CgovLyBleHBvcnRlZCBhcyBz
-        eW1ib2wgbmFtZWQgIlZlcmFkY29QbHVnaW4iCnZhciBWZXJhZGNvUGx1Z2luIEhhcmJvclByb3h5
-        Q2FjaGVQb3B1bGF0b3IKCgoKLy8vLy8vLy8vLy8vLy8vLy8vLwovLy8vLy8vLy8vLy8vLy8vLy8v
-        Ci8vLy8vLy8vLy8vLy8vLy8vLy8KLy8gVXNlZCBmb3IgaW1wbGljaXQgcHVsbAovLy8vLy8vLy8v
-        Ly8vLy8vLy8vCi8vLy8vLy8vLy8vLy8vLy8vLy8KLy8vLy8vLy8vLy8vLy8vLy8vLwoKZnVuYyBx
-        dWVyeUhhcmJvckRvY2tlckFQSSh1cmwgc3RyaW5nKSAoW11ieXRlLCBlcnJvcikgewoJdXNlciA6
-        PSBvcy5HZXRlbnYoImhVU0VSIikKCXB3IDo9IG9zLkdldGVudigiaFBXIikKCgljbGllbnQgOj0g
-        Jmh0dHAuQ2xpZW50ewoJCVRyYW5zcG9ydDogJmh0dHAuVHJhbnNwb3J0ewoJCQlUTFNDbGllbnRD
-        b25maWc6ICZ0bHMuQ29uZmlne0luc2VjdXJlU2tpcFZlcmlmeTogdHJ1ZX0sCgkJfSwKCX0KCXJl
-        cSwgZXJyIDo9IGh0dHAuTmV3UmVxdWVzdChodHRwLk1ldGhvZEdldCwgdXJsLCBuaWwpCglpZiBl
-        cnIgIT0gbmlsIHsKCQkvLyBsb2cuRmF0YWwoZXJyKQoJCXJldHVybiBuaWwsIGVycgoJfQoKCXJl
-        cS5TZXRCYXNpY0F1dGgodXNlciwgcHcpCgoJcmVzcCwgZXJyIDo9IGNsaWVudC5EbyhyZXEpCglp
-        ZiBlcnIgIT0gbmlsIHsKCQkvLyBsb2cuUHJpbnRmKCJFcnJvcmVkIHdoZW4gc2VuZGluZyByZXF1
-        ZXN0IHRvIHRoZSBzZXJ2ZXI6ICV2XG4iLCBlcnIpCgkJcmV0dXJuIG5pbCwgZXJyCgl9CgoJZGVm
-        ZXIgcmVzcC5Cb2R5LkNsb3NlKCkKCgkvLyBsb2cuUHJpbnRmKCJxdWVyeUhhcmJvckRvY2tlckFQ
-        SSByZXNwLlN0YXR1cyA9ICV2IiwgcmVzcC5TdGF0dXMpCgkvLyBsb2cuUHJpbnRsbihzdHJpbmco
-        cmVzcG9uc2VCb2R5KSkKCglpZiByZXNwLlN0YXR1c0NvZGUgPT0gMjAwIHsKCQlyZXNwb25zZUJv
-        ZHksIGVyciA6PSBpby5SZWFkQWxsKHJlc3AuQm9keSkKCQlpZiBlcnIgIT0gbmlsIHsKCQkJLy8g
-        bG9nLkZhdGFsKGVycikKCQkJcmV0dXJuIG5pbCwgZXJyCgkJfQoJCXJldHVybiByZXNwb25zZUJv
-        ZHksIG5pbAoJfSBlbHNlIHsKCQlyZXR1cm4gbmlsLCBlcnJvcnMuTmV3KGZtdC5TcHJpbnRmKCJS
-        ZXF1ZXN0IGZhaWxlZCB3aXRoIHN0YXR1cyBjb2RlICVkIiwgcmVzcC5TdGF0dXNDb2RlKSkKCX0K
-        Cn0KCmZ1bmMgcHVsbEltYWdlRnJvbVByb3h5Q2FjaGUodXJsIHN0cmluZywgcmVnZXhVUkwgc3Ry
-        aW5nLCByZXBsYWNlbWVudE9DSSBzdHJpbmcsIHJlcGxhY2VtZW50QXJjaCBzdHJpbmcsIHRhcmdl
-        dEFyY2ggc3RyaW5nLCB0YXJnZXRPUyBzdHJpbmcsIGRyeVJ1biBib29sKSAoZXJyb3IpIHsKCgkv
-        LyBQdWxsaW5nIGFuIGltYWdlIGZyb20gcHJveHkgY2FjaGUgdHJpZ2dlcnMgdGhlIHB1bGwgZnJv
-        bSB0aGUgY2FjaGVkIHJlZ2lzdHJ5IGlmIG5vdCBhbHJlYWR5IHByZXNlbnQuCgoJSEFSQk9SUENQ
-        X0RFQlVHIDo9IG9zLkdldGVudigiSEFSQk9SUENQX0RFQlVHIikKCglpZiBsZW4oSEFSQk9SUENQ
-        X0RFQlVHKSA+IDAgewoJCXJhbmQuU2VlZCh0aW1lLk5vdygpLlVuaXhOYW5vKCkpCgkJbiA6PSA1
-        ICsgcmFuZC5JbnRuKDEwKQoJCWxvZy5JbmZvZigiPj4+Pj4+IHNpbXVsYXRlIHB1bGxJbWFnZUZy
-        b21Qcm94eUNhY2hlIHRvIHB1bGwgJXMgLSBXYWl0ICVkIHNlY29uZHMiLHVybCwgbikKCQlsb2cu
-        Rmx1c2goKQogICAgdGltZS5TbGVlcCh0aW1lLkR1cmF0aW9uKG4pKnRpbWUuU2Vjb25kKQoJCXJl
-        dHVybiBuaWwKCX0KCgkvLyBodHRwczovL2hhcmJvci5yZWdpc3RyeS5taW5lLmlvL3YyL3Byb3h5
-        X2RvY2tlci5pby9saWJyYXJ5L25naW54L21hbmlmZXN0cy8xLjIyLXBlcmwKCgkvLyBNb2RpZnkg
-        dG8gaGFyYm9yIFVSTDoKCXJlIDo9IHJlZ2V4cC5NdXN0Q29tcGlsZShyZWdleFVSTCkKCgkvLyBy
-        ZXBsYWNlbWVudE9DSSA6PSAiaHR0cHM6Ly9oYXJib3IucmVnaXN0cnkubWluZS5pby92Mi8kMS8k
-        Mi9tYW5pZmVzdHMvJDMiCgoJLy8gcmVwbGFjZW1lbnRBcmNoIDo9ICJodHRwczovL2hhcmJvci5y
-        ZWdpc3RyeS5taW5lLmlvL3YyLyQxLyQyL21hbmlmZXN0cy9BUkNIRElHRVNUIgoKCWlmICEgcmUu
-        TWF0Y2hTdHJpbmcodXJsKSB7CgkJZXJyTXNnIDo9IGZtdC5TcHJpbnRmKCIlcyBVUkwgaXMgbm90
-        IGFzIGF3YWl0ZWQiLCB1cmwpCgkJbG9nLkVycm9yKGVyck1zZykKCQlsb2cuRmx1c2goKQoJCXJl
-        dHVybiBlcnJvcnMuTmV3KGVyck1zZykKCX0KCgkvLyBRdWVyeSBhcmNoaXRlY3R1cmVzCgl1cmxP
-        Q0kgOj0gcmUuUmVwbGFjZUFsbFN0cmluZyh1cmwsIHJlcGxhY2VtZW50T0NJKQoKCXZhciByZXNw
-        IFtdYnl0ZQoJdmFyIGVyciBlcnJvcgoKCWlmIGRyeVJ1biAmJiBsZW4ocmVwbGFjZW1lbnRBcmNo
-        KSA9PSAwIHsKCQlsb2cuSW5mb2YoIkRSWVJVTiAvIFNob3VsZCBxdWVyeSAlcyIsIHVybE9DSSkK
-        CQlsb2cuRmx1c2goKQoJfSBlbHNlIHsKCQkvLyByZXRyaWV2ZSBBTUQgNjQgZGlnZXN0CgkJcmVz
-        cCwgZXJyID0gcXVlcnlIYXJib3JEb2NrZXJBUEkodXJsT0NJKQoKCQlpZiBlcnIgIT0gbmlsIHsK
-        CQkJZXJyTXNnIDo9IGZtdC5TcHJpbnRmKCJFcnJvciBxdWVyeWluZyAlcyBVUkw6ICV2IiwgdXJs
-        T0NJLCBlcnIpCgkJCWxvZy5FcnJvcihlcnJNc2cpCgkJCWxvZy5GbHVzaCgpCgkJCXJldHVybiBl
-        cnJvcnMuTmV3KGVyck1zZykKCQl9CgkJLy8gZWxzZSB7CgkJLy8gCWxvZy5QcmludGYoIlJlc3A6
-        ICVzXG4iLCBzdHJpbmcocmVzcCkpCgkJLy8gfQoKCX0KCQoJaWYgbGVuKHJlcGxhY2VtZW50QXJj
-        aCkgPiAwIHsKCgkJLy8gdW5tYXJzaGFsbCByZXNwb25zZQoJCXZhciBvY2lNYW5pZmVzdCBPQ0lN
-        YW5pZmVzdAoJCWVyciA9IGpzb24uVW5tYXJzaGFsKHJlc3AsICZvY2lNYW5pZmVzdCkKCgkJaWYg
-        ZXJyICE9IG5pbCB7CgkJCWVyck1zZyA6PSBmbXQuU3ByaW50ZigiVW5hYmxlIHRvIHVubWFyc2hh
-        bCBqc29uIHJldHVybmVkIGJ5IFVSTCAlczogJXYiLCB1cmxPQ0ksIGVycikKCQkJbG9nLkVycm9y
-        KGVyck1zZykKCQkJbG9nLkZsdXNoKCkKCQkJcmV0dXJuIGVycm9ycy5OZXcoZXJyTXNnKQoJCX0K
-        CgkJLy8gbG9nLkluZm9mKCJvY2lNYW5pZmVzdDogJXZcbiIsIG9jaU1hbmlmZXN0KQoKCQlkaWdl
-        c3QsIGVyciA6PSByZXRyaWV2ZVRhcmdldEFyY2hEaWdlc3Qob2NpTWFuaWZlc3QsIHRhcmdldEFy
-        Y2gsIHRhcmdldE9TKQoKCQlpZiBlcnIgIT0gbmlsIHsKCQkJZXJyTXNnIDo9IGZtdC5TcHJpbnRm
-        KCIldiIsIGVycikKCQkJbG9nLkVycm9yKGVyck1zZykKCQkJbG9nLkZsdXNoKCkKCQkJcmV0dXJu
-        IGVycm9ycy5OZXcoZXJyTXNnKQoJCX0KCgkJLy8gUXVlcnkgdGFyZ2V0IGFyY2hpdGVjdHVyZSBp
-        bWFnZQoJCXVybFRhcmdldEltYWdlIDo9IHJlLlJlcGxhY2VBbGxTdHJpbmcodXJsLCByZXBsYWNl
-        bWVudEFyY2gpCgoJCXVybFRhcmdldEltYWdlID0gc3RyaW5ncy5SZXBsYWNlKHVybFRhcmdldElt
-        YWdlLCAiQVJDSERJR0VTVCIsIGRpZ2VzdCwgLTEpCgoJCWlmICEgZHJ5UnVuIHsKCQkJbG9nLklu
-        Zm9mKCJ1cmxUYXJnZXRJbWFnZTogJXNcbiIsIHVybFRhcmdldEltYWdlKQoJCQlsb2cuRmx1c2go
-        KQoJCQkvLyB0YXJnZXQgYXJjaCBpbWFnZQoJCQlfLCBlcnIgPSBxdWVyeUhhcmJvckRvY2tlckFQ
-        SSh1cmxUYXJnZXRJbWFnZSkKCgkJCWlmIGVyciAhPSBuaWwgewoJCQkJZXJyTXNnIDo9IGZtdC5T
-        cHJpbnRmKCJFcnJvciBxdWVyeWluZyAlcyBVUkw6ICV2IiwgdXJsVGFyZ2V0SW1hZ2UsIGVycikK
-        CQkJCWxvZy5FcnJvcihlcnJNc2cpCgkJCQlsb2cuRmx1c2goKQoJCQkJcmV0dXJuIGVycm9ycy5O
-        ZXcoZXJyTXNnKQoJCQl9CgkJfSBlbHNlIHsKCQkJbG9nLkluZm9mKCJEcnlSdW4gdXJsVGFyZ2V0
-        SW1hZ2U6ICVzIiwgdXJsVGFyZ2V0SW1hZ2UpCgkJCWxvZy5GbHVzaCgpCgkJfQoJfQoKCXJldHVy
-        biBuaWwKfQoKZnVuYyByZXRyaWV2ZVRhcmdldEFyY2hEaWdlc3Qob2NpTWFuaWZlc3QgT0NJTWFu
-        aWZlc3QsIHRhcmdldEFyY2ggc3RyaW5nLCB0YXJnZXRPUyBzdHJpbmcpIChzdHJpbmcsIGVycm9y
-        KSB7Cglmb3IgXywgZGlnZXN0UGxhdGZvcm0gOj0gcmFuZ2Ugb2NpTWFuaWZlc3QuTWFuaWZlc3Rz
-        IHsKCQlpZiBkaWdlc3RQbGF0Zm9ybS5QbGF0Zm9ybS5BcmNoaXRlY3R1cmUgPT0gImFtZDY0IiAm
-        JiBkaWdlc3RQbGF0Zm9ybS5QbGF0Zm9ybS5PUyA9PSAibGludXgiIHsKCQkJcmV0dXJuIGRpZ2Vz
-        dFBsYXRmb3JtLkRpZ2VzdCwgbmlsCgkJfQoJfQoJZXJyTXNnIDo9IGZtdC5TcHJpbnRmKCJVbmFi
-        bGUgdG8gcmV0cmlldmUgZGlnZXN0IGZvciBhcmNoICVzIGFuZCBPUyAlcyIsIHRhcmdldEFyY2gs
-        IHRhcmdldE9TKQoJbG9nLkVycm9yKGVyck1zZykKCWxvZy5GbHVzaCgpCglyZXR1cm4gIiIsIGVy
-        cm9ycy5OZXcoZXJyTXNnKQp9CgovLy8vLy8vLy8vLy8vLy8vLy8vCi8vLy8vLy8vLy8vLy8vLy8v
-        Ly8KLy8vLy8vLy8vLy8vLy8vLy8vLwovLyBVc2VkIGZvciBpbXBsaWNpdCBwdWxsCi8vLy8vLy8v
-        Ly8vLy8vLy8vLy8KLy8vLy8vLy8vLy8vLy8vLy8vLwovLy8vLy8vLy8vLy8vLy8vLy8v
+      path: "/app/plugins/built-in-harbor_proxy_cache_populator.so"
       # A regular expression to define the kinds on which the plugin is called
       kinds: "(?i)^Pod$"
       # A regular expression to define the operations on which the plugin is called
