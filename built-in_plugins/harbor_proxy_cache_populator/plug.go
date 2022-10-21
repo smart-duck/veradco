@@ -99,7 +99,7 @@ type Platform struct {
 
 func (plug *HarborProxyCachePopulator) PullQueueConsumer() {
 	for {
-		log.Infof("Wait for a pull request")
+		log.Infof("[HPCP] Wait for a pull request")
 		log.Flush()
 		item := <- plug.pullQueue
 		plug.pullImageV2(item.url, *item.configuration, item.dryRun)
@@ -134,6 +134,8 @@ func (plug *HarborProxyCachePopulator) Execute(kobj runtime.Object, operation st
 
 	if ! okUser || ! okPw {
 		plug.summary = fmt.Sprintf("hUSER and hPW environment variables shall be defined")
+		log.Errorf("[HPCP] hUSER and hPW environment variables shall be defined")
+		log.Flush()
 		return nil, fmt.Errorf("Error: %s", plug.summary)
 	}
 
@@ -148,6 +150,8 @@ func (plug *HarborProxyCachePopulator) Execute(kobj runtime.Object, operation st
 			pod, err = kres.ParsePod(r)
 			if err != nil {
 				plug.summary += "\n" + fmt.Sprintf("Definitly, it is not a pod!")
+				log.Errorf("[HPCP] Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
+				log.Flush()
 				return nil, fmt.Errorf("Kubernetes resource is not a pod as expected (%s)", kobj.GetObjectKind().GroupVersionKind().Kind)
 			}
 		}
@@ -160,6 +164,8 @@ func (plug *HarborProxyCachePopulator) Execute(kobj runtime.Object, operation st
 		pProxyCache := plug.retrieveConfigurationIfAny(c.Image)
 		
 		if pProxyCache != nil {
+			log.Infof("[HPCP] Check that image %s is in the proxy cache", c.Image)
+			log.Flush()
 			plug.summary += "\n" + fmt.Sprintf("Check that image %s is in the proxy cache", c.Image)
 			// Put in queue
 			plug.pullQueue <- QueuedPull{url: c.Image, configuration: pProxyCache, dryRun: dryRun}
@@ -172,6 +178,8 @@ func (plug *HarborProxyCachePopulator) Execute(kobj runtime.Object, operation st
 		pProxyCache := plug.retrieveConfigurationIfAny(c.Image)
 		
 		if pProxyCache != nil {
+			log.Infof("[HPCP] Check that image %s is in the proxy cache", c.Image)
+			log.Flush()
 			plug.summary += "\n" + fmt.Sprintf("Check that image %s is in the proxy cache", c.Image)
 			// Put in the Queue channel
 			plug.pullQueue <- QueuedPull{url: c.Image, configuration: pProxyCache, dryRun: dryRun}
@@ -204,14 +212,14 @@ func (plug *HarborProxyCachePopulator) pullImageV2(url string, configuration Pro
 		errPull = pullImageFromProxyCache(url, configuration.RegexURL, configuration.ReplacementOCI, configuration.ReplacementArch, configuration.TargetArch, configuration.TargetOS, dryRun)
 		
 		if errPull != nil {
-			log.Infof("Error pulling image: %v", errPull)
+			log.Infof("[HPCP] Error pulling image: %v", errPull)
 			plug.proceededImagesLock.Lock()
 			defer plug.proceededImagesLock.Unlock()
 			delete(plug.proceededImages, url)
 			log.Flush()
 		}
 	} else {
-		log.Infof("%s already met and managed", url)
+		log.Infof("[HPCP] %s already met and managed", url)
 		plug.proceededImagesLock.Unlock()
 		log.Flush()
 	}
@@ -284,7 +292,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 	if len(HARBORPCP_DEBUG) > 0 {
 		rand.Seed(time.Now().UnixNano())
 		n := 5 + rand.Intn(10)
-		log.Infof(">>>>>> simulate pullImageFromProxyCache to pull %s - Wait %d seconds",url, n)
+		log.Infof("[HPCP] simulate pullImageFromProxyCache to pull %s - Wait %d seconds",url, n)
 		log.Flush()
     time.Sleep(time.Duration(n)*time.Second)
 		return nil
@@ -301,7 +309,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 
 	if ! re.MatchString(url) {
 		errMsg := fmt.Sprintf("%s URL is not as awaited", url)
-		log.Error(errMsg)
+		log.Error("[HPCP] " + errMsg)
 		log.Flush()
 		return errors.New(errMsg)
 	}
@@ -313,7 +321,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 	var err error
 
 	if dryRun && len(replacementArch) == 0 {
-		log.Infof("DRYRUN / Should query %s", urlOCI)
+		log.Infof("[HPCP] DRYRUN / Should query %s", urlOCI)
 		log.Flush()
 	} else {
 		// retrieve AMD 64 digest
@@ -321,7 +329,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Error querying %s URL: %v", urlOCI, err)
-			log.Error(errMsg)
+			log.Error("[HPCP] " + errMsg)
 			log.Flush()
 			return errors.New(errMsg)
 		}
@@ -339,7 +347,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 
 		if err != nil {
 			errMsg := fmt.Sprintf("Unable to unmarshal json returned by URL %s: %v", urlOCI, err)
-			log.Error(errMsg)
+			log.Error("[HPCP] " + errMsg)
 			log.Flush()
 			return errors.New(errMsg)
 		}
@@ -350,7 +358,7 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 
 		if err != nil {
 			errMsg := fmt.Sprintf("%v", err)
-			log.Error(errMsg)
+			log.Error("[HPCP] " + errMsg)
 			log.Flush()
 			return errors.New(errMsg)
 		}
@@ -361,19 +369,19 @@ func pullImageFromProxyCache(url string, regexURL string, replacementOCI string,
 		urlTargetImage = strings.Replace(urlTargetImage, "ARCHDIGEST", digest, -1)
 
 		if ! dryRun {
-			log.Infof("urlTargetImage: %s\n", urlTargetImage)
+			log.Infof("[HPCP] urlTargetImage: %s\n", urlTargetImage)
 			log.Flush()
 			// target arch image
 			_, err = queryHarborDockerAPI(urlTargetImage)
 
 			if err != nil {
 				errMsg := fmt.Sprintf("Error querying %s URL: %v", urlTargetImage, err)
-				log.Error(errMsg)
+				log.Error("[HPCP] " + errMsg)
 				log.Flush()
 				return errors.New(errMsg)
 			}
 		} else {
-			log.Infof("DryRun urlTargetImage: %s", urlTargetImage)
+			log.Infof("[HPCP] DryRun urlTargetImage: %s", urlTargetImage)
 			log.Flush()
 		}
 	}
@@ -388,7 +396,7 @@ func retrieveTargetArchDigest(ociManifest OCIManifest, targetArch string, target
 		}
 	}
 	errMsg := fmt.Sprintf("Unable to retrieve digest for arch %s and OS %s", targetArch, targetOS)
-	log.Error(errMsg)
+	log.Error("[HPCP] " + errMsg)
 	log.Flush()
 	return "", errors.New(errMsg)
 }

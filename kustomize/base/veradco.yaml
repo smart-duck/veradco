@@ -82,9 +82,13 @@ kind: Service
 metadata:
   name: veradco-monitoring
   namespace: veradco
+  labels:
+    app: veradco-monitoring
 spec:
   selector:
     app: veradco
   ports:
-    - port: 8080
+    - name: metrics
+      port: 8080
       targetPort: 8080
+      protocol: TCP

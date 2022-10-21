@@ -8,6 +8,6 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: veradco
+      app: veradco-monitoring
   endpoints:
-  - port: 8080
+  - port: "metrics"
