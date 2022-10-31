@@ -31,12 +31,12 @@ Basically, Veradco works as follow:
         | Validate or Mutate             |                            
         |------------------------------->|                            
         |                                |                            
-        |                                | Excecute concerned plugins 
-        |                                |--------------------------- 
-        |                                |                          | 
-        |                                |<-------------------------- 
+        |                                | Excecute scoped plugins 
+        |                                |------------------------------
+        |                                |                             | 
+        |                                |<----------------------------- 
         |                                |                            
-        |     Responds to the API server |                            
+        |   Plugins responses aggregated |                            
         |<-------------------------------|                            
         |                                |
 ```
@@ -46,12 +46,48 @@ Description of the operation:
 2. Veradco execute the plugins that are in the scope of the admission review. It sums up the pluings responses.
 3. Veradco responds to the API server on behalf of executed plugins.
 
+More fully, this sequence diagram shows that Veradco acts at mutate and at validate phase:
+```
++---------------+                     +---------+                   
+| KubernetesAPI |                     | Veradco |                   
++---------------+                     +---------+                   
+        |                                  |                        
+        | Mutate                           |                        
+        |--------------------------------->|                        
+        |                                  |                        
+        |                                  | Execute scoped plugins 
+        |                                  |----------------------- 
+        |                                  |                      | 
+        |                                  |<---------------------- 
+        |                                  |                        
+        |       Aggregated plugins patches |                        
+        |<---------------------------------|                        
+        |                                  |                        
+        | Validate                         |                        
+        |--------------------------------->|                        
+        |                                  |                        
+        |                                  | Execute scoped plugins 
+        |                                  |----------------------- 
+        |                                  |                      | 
+        |                                  |<---------------------- 
+        |                                  |                        
+        |      Summed up plugins allowance |                        
+        |<---------------------------------|                        
+        |                                  |                        
+```
+
+Note: If a plugin rejects the request, then its response is sent to the Kubernetes API.
+
 ## Repository structure
 
 The repository is made of 3 main folders:
 - veradco: the Golang code of the Veradco Admission Controller.
 - built-in_plugins: a collection of plugins provided with Veradco. Some plugins are simple example while some others can be useful in a real Kubernetes cluster. Each plugin is in a subfolder and has a documentation in the README.md file.
 - Kustomize: some Kustomize overlays to install Veradco in a Kubernetes cluster. You can create your own Kustomize overlay from one of the provided one to deploy Veradco in your cluster in a way suitable to your environment.
+- docker: Several Dockerfile files and linked generation scripts. This collection of Dockerfiles covers the following use cases:
+  - Build binaries including plugins
+  - Create a Veradco standalone image (does not build on the fly)
+  - Create a build on the fly image for the init container and a run image for the container
 
 ## Install Veradco
 
