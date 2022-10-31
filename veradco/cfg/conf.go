@@ -14,6 +14,7 @@ import (
 	"github.com/smart-duck/veradco/kres"
 	"github.com/smart-duck/veradco/monitoring"
 	"time"
+	"strings"
   // "math/rand"
 )
 
@@ -312,9 +313,9 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!", plug.Name)
 			} else {
 				if ! result.Allowed {
-					return result, err
+					return result, nil
 				} else {
-					globalResult.Msg += result.Msg
+					globalResult.Msg += result.Msg + "\n"
 					globalResult.PatchOps = append(globalResult.PatchOps, result.PatchOps...)
 				}
 			}
@@ -325,6 +326,8 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		}
 	}
 	
+	globalResult.Msg = strings.ReplaceAll(strings.Trim(globalResult.Msg, "\n"), "\n", " - ")
+
 	// return &admissioncontroller.Result{Allowed: true}, nil
 	return &globalResult, nil
 
