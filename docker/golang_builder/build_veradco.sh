@@ -10,8 +10,8 @@ set -e
 go mod init github.com/smart-duck/veradco
 go mod tidy
 
-mkdir -p /release
+mkdir -p /app
 
-go build -o /release/veradcod cmd/serverd/main.go
+go build -o /app/veradcod cmd/serverd/main.go
 
 source $(dirname $(readlink -f $0))/end_any_script.source

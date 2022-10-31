@@ -26,7 +26,7 @@ docker run --rm \
   --env TO_BUILD_CHMOD="1000:1000" \
   --env VERADCO_CONF="/conf/veradco_conf.yaml" \
   -v $STANDALONE_DIR:/conf \
-  -v $RELEASE_DIR:/release \
+  -v $RELEASE_DIR:/app \
   -v $CURRDIR/../veradco:/to_build/veradco \
   -v $CURRDIR/../built-in_plugins:/to_build/built-in_plugins \
   smartduck/veradco-golang-builder:$BUILD_VERSION_BUILDER /bin/sh -c "/veradco_scripts/build_all.sh"

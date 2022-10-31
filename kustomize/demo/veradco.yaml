@@ -11,10 +11,10 @@ spec:
     spec:
       initContainers:
       - name: veradco-plugins-init
-        image: localhost:5001/smartduck/veradco-golang-builder:0.1
+        image: localhost:5001/smartduck/veradco-golang-builder:v0.1.1
       containers:
       - name: veradco-server
-        image: localhost:5001/smartduck/veradco:0.1
+        image: localhost:5001/smartduck/veradco:v0.1.1
         args: ["-v=0"]
         env:
         - name: hUSER

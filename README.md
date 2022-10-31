@@ -93,7 +93,7 @@ The repository is made of 3 main folders:
 
 ### Nominal installation
 
-The nominal installation install Veradco container together with its init container. It is then able to build plugins (and even veradcod) on the fly.
+The nominal installation install Veradco container together with its init container. Veradco is then able to build plugins (and even veradcod) on the fly.
 
 To install Veradco, use the Kustomize configuration provided or create your own.
 

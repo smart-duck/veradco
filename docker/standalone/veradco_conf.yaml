@@ -86,7 +86,7 @@ plugins:
   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
   # For a built-in plugin the path is /app/plugins
   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
-  path: "/release/plugins/built-in-generic.so"
+  path: "/app/plugins/built-in-generic.so"
   endpoints: "/validate/others"
   # A regular expression to define the kinds on which the plugin is called
   kinds: "(?i)^(Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job)$"
@@ -253,7 +253,7 @@ plugins:
   # For a built-in plugin the path is /app/plugins
   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
   endpoints: "/validate/pods"
-  path: "/release/plugins/built-in-harbor_proxy_cache_populator.so"
+  path: "/app/plugins/built-in-harbor_proxy_cache_populator.so"
   # A regular expression to define the kinds on which the plugin is called
   kinds: "(?i)^Pod$"
   # A regular expression to define the operations on which the plugin is called

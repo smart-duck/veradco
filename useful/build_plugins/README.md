@@ -34,7 +34,7 @@ docker run --rm \
 ```
 If TO_BUILD_FOLDER environment variable is defined, then /go/src folder is emptied and content of TO_BUILD_FOLDER folder is copied in. It prevents modification of rights in sources and also update of go.mod and go.sum files.
 
-If TO_BUILD_CHMOD is defined, at the end the following command is launched: chown -R $TO_BUILD_CHMOD /release/*.
+If TO_BUILD_CHMOD is defined, at the end the following command is launched: chown -R $TO_BUILD_CHMOD /app/*.
 
 From source on the host:
 ```

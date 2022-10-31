@@ -31,7 +31,7 @@ echo "$PLUGINS_PATH" | grep "$DEFAULT_PLUGINS_PATH" || PLUGIN_PREFIX="ext-"
 
 cd $PLUGINS_PATH
 
-PLUGINS_LIB_PATH="/release/plugins"
+PLUGINS_LIB_PATH="/app/plugins"
 
 [ -z "$VERADCO_CONF" ] && VERADCO_CONF="/conf/veradco.yaml"
 

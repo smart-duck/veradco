@@ -33,7 +33,7 @@ spec:
           readOnly: true
       containers:
       - name: veradco-server
-        image: smartduck/veradco:0.1
+        image: smartduck/veradco:v0.1.0
         imagePullPolicy: Always
         command: ["/app/veradcod"]
         args: ["-v=0"]

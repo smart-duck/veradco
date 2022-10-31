@@ -15,7 +15,7 @@ build_folder="/go/src/ext_plugins"
 
 mkdir -p "$build_folder"
 
-external_plugins_folder="/release/external_plugins"
+external_plugins_folder="/app/external_plugins"
 
 mkdir -p "$external_plugins_folder"
 
