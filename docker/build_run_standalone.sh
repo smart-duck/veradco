@@ -12,6 +12,10 @@ BUILD_VERSION="v0.1.0"
 
 [[ "$1" != "" ]] && BUILD_VERSION=$1
 
+BUILD_VERSION_BUILDER=$BUILD_VERSION
+
+[[ "$2" != "" ]] && BUILD_VERSION_BUILDER=$2
+
 rm -Rf $RELEASE_DIR || true
 
 mkdir -p $RELEASE_DIR
@@ -25,7 +29,7 @@ docker run --rm \
   -v $RELEASE_DIR:/release \
   -v $CURRDIR/../veradco:/to_build/veradco \
   -v $CURRDIR/../built-in_plugins:/to_build/built-in_plugins \
-  smartduck/veradco-golang-builder:$BUILD_VERSION /bin/sh -c "/veradco_scripts/build_all.sh"
+  smartduck/veradco-golang-builder:$BUILD_VERSION_BUILDER /bin/sh -c "/veradco_scripts/build_all.sh"
 
 cd $STANDALONE_DIR
 docker build --no-cache -t smartduck/veradco-standalone:$BUILD_VERSION -f ./Dockerfile.standalone $RELEASE_DIR/
