@@ -41,10 +41,14 @@ func Init() {
 }
 
 func AddOperation(plugin string, scope string, dryRun bool, allowed	bool, group string, version string, kind string, name string, namespace string, operation string, errStr string) {
+	// Not used because it makes metrics too heavy: pods with random suffix
+	name = "NotUsed"
 	pluginExecutions.With(prometheus.Labels{"plugin": plugin, "scope": scope, "dry_run": strconv.FormatBool(dryRun), "allowed": strconv.FormatBool(allowed), "group": group, "version": version, "kind": kind, "name": name, "namespace": namespace, "operation": operation, "error": errStr}).Inc()
 }
 
 func AddStat(plugin string, scope string, dryRun bool, allowed	bool, group string, version string, kind string, name string, namespace string, operation string, errStr string, elapsed time.Duration) {
+	// Not used because it makes metrics too heavy: pods with random suffix
+	name = "NotUsed"
 	pluginExecTime.With(prometheus.Labels{"plugin": plugin, "scope": scope, "dry_run": strconv.FormatBool(dryRun), "allowed": strconv.FormatBool(allowed), "group": group, "version": version, "kind": kind, "name": name, "namespace": namespace, "operation": operation, "error": errStr}).Observe(float64(elapsed))
 }
 
