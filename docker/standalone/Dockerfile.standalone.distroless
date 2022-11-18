@@ -1,0 +1,26 @@
+FROM alpine:3.16.2 AS secu
+
+WORKDIR /app
+
+COPY . /app/
+
+# COPY veradcod /app/
+
+# COPY plugins /app/plugins
+
+# RUN chown -R 1000:1000 /app/
+
+RUN chmod -R a-w /app/*
+RUN chmod u+x /app/veradcod || true
+
+# RUN chmod -R a-wx /app/veradcod
+# RUN chmod u+x /app/veradcod
+
+# # RUN chmod -w /app/plugins
+# RUN chmod -R a-w /app/plugins/*
+
+
+FROM gcr.io/distroless/base
+COPY --from=secu /app /app
+EXPOSE 8443 8080
+CMD ["/app/veradcod"]

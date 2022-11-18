@@ -16,6 +16,10 @@ BUILD_VERSION_BUILDER=$BUILD_VERSION
 
 [[ "$2" != "" ]] && BUILD_VERSION_BUILDER=$2
 
+DOCKERFILE_STANDALONE="./Dockerfile.standalone"
+
+[[ "$3" != "" ]] && DOCKERFILE_STANDALONE=$3
+
 rm -Rf $RELEASE_DIR || true
 
 mkdir -p $RELEASE_DIR

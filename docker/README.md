@@ -19,3 +19,8 @@ sudo ./build_golang_builder.sh NOTHING
 # Build a standalone image previously built image and the provided standalone/veradco_conf.yaml configuration.
 sudo ./build_run_standalone.sh
 ```
+
+Distroless one:
+```
+./build_run_standalone.sh "v0.1.0" "v0.1.0" "./Dockerfile.standalone.distroless"
+```
