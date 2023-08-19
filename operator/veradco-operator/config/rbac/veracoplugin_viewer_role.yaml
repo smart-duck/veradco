@@ -1,0 +1,27 @@
+# permissions for end users to view veracoplugins.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: veracoplugin-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: veradco-operator
+    app.kubernetes.io/part-of: veradco-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: veracoplugin-viewer-role
+rules:
+- apiGroups:
+  - apps.veradco-operator.com
+  resources:
+  - veracoplugins
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps.veradco-operator.com
+  resources:
+  - veracoplugins/status
+  verbs:
+  - get

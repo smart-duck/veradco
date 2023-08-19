@@ -1,0 +1,101 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: veracoplugins.apps.veradco-operator.com
+spec:
+  group: apps.veradco-operator.com
+  names:
+    kind: VeracoPlugin
+    listKind: VeracoPluginList
+    plural: veracoplugins
+    singular: veracoplugin
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: VeracoPlugin is the Schema for the veracoplugins API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VeracoPluginSpec defines the desired state of VeracoPlugin
+            properties:
+              annotations:
+                items:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: array
+              code:
+                type: string
+              codeSignature:
+                type: string
+              configuration:
+                type: string
+              dryRun:
+                type: boolean
+              endpoints:
+                type: string
+              kinds:
+                type: string
+              labels:
+                items:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: array
+              name:
+                description: Foo is an example field of VeracoPlugin. Edit veracoplugin_types.go
+                  to remove/update
+                type: string
+              namespaces:
+                type: string
+              operations:
+                type: string
+              path:
+                type: string
+              scope:
+                type: string
+            required:
+            - code
+            - configuration
+            - dryRun
+            - kinds
+            - name
+            - namespaces
+            - operations
+            - path
+            - scope
+            type: object
+          status:
+            description: VeracoPluginStatus defines the observed state of VeracoPlugin
+            properties:
+              pluginCalls:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file How many executions'
+                format: int32
+                type: integer
+            required:
+            - pluginCalls
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -1,0 +1,31 @@
+# permissions for end users to edit veracoplugins.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: veracoplugin-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: veradco-operator
+    app.kubernetes.io/part-of: veradco-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: veracoplugin-editor-role
+rules:
+- apiGroups:
+  - apps.veradco-operator.com
+  resources:
+  - veracoplugins
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.veradco-operator.com
+  resources:
+  - veracoplugins/status
+  verbs:
+  - get

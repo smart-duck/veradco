@@ -36,3 +36,5 @@ useful/build_plugins/a_plugin/go.mod
 docker/standalone/release
 
 eu-central-1.integration
+
+operator-sdk_linux_amd64

@@ -1,0 +1,12 @@
+apiVersion: apps.veradco-operator.com/v1alpha1
+kind: VeracoPlugin
+metadata:
+  labels:
+    app.kubernetes.io/name: veracoplugin
+    app.kubernetes.io/instance: veracoplugin-sample
+    app.kubernetes.io/part-of: veradco-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: veradco-operator
+  name: veracoplugin-sample
+spec:
+  # TODO(user): Add fields here

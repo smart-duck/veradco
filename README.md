@@ -358,6 +358,11 @@ go mod tidy
 go build -buildmode=plugin -o /dev/null plug.go
 ```
 
+Base 64 of a plugin:
+```
+base64 ../built-in_plugins/generic/plug.go > ~/go/src/veradco/veradco/demo/tmp.base64
+```
+
 ## Regular expressions handling
 
 Regular expressions are handled by Verado thanks to the golang package regexp. But, Veradco introduces a special wild card that is used in the cases it is relevant:
