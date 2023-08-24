@@ -1,3 +1,6 @@
 go 1.19
 
-use ./veradco
+use (
+	./built-in_plugins/implicit_proxy_cache_populator
+	./veradco
+)
