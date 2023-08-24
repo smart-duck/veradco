@@ -10,6 +10,11 @@ set -e
 go mod init github.com/smart-duck/veradco
 go mod tidy
 
+echo "veradco go.mod:"
+cat go.mod
+echo "veradco go.sum:"
+cat go.sum || true
+
 mkdir -p /app
 
 go build -o /app/veradcod cmd/serverd/main.go

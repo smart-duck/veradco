@@ -51,6 +51,10 @@ for folder in $(ls -d $PLUGINS_PATH/*/); do
     go mod init "github.com/smart-duck/veradco/$plugin_name"
     go mod edit -replace github.com/smart-duck/veradco=../../veradco
     go mod tidy
+    echo "$plugin_name go.mod:"
+    cat go.mod
+    echo "$plugin_name go.sum:"
+    cat go.sum || true
     go build -buildmode=plugin -o "$PLUGINS_LIB_PATH/$plugin_name.so" plug.go
   else
     echo "NO NEED TO BUILD plugin $plugin_name"

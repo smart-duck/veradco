@@ -4,6 +4,7 @@ WORKDIR /prepared
 # Copy sources
 COPY veradco /prepared/veradco
 COPY built-in_plugins /prepared/built-in_plugins
+# COPY built-in_plugins/implicit_proxy_cache_populator /prepared/built-in_plugins/implicit_proxy_cache_populator
 
 # Remove .so from sources to lightweight image
 RUN find /prepared -type f -name '*.so' -delete
@@ -17,6 +18,10 @@ COPY docker/golang_builder/build_external_plugins.sh /prepared/veradco_scripts/
 RUN chmod +x /prepared/veradco_scripts/build_external_plugins.sh
 COPY docker/golang_builder/build_all.sh /prepared/veradco_scripts/
 RUN chmod +x /prepared/veradco_scripts/build_all.sh
+
+COPY docker/golang_builder/build_workspace.sh /prepared/veradco_scripts/
+RUN chmod +x /prepared/veradco_scripts/build_workspace.sh
+
 COPY docker/golang_builder/build_a_plugin.sh /prepared/veradco_scripts/
 RUN chmod +x /prepared/veradco_scripts/build_a_plugin.sh
 
@@ -35,7 +40,7 @@ ARG BUILD=ALL
 #  ENV CGO_ENABLED=1 GOOS=linux GCCGO=gccgo CGO_LDFLAGS="-g -O2"
 
  # Install gcc
- RUN apk add gcc && apk add musl-dev && apk add libc-dev && apk add yq
+ RUN apk add gcc && apk add musl-dev && apk add libc-dev && apk add yq && apk add git
 
  # Copy veradco source code
  COPY --from=secu /prepared/veradco /go/src/veradco

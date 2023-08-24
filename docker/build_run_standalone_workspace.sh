@@ -33,7 +33,7 @@ docker run --rm \
   -v $RELEASE_DIR:/app \
   -v $CURRDIR/../veradco:/to_build/veradco \
   -v $CURRDIR/../built-in_plugins:/to_build/built-in_plugins \
-  smartduck/veradco-golang-builder:$BUILD_VERSION_BUILDER /bin/sh -c "/veradco_scripts/build_all.sh"
+  smartduck/veradco-golang-builder:$BUILD_VERSION_BUILDER /bin/sh -c "/veradco_scripts/build_workspace.sh"
 
 cd $STANDALONE_DIR
 docker build --no-cache -t smartduck/veradco-standalone:$BUILD_VERSION -f ./Dockerfile.standalone $RELEASE_DIR/

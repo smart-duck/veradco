@@ -114,73 +114,73 @@ plugins:
 #   # "Validating|Mutating" fits to both scopes
 #   scope: "Validating"
 
-# - name: "GenericExternal"
-#   # The path of the plugin.
-#   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
-#   # For a built-in plugin the path is /app/plugins
-#   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
-#   path: "/release/external_plugins/generic.so"
-#   code: |
-#     cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
-#     MSIKCW1ldGEgIms4cy5pby9hcGltYWNoaW5lcnkvcGtnL2FwaXMvbWV0YS92MSIKCSJrOHMuaW8v
-#     YXBpbWFjaGluZXJ5L3BrZy9ydW50aW1lIgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNv
-#     IgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNvL2tyZXMiCgkiZm10IgopCgp2YXIgKAoJ
-#     bmFtZSBzdHJpbmcgPSAiR2VuZXJpYyIKCWNhbGxzIGludCA9IDEKKQoKdHlwZSBHZW5lcmljIHN0
-#     cnVjdCB7CglzdW1tYXJ5IHN0cmluZwp9CgpmdW5jIChwbHVnICpHZW5lcmljKSBJbml0KGNvbmZp
-#     Z0ZpbGUgc3RyaW5nKSBlcnJvciB7CgkvLyBwbHVnLnN1bW1hcnkgPSBmbXQuU3ByaW50ZigiQ29u
-#     ZmlndXJhdGlvbiBvZiBwbHVnaW4gJXMgaXM6ICVzIiwgbmFtZSwgY29uZmlnRmlsZSkKCS8vIHBs
-#     dWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIlslVF0gJSt2ICVwIiwgcGx1ZywgcGx1
-#     ZywgcGx1ZykKCXJldHVybiBuaWwKfQoKCmZ1bmMgKHBsdWcgKkdlbmVyaWMpIEV4ZWN1dGUoa29i
-#     aiBydW50aW1lLk9iamVjdCwgb3BlcmF0aW9uIHN0cmluZywgZHJ5UnVuIGJvb2wsIHIgKmFkbWlz
-#     c2lvbi5BZG1pc3Npb25SZXF1ZXN0KSAoKmFkbWlzc2lvbmNvbnRyb2xsZXIuUmVzdWx0LCBlcnJv
-#     cikgewoJY2FsbHMrKwoJcGx1Zy5zdW1tYXJ5ID0gIiIKCS8vIHBsdWcuc3VtbWFyeSArPSAiXG4i
-#     ICsgZm10LlNwcmludGYoIkdlbmVyaWM6IGNhbGwgbmIgJWQiLCBjYWxscykKCQoJdmFyICgKCQlv
-#     YmogKm1ldGEuUGFydGlhbE9iamVjdE1ldGFkYXRhCgkJb2sgYm9vbAoJCWVyciBlcnJvcgoJKQoK
-#     CW9iaiwgb2sgPSBrb2JqLigqbWV0YS5QYXJ0aWFsT2JqZWN0TWV0YWRhdGEpCgoJaWYgIW9rIHsK
-#     CgkJb2JqLCBlcnIgPSBrcmVzLlBhcnNlT3RoZXIocikKCgkJaWYgZXJyICE9IG5pbCB7CgkJCXJl
-#     dHVybiBuaWwsIGVycgoJCX0KCgl9CgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50
-#     ZigiR2VuZXJpYyByZXNvdXJjZTogJXMgJXMvJXMgJXMgbnM6JXMiLCBvcGVyYXRpb24sIG9iai5U
-#     eXBlTWV0YS5LaW5kLCBvYmouVHlwZU1ldGEuQVBJVmVyc2lvbiwgb2JqLk9iamVjdE1ldGEuTmFt
-#     ZSwgb2JqLk9iamVjdE1ldGEuTmFtZXNwYWNlKQoKCS8vIGlmICFvayB7CgkvLyAJcGx1Zy5zdW1t
-#     YXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50ZigiS3ViZXJuZXRlcyByZXNvdXJjZSBpcyBub3QgYXMg
-#     ZXhwZWN0ZWQgKCVzKSIsIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktpbmQoKS5L
-#     aW5kKQoJLy8gCXJldHVybiBuaWwsIGZtdC5FcnJvcmYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMg
-#     bm90IGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNpb25L
-#     aW5kKCkuS2luZCkKCS8vIH0gZWxzZSB7CgkvLyAJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQu
-#     U3ByaW50ZigiR2VuZXJpYyByZXNvdXJjZTogJXMsICVzLCAlcywgJXMiLCBvdGhlci5UeXBlTWV0
-#     YS5LaW5kLAoJLy8gCQlvdGhlci5UeXBlTWV0YS5BUElWZXJzaW9uLCBvdGhlci5PYmplY3RNZXRh
-#     Lk5hbWUsIG90aGVyLk9iamVjdE1ldGEuTmFtZXNwYWNlKQoJLy8gfQoKCS8vIHBsdWcuc3VtbWFy
-#     eSArPSAiXG4iICsgZm10LlNwcmludGYoIiVzICVzLCBhY2NlcHRlZCIsIG9iai5UeXBlTWV0YS5L
-#     aW5kLCBvYmouT2JqZWN0TWV0YS5OYW1lKQoKCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5S
-#     ZXN1bHR7QWxsb3dlZDogdHJ1ZX0sIG5pbAp9CgpmdW5jIChwbHVnICpHZW5lcmljKSBTdW1tYXJ5
-#     KCkgc3RyaW5nIHsKCXJldHVybiBwbHVnLnN1bW1hcnkKfQoKLy8gZXhwb3J0ZWQgYXMgc3ltYm9s
-#     IG5hbWVkICJWZXJhZGNvUGx1Z2luIgp2YXIgVmVyYWRjb1BsdWdpbiBHZW5lcmlj
-#   endpoints: "/validate/others"
-#   # A regular expression to define the kinds on which the plugin is called
-#   kinds: "(?i)^(Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job)$"
-#   # A regular expression to define the operations on which the plugin is called
-#   # Example: "CREATE|UPDATE"
-#   # It's up to the plugin to manage different operations in its code
-#   operations: "CREATE|DELETE|UPDATE|CONNECT"
-#   # A regular expression to define the namespaces in the scope of the plugin
-#   # Example: "kube-system|default"
-#   namespaces: "(!~)kube-system|kube-public"
-#   # Filter only on resources having some labels.
-#   # value is a regular expressions
-#   # labels:
-#   # - key: owner
-#   #   # value: (?i)^me$
-#   #   value: "(!~)(?i)^me$"
-#   # Filter only on resources having some labels.
-#   # Both key and value are regular expressions
-#   # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
-#   dryRun: true
-#   # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
-#   configuration: |
-#     This plugin does not have configuration
-#   # A regular expression that define the scope of the plugin.
-#   # "Validating|Mutating" fits to both scopes
-#   scope: "Validating"
+- name: "generic_external"
+  # The path of the plugin.
+  # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+  # For a built-in plugin the path is /app/plugins
+  # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+  path: "/app/plugins/generic_ext.so"
+  code: |
+    cGFja2FnZSBtYWluCgppbXBvcnQgKAoJYWRtaXNzaW9uICJrOHMuaW8vYXBpL2FkbWlzc2lvbi92
+    MSIKCW1ldGEgIms4cy5pby9hcGltYWNoaW5lcnkvcGtnL2FwaXMvbWV0YS92MSIKCSJrOHMuaW8v
+    YXBpbWFjaGluZXJ5L3BrZy9ydW50aW1lIgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNv
+    IgoJImdpdGh1Yi5jb20vc21hcnQtZHVjay92ZXJhZGNvL2tyZXMiCgkiZm10IgopCgp2YXIgKAoJ
+    bmFtZSBzdHJpbmcgPSAiR2VuZXJpYyIKCWNhbGxzIGludCA9IDEKKQoKdHlwZSBHZW5lcmljIHN0
+    cnVjdCB7CglzdW1tYXJ5IHN0cmluZwp9CgpmdW5jIChwbHVnICpHZW5lcmljKSBJbml0KGNvbmZp
+    Z0ZpbGUgc3RyaW5nKSBlcnJvciB7CgkvLyBwbHVnLnN1bW1hcnkgPSBmbXQuU3ByaW50ZigiQ29u
+    ZmlndXJhdGlvbiBvZiBwbHVnaW4gJXMgaXM6ICVzIiwgbmFtZSwgY29uZmlnRmlsZSkKCS8vIHBs
+    dWcuc3VtbWFyeSArPSAiXG4iICsgZm10LlNwcmludGYoIlslVF0gJSt2ICVwIiwgcGx1ZywgcGx1
+    ZywgcGx1ZykKCXJldHVybiBuaWwKfQoKCmZ1bmMgKHBsdWcgKkdlbmVyaWMpIEV4ZWN1dGUoa29i
+    aiBydW50aW1lLk9iamVjdCwgb3BlcmF0aW9uIHN0cmluZywgZHJ5UnVuIGJvb2wsIHIgKmFkbWlz
+    c2lvbi5BZG1pc3Npb25SZXF1ZXN0KSAoKmFkbWlzc2lvbmNvbnRyb2xsZXIuUmVzdWx0LCBlcnJv
+    cikgewoJY2FsbHMrKwoJcGx1Zy5zdW1tYXJ5ID0gIiIKCS8vIHBsdWcuc3VtbWFyeSArPSAiXG4i
+    ICsgZm10LlNwcmludGYoIkdlbmVyaWM6IGNhbGwgbmIgJWQiLCBjYWxscykKCQoJdmFyICgKCQlv
+    YmogKm1ldGEuUGFydGlhbE9iamVjdE1ldGFkYXRhCgkJb2sgYm9vbAoJCWVyciBlcnJvcgoJKQoK
+    CW9iaiwgb2sgPSBrb2JqLigqbWV0YS5QYXJ0aWFsT2JqZWN0TWV0YWRhdGEpCgoJaWYgIW9rIHsK
+    CgkJb2JqLCBlcnIgPSBrcmVzLlBhcnNlT3RoZXIocikKCgkJaWYgZXJyICE9IG5pbCB7CgkJCXJl
+    dHVybiBuaWwsIGVycgoJCX0KCgl9CgoJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50
+    ZigiR2VuZXJpYyByZXNvdXJjZTogJXMgJXMvJXMgJXMgbnM6JXMiLCBvcGVyYXRpb24sIG9iai5U
+    eXBlTWV0YS5LaW5kLCBvYmouVHlwZU1ldGEuQVBJVmVyc2lvbiwgb2JqLk9iamVjdE1ldGEuTmFt
+    ZSwgb2JqLk9iamVjdE1ldGEuTmFtZXNwYWNlKQoKCS8vIGlmICFvayB7CgkvLyAJcGx1Zy5zdW1t
+    YXJ5ICs9ICJcbiIgKyBmbXQuU3ByaW50ZigiS3ViZXJuZXRlcyByZXNvdXJjZSBpcyBub3QgYXMg
+    ZXhwZWN0ZWQgKCVzKSIsIGtvYmouR2V0T2JqZWN0S2luZCgpLkdyb3VwVmVyc2lvbktpbmQoKS5L
+    aW5kKQoJLy8gCXJldHVybiBuaWwsIGZtdC5FcnJvcmYoIkt1YmVybmV0ZXMgcmVzb3VyY2UgaXMg
+    bm90IGFzIGV4cGVjdGVkICglcykiLCBrb2JqLkdldE9iamVjdEtpbmQoKS5Hcm91cFZlcnNpb25L
+    aW5kKCkuS2luZCkKCS8vIH0gZWxzZSB7CgkvLyAJcGx1Zy5zdW1tYXJ5ICs9ICJcbiIgKyBmbXQu
+    U3ByaW50ZigiR2VuZXJpYyByZXNvdXJjZTogJXMsICVzLCAlcywgJXMiLCBvdGhlci5UeXBlTWV0
+    YS5LaW5kLAoJLy8gCQlvdGhlci5UeXBlTWV0YS5BUElWZXJzaW9uLCBvdGhlci5PYmplY3RNZXRh
+    Lk5hbWUsIG90aGVyLk9iamVjdE1ldGEuTmFtZXNwYWNlKQoJLy8gfQoKCS8vIHBsdWcuc3VtbWFy
+    eSArPSAiXG4iICsgZm10LlNwcmludGYoIiVzICVzLCBhY2NlcHRlZCIsIG9iai5UeXBlTWV0YS5L
+    aW5kLCBvYmouT2JqZWN0TWV0YS5OYW1lKQoKCXJldHVybiAmYWRtaXNzaW9uY29udHJvbGxlci5S
+    ZXN1bHR7QWxsb3dlZDogdHJ1ZX0sIG5pbAp9CgpmdW5jIChwbHVnICpHZW5lcmljKSBTdW1tYXJ5
+    KCkgc3RyaW5nIHsKCXJldHVybiBwbHVnLnN1bW1hcnkKfQoKLy8gZXhwb3J0ZWQgYXMgc3ltYm9s
+    IG5hbWVkICJWZXJhZGNvUGx1Z2luIgp2YXIgVmVyYWRjb1BsdWdpbiBHZW5lcmlj
+  endpoints: "/validate/others"
+  # A regular expression to define the kinds on which the plugin is called
+  kinds: "(?i)^(Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job)$"
+  # A regular expression to define the operations on which the plugin is called
+  # Example: "CREATE|UPDATE"
+  # It's up to the plugin to manage different operations in its code
+  operations: "CREATE|DELETE|UPDATE|CONNECT"
+  # A regular expression to define the namespaces in the scope of the plugin
+  # Example: "kube-system|default"
+  namespaces: "(!~)kube-system|kube-public"
+  # Filter only on resources having some labels.
+  # value is a regular expressions
+  # labels:
+  # - key: owner
+  #   # value: (?i)^me$
+  #   value: "(!~)(?i)^me$"
+  # Filter only on resources having some labels.
+  # Both key and value are regular expressions
+  # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+  dryRun: true
+  # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+  configuration: |
+    This plugin does not have configuration
+  # A regular expression that define the scope of the plugin.
+  # "Validating|Mutating" fits to both scopes
+  scope: "Validating"
 
 
 # - name: "EnforceLabels"
@@ -247,13 +247,13 @@ plugins:
 #   # "Validating|Mutating" fits to both scopes
 #   scope: "Validating"
 
-- name: "HarborProxyCachePopulator"
+- name: "implicit_proxy_cache_populator"
   # The path of the plugin.
   # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
   # For a built-in plugin the path is /app/plugins
   # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
   endpoints: "/validate/pods"
-  path: "/app/plugins/built-in-harbor_proxy_cache_populator.so"
+  path: "/app/plugins/built-in-implicit_proxy_cache_populator.so"
   # A regular expression to define the kinds on which the plugin is called
   kinds: "(?i)^Pod$"
   # A regular expression to define the operations on which the plugin is called
