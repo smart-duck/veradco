@@ -2,13 +2,16 @@ package kres
 
 import (
 	"encoding/json"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	admission "k8s.io/api/admission/v1"
-	batch "k8s.io/kubernetes/pkg/apis/batch"
-	v1 "k8s.io/api/core/v1"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	// batch "k8s.io/kubernetes/pkg/apis/batch"
 	appsv1 "k8s.io/api/apps/v1"
-	log "k8s.io/klog/v2"
+	batch "k8s.io/api/batch/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	log "k8s.io/klog/v2"
 )
 
 func ParseTypeMeta(object []byte) (*meta.TypeMeta, error) {
@@ -159,7 +162,7 @@ func ParseObject(r *admission.AdmissionRequest) (runtime.Object, error) {
 	if r.Kind.Kind == "Pod" {
 		return ParsePod(r)
 	} else if r.Kind.Kind == "Deployment" {
-		return ParseDeployment(r)		
+		return ParseDeployment(r)
 	} else if r.Kind.Kind == "DaemonSet" {
 		return ParseDaemonSet(r)
 	} else if r.Kind.Kind == "StatefulSet" {
