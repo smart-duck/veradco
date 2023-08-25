@@ -21,9 +21,11 @@ DOCKERFILE_STANDALONE="./Dockerfile.standalone"
 [[ "$3" != "" ]] && DOCKERFILE_STANDALONE=$3
 
 VERADCO_CONF="/conf/veradco_conf.yaml"
-[[ "$4" != "" ]] && VERADCO_CONF=$4
-
-VERADCO_CONF_DIR=$(dirname $VERADCO_CONF)
+VERADCO_CONF_DIR=$STANDALONE_DIR
+if [[ "$4" != "" ]]; then
+  VERADCO_CONF="/conf/$(basename $4)"
+  VERADCO_CONF_DIR=$(dirname $4)
+fi
 
 sudo rm -Rf $RELEASE_DIR || true
 
@@ -34,7 +36,7 @@ docker run --rm \
   --env TO_BUILD_FOLDER="/to_build" \
   --env TO_BUILD_CHMOD="1000:1000" \
   --env VERADCO_CONF=$VERADCO_CONF \
-  -v $STANDALONE_DIR:$VERADCO_CONF_DIR \
+  -v $VERADCO_CONF_DIR:/conf \
   -v $RELEASE_DIR:/app \
   -v $CURRDIR/../veradco:/to_build/veradco \
   -v $CURRDIR/../built-in_plugins:/to_build/built-in_plugins \
