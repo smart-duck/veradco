@@ -39,7 +39,7 @@ const (
 	// patternEcrProxyCache = "(^[0-9]+\\.dkr\\.ecr\\.[^.]+\\.amazonaws.com)/(proxy_)(docker\\.io|docker\\.cloudsmith\\.io|docker\\.elastic\\.io|gcr\\.io|ghcr\\.io|k8s\\.gcr\\.io|public\\.ecr\\.aws|quay\\.io|registry\\.k8s\\.io|registry\\.opensource\\.zalan\\.do|us-docker\\.pkg\\.dev|xpkg\\.upbound\\.io)/([^:]+):?(.*)$"
 	// ecrRegion            = "eu-central-1"
 	// patternRepoTag                      = "(^[^:]+):?(.+)?"
-	logLevel = 100
+	logLevel = 3
 )
 
 var (
@@ -200,24 +200,24 @@ func replicateToEcr(imgDest string, configuration ProxyCache, dryRun bool) (erro
 
 	softErr := imgToReplicate.ParseInput(configuration.PatternEcrProxyCache)
 	if softErr != nil {
-		log.Infof("softErr=%v\n", softErr)
+		log.Infof("[IPCP] softErr=%v\n", softErr)
 		return softErr, nil
 	}
 
 	_, err := imgToReplicate.GetManifest()
 
 	if err != nil {
-		log.Infof("err get manifest=%v\n", err)
+		log.Infof("[IPCP] err get manifest=%v\n", err)
 	} else {
 		// Manifest found
-		log.Infof("Image %s%s/%s:%s already exists in registry %s\n", imgToReplicate.prefixEcrRepository, imgToReplicate.publicHostName, imgToReplicate.image, imgToReplicate.tag, imgToReplicate.ecrHostName)
+		log.Infof("[IPCP] Image %s%s/%s:%s already exists in registry %s\n", imgToReplicate.prefixEcrRepository, imgToReplicate.publicHostName, imgToReplicate.image, imgToReplicate.tag, imgToReplicate.ecrHostName)
 		return nil, nil
 	}
 
-	log.Infof("Image %s%s/%s:%s does not exist in registry %s: replicate it\n", imgToReplicate.prefixEcrRepository, imgToReplicate.publicHostName, imgToReplicate.image, imgToReplicate.tag, imgToReplicate.ecrHostName)
+	log.Infof("[IPCP] Image %s%s/%s:%s does not exist in registry %s: replicate it\n", imgToReplicate.prefixEcrRepository, imgToReplicate.publicHostName, imgToReplicate.image, imgToReplicate.tag, imgToReplicate.ecrHostName)
 
 	if dryRun { // Dry run
-		log.Infof("Dry Run mode, exiting\n")
+		log.Infof("[IPCP] Dry Run mode, exiting\n")
 		return nil, nil
 	} else {
 
@@ -226,17 +226,17 @@ func replicateToEcr(imgDest string, configuration ProxyCache, dryRun bool) (erro
 		err = imgToReplicate.CheckDockerRepoExistsOrCreateIt(repo)
 
 		if err != nil {
-			log.Infof("err repo exists=%v\n", err)
+			log.Infof("[IPCP] err repo exists=%v\n", err)
 		}
 
 		softErr, hardErr := imgToReplicate.ReplicateImage()
 
 		if softErr != nil {
-			log.Infof("softErr=%v\n", softErr)
+			log.Infof("[IPCP] softErr=%v\n", softErr)
 		}
 
 		if hardErr != nil {
-			log.Infof("hardErr=%v\n", hardErr)
+			log.Infof("[IPCP] hardErr=%v\n", hardErr)
 		}
 	}
 
@@ -515,15 +515,18 @@ func (ic *ImgCopy) ReplicateImage() (error, error) {
 	}
 
 	if err := client.ImageCopy(ctx, sourceRef, targetRef, imgOpts...); err != nil {
+		debug(2, "Image %s unsuccessfuly replicated to %s: %v", imgSrc, imgDest, err)
 		return nil, err
 	}
+
+	debug(2, "Image %s successfuly replicated to %s", imgSrc, imgDest)
 
 	return nil, nil
 }
 
 func debug(level int, format string, a ...any) {
 	if level < logLevel {
-		log.Infof(format, a...)
+		log.Infof("[IPCP] " + format, a...)
 	}
 }
 
