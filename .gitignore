@@ -40,3 +40,4 @@ eu-central-1.integration
 operator-sdk_linux_amd64
 
 operator/veradco-operator/bin
+veradco/demo/grpc/veradcod

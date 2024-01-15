@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veradco
+  namespace: veradco
+  labels:
+    app: veradco
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: veradco
+  template:
+    metadata:
+      labels:
+        app: veradco
+    spec:
+      containers:
+      - name: veradco-server
+        image: localhost:5001/smartduck/veradco:0.1.grpc
+        imagePullPolicy: Always
+        command: ["/app/veradcod"]
+        # command: ["/bin/sh"]
+        args: ["-v=10"]
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/certs
+          readOnly: true
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+      volumes:
+      - name: tls-certs
+        secret:
+          secretName: veradco-tls
+      - name: config-volume
+        configMap:
+          name: veradco
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veradco
+  namespace: veradco
+spec:
+  selector:
+    app: veradco
+  ports:
+    - port: 443
+      targetPort: 8443
