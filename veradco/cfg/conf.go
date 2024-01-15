@@ -1,6 +1,10 @@
 package conf
 
 import (
+	"os"
+	"crypto/tls"
+	"crypto/x509"
+	"context"
 	"io/ioutil"
 	log "k8s.io/klog/v2"
 	"gopkg.in/yaml.v3"
@@ -16,11 +20,20 @@ import (
 	"time"
 	"strings"
   // "math/rand"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	pb "github.com/smart-duck/veradco/protoc"
+)
+
+const (
+	timeout = time.Millisecond * 500
 )
 
 type Plugin struct {
 	Name string `yaml:"name"`
-	Path string `yaml:"path"`
+	Path string `yaml:"path"` // can be a grpc address: localhost:50051
 	Code string `yaml:"code,omitempty"`
 	Kinds string `yaml:"kinds"`
 	Operations string `yaml:"operations"`
@@ -31,6 +44,11 @@ type Plugin struct {
 	Configuration string `yaml:"configuration"`
 	Scope string `yaml:"scope"`
 	Endpoints string `yaml:"endpoints,omitempty"`
+	GrpcClientCertFile string `yaml:"grpcClientCertFile,omitempty"` // cert/client-cert.pem
+	GrpcClientKeyFile string `yaml:"grpcClientKeyFile,omitempty"` // cert/client-key.pem
+	GrpcServerCaCertFile string `yaml:"grpcServerCaCertFile,omitempty"` // cert/ca-cert.pem
+	GrpcAutoAccept bool `yaml:"grpcAutoAccept"`
+	GrpcConn *grpc.ClientConn `yaml:"-"`
 	VeradcoPlugin veradcoplugin.VeradcoPlugin `yaml:"-"`
 	VeradcoPluginLoaded bool `yaml:"-"`
 }
@@ -63,51 +81,139 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 	return nil
 }
 
+func (plugin *Plugin) queryGrpcPlugin(review string) (*pb.AdmissionResponse, error) {
+	c := pb.NewPluginClient(plugin.GrpcConn)
+
+	// Contact the server and print out its response.
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	var result *pb.AdmissionResponse
+	var err error
+
+	result, err = c.Execute(ctx, &pb.AdmissionReview{Review: review})
+
+	return result, err
+}
+
+func (plugin *Plugin) loadTLSCredentials() (credentials.TransportCredentials, error) {
+	// No security case
+	if plugin.GrpcServerCaCertFile == "" {
+		return nil, nil
+	}
+	pemServerCA, err := os.ReadFile(plugin.GrpcServerCaCertFile)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+
+	// TLS case
+	if plugin.GrpcClientCertFile == "" || plugin.GrpcClientKeyFile == "" {
+		config := &tls.Config{
+			RootCAs: certPool,
+		}
+		return credentials.NewTLS(config), nil
+	}
+
+	// mTLS case
+	clientCert, err := tls.LoadX509KeyPair(plugin.GrpcClientCertFile, plugin.GrpcClientKeyFile)
+	if err != nil {
+		return nil, err
+	}
+
+	config := &tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      certPool,
+	}
+
+	return credentials.NewTLS(config), nil
+}
+
+func (plugin *Plugin) newGrpcConn(addr string) (*grpc.ClientConn, error) {
+	transportCreds, err := plugin.loadTLSCredentials()
+	if err != nil {
+		return nil, err
+	}
+
+	if transportCreds == nil {
+		return grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	} else {
+		return grpc.Dial(addr, grpc.WithTransportCredentials(transportCreds))
+	}
+}
+
 func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 	numberOfPluginsLoaded := 0
 	log.Infof(">>>> Loading plugins")
+
+	reGrpc := regexp.MustCompile(`^[^:]+:[0-9]+$`)
+
 	for _, plugin := range veradcoCfg.Plugins {
 		log.Infof(">> Loading plugin  %s", plugin.Name)
 
-		// Try to execute plugins
-		plug, err := goplugin.Open(plugin.Path)
-		if err != nil {
-			log.Errorf("Unable to load plugin %s: %v", plugin.Name, err)
-			if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-				return numberOfPluginsLoaded, err			
-			}
-		} else {
-			pluginHandler, err := plug.Lookup("VeradcoPlugin")
+		// Test if it is a GRPC plugin or a legacy one
+		if reGrpc.MatchString(plugin.Path) {
+			// GRPC plugin
+			conn, err := plugin.newGrpcConn(plugin.Path)
+
 			if err != nil {
-				log.Errorf("Unable to find handler for plugin %s: %v", plugin.Name, err)
+				log.Errorf("Unable to load GRPC plugin %s: %v", plugin.Name, err)
 				if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
 					return numberOfPluginsLoaded, err			
 				}
 			} else {
-				var veradcoPlugin veradcoplugin.VeradcoPlugin
+				// defer conn.Close(): conn never closed TODO?
+				plugin.GrpcConn = conn
+				plugin.VeradcoPluginLoaded = true
+				numberOfPluginsLoaded++
+			}
+		} else {
+			// Legacy plugin: go plugin
 
-				veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
-				if !ok {
-					log.Errorf("Plugin %s does not implement awaited interface", plugin.Name)
+			// Try to execute plugins
+			plug, err := goplugin.Open(plugin.Path)
+			if err != nil {
+				log.Errorf("Unable to load plugin %s: %v", plugin.Name, err)
+				if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
+					return numberOfPluginsLoaded, err			
+				}
+			} else {
+				pluginHandler, err := plug.Lookup("VeradcoPlugin")
+				if err != nil {
+					log.Errorf("Unable to find handler for plugin %s: %v", plugin.Name, err)
 					if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-						return numberOfPluginsLoaded, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
+						return numberOfPluginsLoaded, err			
 					}
 				} else {
+					var veradcoPlugin veradcoplugin.VeradcoPlugin
 
-					log.Infof(">> Init plugin %s", plugin.Name)
-					err := veradcoPlugin.Init(plugin.Configuration)
-
-					if err != nil {
-						log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
+					veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
+					if !ok {
+						log.Errorf("Plugin %s does not implement awaited interface", plugin.Name)
 						if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-							return numberOfPluginsLoaded, err			
+							return numberOfPluginsLoaded, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
 						}
 					} else {
-						plugin.VeradcoPlugin = veradcoPlugin
-						plugin.VeradcoPluginLoaded = true
-						numberOfPluginsLoaded++
+
+						log.Infof(">> Init plugin %s", plugin.Name)
+						err := veradcoPlugin.Init(plugin.Configuration)
+
+						if err != nil {
+							log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
+							if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
+								return numberOfPluginsLoaded, err			
+							}
+						} else {
+							plugin.VeradcoPlugin = veradcoPlugin
+							plugin.VeradcoPluginLoaded = true
+							numberOfPluginsLoaded++
+						}
+						// log.Infof("Plugin: %v\n", plugin)
 					}
-					// log.Infof("Plugin: %v\n", plugin)
 				}
 			}
 		}
@@ -299,7 +405,31 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
 		startTime := time.Now()
-		result, err := plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
+		var result *admissioncontroller.Result
+		var err error
+		if plug.GrpcConn != nil {
+			if plug.GrpcAutoAccept {
+				go func() {
+					_, err := plug.queryGrpcPlugin("payload")
+					if err != nil {
+						log.Errorf("Error while executing async GRPC plugin %s: %v", plug.Name, err)
+					}
+				}()
+				result = &admissioncontroller.Result{Allowed: true}
+			} else {
+				var admResponse *pb.AdmissionResponse
+				admResponse, err = plug.queryGrpcPlugin("payload")
+				if err != nil {
+					log.Errorf("Error while executing sync GRPC plugin %s: %v", plug.Name, err)
+				} else {
+					log.V(4).Infof(">> admResponse.GetResponse() = %s\n", admResponse.GetResponse())
+					log.V(4).Infof(">> admResponse.GetError() = %s\n", admResponse.GetError())
+				}
+				result = &admissioncontroller.Result{Allowed: true}
+			}
+		} else {
+			result, err = plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
+		}
 		// rand.Seed(time.Now().UnixNano())
     // n := rand.Intn(3000000000) // n will be between 0 and 3
     // time.Sleep(time.Duration(n)*time.Nanosecond)
@@ -308,7 +438,9 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 			monitoring.AddOperation(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "false")
 			monitoring.AddStat(plug.Name, plug.Scope, plug.DryRun, result.Allowed, r.Kind.Group, r.Kind.Version, r.Kind.Kind, r.Name, r.Namespace, string(r.Operation), "false", elapsed)
 			// monitoring.AddOperation(plug, r, result)
-			log.Infof(">> Plugin %s execution summary: %s", plug.Name, plug.VeradcoPlugin.Summary())
+			if plug.VeradcoPlugin != nil {
+				log.Infof(">> Plugin %s execution summary: %s", plug.Name, plug.VeradcoPlugin.Summary())
+			}
 			if plug.DryRun {
 				log.Infof(">> Plugin %s is in dry run mode. Nothing to do!", plug.Name)
 			} else {
