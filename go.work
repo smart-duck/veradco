@@ -1,6 +1,6 @@
 go 1.19
 
 use (
-	./built-in_plugins/implicit_proxy_cache_populator
+	./grpc_plugins/implicit_proxy_cache_populator
 	./veradco
 )

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: implicit_proxy_cache_populator
+  namespace: default
+  labels:
+    app: implicit_proxy_cache_populator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: implicit_proxy_cache_populator
+  template:
+    metadata:
+      labels:
+        app: implicit_proxy_cache_populator
+    spec:
+      containers:
+      - name: implicit_proxy_cache_populator
+        image: localhost:5001/smartduck/adddummysidecar-grpc-plugin:0.1
+        command: ["/app/adddummysidecar"]
+        args: ["-port=50052"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: implicit_proxy_cache_populator
+  namespace: default
+spec:
+  selector:
+    app: implicit_proxy_cache_populator
+  ports:
+    - port: 50053
+      targetPort: 50053
