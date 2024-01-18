@@ -8,7 +8,8 @@ import (
 	"sync"
 	"time"
 
-	admissioncontroller "github.com/smart-duck/veradco"
+	admissioncontroller "github.com/smart-duck/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/grpc"
 	"github.com/smart-duck/veradco/kres"
 	"gopkg.in/yaml.v3"
 	admission "k8s.io/api/admission/v1"
@@ -560,5 +561,13 @@ func debug(level int, format string, a ...any) {
 ///////////////////
 ///////////////////
 
-// Declared not to be bothered by a linter or something else
-func main() {}
+func main() {
+	plugin := grpc.GrpcPlugin {
+		Port: 50053,
+		VeradcoPlugin: &ImplicitProxyCachePopulator{},
+	}
+	err := plugin.StartServer()
+	if err != nil {
+		fmt.Printf("Error starting ImplicitProxyCachePopulator plugin: %v\n", err)
+	}
+}
