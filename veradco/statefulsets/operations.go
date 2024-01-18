@@ -1,7 +1,7 @@
 package statefulsets
 
 import (
-	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/admissioncontroller"
 
 	"github.com/smart-duck/veradco/kres"
 
@@ -47,7 +47,7 @@ func mutateConnect(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontro
 }
 
 func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string, endpoint string) admissioncontroller.AdmitFunc {
-	return func(r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
+	return func(body *[]byte, r *admission.AdmissionRequest) (*admissioncontroller.Result, error) {
 
 		log.V(1).Infof(">>>> statefulsets / %s operation, Kind: %s, Version: %s, Group: %s, Name: %s, Namespace: %s", string(op), r.Kind.Kind, r.Kind.Version, r.Kind.Group, r.Name, r.Namespace)
 
@@ -61,6 +61,6 @@ func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string
 		}
 
 		// Apply the plugins
-		return veradcoCfg.ProceedPlugins(sfs, r, scope, endpoint)
+		return veradcoCfg.ProceedPlugins(body, sfs, r, scope, endpoint)
 	}
 }

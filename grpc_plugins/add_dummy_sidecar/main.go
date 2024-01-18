@@ -3,15 +3,11 @@ package main
 import (
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/smart-duck/veradco/admissioncontroller"
-	"github.com/smart-duck/veradco/kres"
 	v1 "k8s.io/api/core/v1"
-	// "gopkg.in/yaml.v3"
-	// "regexp"
-)
-
-var (
-	name string = "AddSidecar"
+	"github.com/smart-duck/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/grpc"
+	"github.com/smart-duck/veradco/kres"
+	"fmt"
 )
 
 type AddSidecar struct {
@@ -19,6 +15,7 @@ type AddSidecar struct {
 }
 
 func (plug *AddSidecar) Init(configFile string) error {
+	fmt.Printf("Init GRPC plugin add_dummy_sidecar\n")
 	// Load configuration
 	// err := yaml.Unmarshal([]byte(configFile), plug)
 	// if err != nil {
@@ -40,7 +37,7 @@ func (plug *AddSidecar) Execute(kobj runtime.Object, operation string, dryRun bo
 	}
 
 	// Very simple logic to inject a new "sidecar" container.
-	if pod.Namespace == "special" {
+	if pod.Namespace == "default" {
 		var containers []v1.Container
 		containers = append(containers, pod.Spec.Containers...)
 		sideC := v1.Container{
@@ -62,6 +59,7 @@ func (plug *AddSidecar) Execute(kobj runtime.Object, operation string, dryRun bo
 
 	return &admissioncontroller.Result{
 		Allowed:  true,
+		Msg: "mutated",
 		PatchOps: operations,
 	}, nil
 }
@@ -70,5 +68,13 @@ func (plug *AddSidecar) Summary() string {
 	return plug.summary
 }
 
-// exported as symbol named "VeradcoPlugin"
-var VeradcoPlugin AddSidecar
+func main() {
+	plugin := grpc.GrpcPlugin {
+		Port: 50053,
+		VeradcoPlugin: &AddSidecar{},
+	}
+	err := plugin.StartServer()
+	if err != nil {
+		fmt.Printf("Error starting Basic plugin: %v\n", err)
+	}
+}

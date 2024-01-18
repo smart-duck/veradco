@@ -1,7 +1,7 @@
 package pods
 
 import (
-	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/admissioncontroller"
 
 	"github.com/smart-duck/veradco/cfg"
 )

@@ -4,7 +4,7 @@ import (
 	admission "k8s.io/api/admission/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/admissioncontroller"
 	"github.com/smart-duck/veradco/kres"
 	"fmt"
 	"gopkg.in/yaml.v3"

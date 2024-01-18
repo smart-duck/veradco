@@ -8,13 +8,14 @@ import (
 	"io/ioutil"
 	log "k8s.io/klog/v2"
 	"gopkg.in/yaml.v3"
+	"encoding/json"
 	veradcoplugin "github.com/smart-duck/veradco/plugin"
 	goplugin "plugin"
 	"fmt"
 	"regexp"
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/admissioncontroller"
 	"github.com/smart-duck/veradco/kres"
 	"github.com/smart-duck/veradco/monitoring"
 	"time"
@@ -47,7 +48,8 @@ type Plugin struct {
 	GrpcClientCertFile string `yaml:"grpcClientCertFile,omitempty"` // cert/client-cert.pem
 	GrpcClientKeyFile string `yaml:"grpcClientKeyFile,omitempty"` // cert/client-key.pem
 	GrpcServerCaCertFile string `yaml:"grpcServerCaCertFile,omitempty"` // cert/ca-cert.pem
-	GrpcAutoAccept bool `yaml:"grpcAutoAccept"`
+	GrpcAutoAccept bool `yaml:"grpcAutoAccept,omitempty"`
+	GrpcUnallowOnFailure bool `yaml:"grpcUnallowOnFailure,omitempty"`
 	GrpcConn *grpc.ClientConn `yaml:"-"`
 	VeradcoPlugin veradcoplugin.VeradcoPlugin `yaml:"-"`
 	VeradcoPluginLoaded bool `yaml:"-"`
@@ -81,7 +83,7 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 	return nil
 }
 
-func (plugin *Plugin) queryGrpcPlugin(review string) (*pb.AdmissionResponse, error) {
+func (plugin *Plugin) queryGrpcPlugin(review []byte) (*pb.AdmissionResponse, error) {
 	c := pb.NewPluginClient(plugin.GrpcConn)
 
 	// Contact the server and print out its response.
@@ -385,7 +387,7 @@ func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope st
 	return &result, nil
 }
 
-func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.AdmissionRequest, scope string, endpoint string) (*admissioncontroller.Result, error) {
+func (veradcoCfg *VeradcoCfg) ProceedPlugins(body *[]byte, kobj runtime.Object, r *admission.AdmissionRequest, scope string, endpoint string) (*admissioncontroller.Result, error) {
 
 	plugins, err := veradcoCfg.GetPlugins(r, scope, endpoint)
 
@@ -407,10 +409,11 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 		startTime := time.Now()
 		var result *admissioncontroller.Result
 		var err error
+		// Grpc plugin
 		if plug.GrpcConn != nil {
 			if plug.GrpcAutoAccept {
 				go func() {
-					_, err := plug.queryGrpcPlugin("payload")
+					_, err := plug.queryGrpcPlugin(*body)
 					if err != nil {
 						log.Errorf("Error while executing async GRPC plugin %s: %v", plug.Name, err)
 					}
@@ -418,18 +421,54 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(kobj runtime.Object, r *admission.A
 				result = &admissioncontroller.Result{Allowed: true}
 			} else {
 				var admResponse *pb.AdmissionResponse
-				admResponse, err = plug.queryGrpcPlugin("payload")
-				if err != nil {
-					log.Errorf("Error while executing sync GRPC plugin %s: %v", plug.Name, err)
+				var errGrpc error
+				admResponse, errGrpc = plug.queryGrpcPlugin(*body)
+				if errGrpc != nil {
+					log.Errorf("Error while executing sync GRPC plugin %s: %v", plug.Name, errGrpc)
+					errorMsg := fmt.Sprintf("Error while executing GRPC plugin %s: %v", plug.Name, errGrpc)
+					result = &admissioncontroller.Result{Allowed: !plug.GrpcUnallowOnFailure, Msg: errorMsg}
+					// log.V(4).Infof("plug.GrpcUnallowOnFailure %s: %t", plug.Name, plug.GrpcUnallowOnFailure)
 				} else {
-					log.V(4).Infof(">> admResponse.GetResponse() = %s\n", admResponse.GetResponse())
-					log.V(4).Infof(">> admResponse.GetError() = %s\n", admResponse.GetError())
+					if admResponse.GetError() != "" {
+						log.V(4).Infof(">> admResponse.GetError() %s: %s", plug.Name, admResponse.GetError())
+					}
+					if len(admResponse.GetResponse()) > 0 {
+						log.V(4).Infof(">> admResponse.GetResponse() %s: %c", plug.Name, admResponse.GetResponse())
+						// Initialize to Allowed
+						hookResult := admissioncontroller.Result{Allowed: true}
+						// var hookResult admissioncontroller.Result
+						// grpcResp := string(admResponse.GetResponse())
+						// log.V(4).Infof("grpcResp %s: %s", plug.Name, grpcResp)
+
+						// IF NEED TO CHHECK FORMAT...
+						// decoder := json.NewDecoder(strings.NewReader(string(jsonBlob)))
+						// decoder.DisallowUnknownFields()
+						// err = decoder.Decode(&animals)
+						// if err != nil {
+						// 	fmt.Println("error:", err)
+						// }
+						// fmt.Printf("%+v\n", animals)
+
+						// errUnmarshal := yaml.Unmarshal([]byte(grpcResp), &hookResult)
+						errUnmarshal := json.Unmarshal(admResponse.GetResponse(), &hookResult)
+						if errUnmarshal != nil {
+							log.Errorf("Failed to unmarshal response %s (unexpected): %v", plug.Name, errUnmarshal)
+							result = &admissioncontroller.Result{Allowed: true}
+						} else {
+							result = &hookResult
+							log.V(4).Infof("result %s: %v", plug.Name, result)
+						}
+					} else {
+						result = &admissioncontroller.Result{Allowed: true}
+					}
 				}
-				result = &admissioncontroller.Result{Allowed: true}
 			}
 		} else {
 			result, err = plug.VeradcoPlugin.Execute(kobj, string(r.Operation), *r.DryRun || plug.DryRun, r)
 		}
+
+		log.V(4).Infof("result %s: %v", plug.Name, result)
+
 		// rand.Seed(time.Now().UnixNano())
     // n := rand.Intn(3000000000) // n will be between 0 and 3
     // time.Sleep(time.Duration(n)*time.Nanosecond)

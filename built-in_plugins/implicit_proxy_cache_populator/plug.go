@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	admissioncontroller "github.com/smart-duck/veradco"
+	admissioncontroller "github.com/smart-duck/veradco/admissioncontroller"
 	"github.com/smart-duck/veradco/kres"
 	"gopkg.in/yaml.v3"
 	admission "k8s.io/api/admission/v1"
