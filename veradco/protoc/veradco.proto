@@ -31,12 +31,14 @@ service Plugin {
 // Latitudes should be in the range +/- 90 degrees and longitude should be in
 // the range +/- 180 degrees (inclusive).
 message AdmissionReview {
-  string review = 1;
+  bytes review = 1;
+  string configuration = 2;
+  bool   dryRun = 3;
 }
 
 // A latitude-longitude rectangle, represented as two diagonally opposite
 // points "lo" and "hi".
 message AdmissionResponse {
-  string response = 1;
+  bytes response = 1;
   string error = 2;
 }

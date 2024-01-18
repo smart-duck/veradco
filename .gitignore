@@ -41,3 +41,7 @@ operator-sdk_linux_amd64
 
 operator/veradco-operator/bin
 veradco/demo/grpc/veradcod
+veradco/grpc_plugins/dummy/docker/dummy
+grpc_plugins/add_dummy_sidecar/docker/adddummysidecar
+grpc_plugins/dummy/docker/dummy
+grpc_plugins/valid/docker/valid

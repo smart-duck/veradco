@@ -5,7 +5,7 @@ cd veradco
 go build -o demo/grpc/veradcod cmd/serverd/main.go
 cd demo/grpc/
 sudo docker build -t smartduck/veradco:0.1.grpc -f Dockerfile .
-sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:0.1.grpcsh smartduck/veradco:0.1.grpc
+sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:0.1.grpc
 k delete ns veradco
 k apply -f veradco_ns.yaml
 k apply -f veradco_conf.yaml

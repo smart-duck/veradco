@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/smart-duck/veradco"
+	"github.com/smart-duck/veradco/admissioncontroller"
 
 	// "k8s.io/api/admission/v1beta1"
 	admission "k8s.io/api/admission/v1"
@@ -59,7 +59,7 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 			return
 		}
 
-		result, err := hook.Execute(review.Request)
+		result, err := hook.Execute(&body, review.Request)
 		if err != nil {
 			log.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -95,6 +95,8 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 			http.Error(w, fmt.Sprintf("could not marshal response: %v", err), http.StatusInternalServerError)
 			return
 		}
+
+		log.V(4).Infof("Webhook %s response: %c", r.URL.Path, res)
 
 		log.V(1).Infof("Webhook [%s - %s] - Allowed: %t", r.URL.Path, review.Request.Operation, result.Allowed)
 		w.WriteHeader(http.StatusOK)
