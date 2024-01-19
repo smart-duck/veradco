@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veradco
+  namespace: veradco
+  labels:
+    app: veradco
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: veradco
+  template:
+    metadata:
+      labels:
+        app: veradco
+    spec:
+      serviceAccountName: veradco
+      initContainers:
+      - name: veradco-pki-init
+        image: localhost:5001/smartduck/veradco_pki_manager:0.1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/certs
+        - name: config-volume-webhooks
+          mountPath: /conf/
+          readOnly: true
+      containers:
+      - name: veradco-server
+        image: localhost:5001/smartduck/veradco:0.1.grpc
+        imagePullPolicy: Always
+        command: ["/app/veradcod"]
+        # command: ["/bin/sh"]
+        args: ["-v=10"]
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8443
+            scheme: HTTPS
+        ports:
+        - containerPort: 8443
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: tls-certs
+          mountPath: /etc/certs
+          readOnly: true
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+      volumes:
+      - name: tls-certs
+        emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: veradco
+      - name: config-volume-webhooks
+        configMap:
+          name: webhooks
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: veradco
+  namespace: veradco
+spec:
+  selector:
+    app: veradco
+  ports:
+    - port: 443
+      targetPort: 8443
