@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veradco
+  namespace: veradco
+data:
+  veradco.yaml: |
+    failOnPluginLoadingFails: true
+    plugins:
+    - name: "dummy-grpc"
+      path: "dummyplugin2.default.svc.cluster.local:50052"
+      # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
+      # Except that, it works as defined in the Golang regexp package.
+      # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "^Pod$"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|UPDATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        No configuration because of GRPC
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+      grpcAutoAccept: false
+      grpcUnallowOnFailure: true
+    - name: "valid-grpc"
+      path: "validplugin2.default.svc.cluster.local:50053"
+      # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
+      # Except that, it works as defined in the Golang regexp package.
+      # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "^Pod$"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|UPDATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        No configuration because of GRPC
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Validating"
+      grpcAutoAccept: false
+    - name: "adddummysidecar-grpc"
+      path: "adddummysidecarplugin2.default.svc.cluster.local:50053"
+      # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
+      # Except that, it works as defined in the Golang regexp package.
+      # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
+      # A regular expression to define the kinds on which the plugin is called
+      kinds: "^Pod$"
+      # A regular expression to define the operations on which the plugin is called
+      # Example: "CREATE|UPDATE"
+      # It's up to the plugin to manage different operations in its code
+      operations: "CREATE|UPDATE"
+      # A regular expression to define the namespaces in the scope of the plugin
+      # Example: "kube-system|default"
+      namespaces: ".*"
+      # Filter only on resources having some labels.
+      # Both key and value are regular expressions
+      # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+      dryRun: false
+      # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+      configuration: |
+        No configuration because of GRPC
+      # A regular expression that define the scope of the plugin.
+      # "Validating|Mutating" fits to both scopes
+      scope: "Mutating"
+      grpcAutoAccept: false
+      grpcUnallowOnFailure: false
