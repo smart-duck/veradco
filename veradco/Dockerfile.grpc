@@ -1,0 +1,16 @@
+# Start from a Golang base image
+FROM golang:1.19 as builder
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the source code into the container
+COPY . .
+
+# Build the Go app
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/veradcod cmd/serverd/main.go
+
+FROM gcr.io/distroless/base
+COPY --from=builder /app/veradcod /app/veradcod
+EXPOSE 8443 8080
+CMD ["/app/veradcod"]

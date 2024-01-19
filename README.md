@@ -2,7 +2,7 @@
 
 ## Overview
 
-Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using some third-party ones or the ones that are built-in.
+Veradco a.k.a. Versatile Admission Controller is an admission controller that is expandable via a plugin system. It handles Mutating and Validating webhooks that you can extend by developing your own plugins or by using some third-party ones or the ones that are built-in. There is 2 types of plugins: go plugins and GRPC ones. It is recommended to use the GRPC plugins to avoid Go plugins drawbacks.
 
 [Kubernetes admission controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers)
 
@@ -80,9 +80,10 @@ Note: If a plugin rejects the request, then its response is sent to the Kubernet
 
 ## Repository structure
 
-The repository is made of 3 main folders:
+The repository is made of 4 main folders:
 - veradco: the Golang code of the Veradco Admission Controller.
 - built-in_plugins: a collection of plugins provided with Veradco. Some plugins are simple example while some others can be useful in a real Kubernetes cluster. Each plugin is in a subfolder and has a documentation in the README.md file.
+- grpc-plugins: a collection of GRPC plugins given as examples.
 - Kustomize: some Kustomize overlays to install Veradco in a Kubernetes cluster. You can create your own Kustomize overlay from one of the provided one to deploy Veradco in your cluster in a way suitable to your environment.
 - docker: Several Dockerfile files and linked generation scripts. This collection of Dockerfiles covers the following use cases:
   - Build binaries including plugins
@@ -115,11 +116,21 @@ Note: It is up to you to create the webhooks via Kustomize with your own overlay
 
 It is obviously possible to create your own installation. Typically you can create an image containing all the binaries (veradcod and plugins) in your CI and use it in your CD. In this case you don't need to have the init container (heavy) but you lost the ability to build on the fly. To build the binaries you can use the init container image which is suitable for both CD and CI use: refer to the README of the folder useful/build_plugins. 
 
+### Recommended installation
+
+Build your Kustomize from the grpc kustomize folder.
+
 ## Docker images
 
-Veradco is made of 2 Docker images:
+If you use Golang plugins, Veradco is made of 2 Docker images:
 - An init container that is responsible to provide to Veradco container its binary and the required plugins. In its nominal version, it builds on the fly the required built-in plugins and the external ones. It then shares via a shared volume the veradcod binary and the built plugins. This image can also be used as a CI one to build the binaries.
 - A lightweight container that runs veradcod (the Veradco server and its monitoring server). Nominally, all binaries including plugins and veradcod are provided by the init container via a shared volume.
+
+If you use GRPC plugins, Veradco is made of 2 Docker images:
+- An init container inits the Veradco server PKI and set the webhooks according to your configuration.
+- A lightweight container that runs veradcod (the Veradco server and its monitoring server). Plugins are GRPC servers.
+
+Note: you can use both GRPC and Golang plugins.
 
 ## Veradco endpoints
 
@@ -142,7 +153,7 @@ Note: the "other" endpoints can seem complicated to use. Refer to examples to sp
 
 ### How to define Veradco Webhooks
 
-You have to deploy the webhooks in accordance with the endpoints you want to use.
+You have to deploy the webhooks in accordance with the endpoints you want to use. If you use the grpc kustomize, webhooks are defined in a config map and caBundle is updated by the init container.
 
 Basically, if you want to use the /validate/pods endpoint, then you have to define a webhook with a rule filtering pods resources as follow:
 ```yaml
@@ -229,6 +240,8 @@ type VeradcoPlugin interface {
 }
 ```
 
+Note: refer to the provided examples to develop a GRPC plugin or a Golang plugin. It is quite the same.
+
 ## Configuration
 
 The configuration defines the plugins to use and their configuration. Here is an example of a ConfigMap.
@@ -268,6 +281,8 @@ To identify the plugin.
 The path of the plugin file (.so). If the plugin needs to be built (refer to code field below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container at webhook startup.  
 For a built-in plugin the path is /app/plugins.  
 For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility.
+
+If you use GRPC, the path is the address of the GRPC server (the plugin): localhost:50051 by example
 
 #### Built-in plugins
 
@@ -339,15 +354,37 @@ This field is optional. If not defined, all activated endpoints are likely to be
 A regular expression that defines the endpoints that execute the plugin.  
 "/validate/pods|/validate/others" is suitable for the 2 endpoints /validate/pods et /validate/others. In its code the plugin can restrict suitable endpoints. It can be designed for a particular endpoint: by example a plugin checking the validity of a container image can restrict its usage to the endpoint /validate/pods.
 
+### GrpcClientCertFile
+
+If you use mTLS between the plugin and Veradco.
+
+### GrpcClientKeyFile
+
+If you use mTLS between the plugin and Veradco.
+
+### GrpcServerCaCertFile
+
+If you use TLS between the plugin and Veradco. The plugin is the server.
+
+### GrpcAutoAccept
+
+If set to true, response to the API server is immediate and allowed. The plugin is then executed asynchronously.
+
+### GrpcUnallowOnFailure
+
+If the plugin is unreachable and the parameter set to true, the request is unallowed.
+
 ## How to develop a plugin
 
 Developing a plugin is quiet simple. The most direct path is to take inspiration from the examples provided.
 
 A plugin is generally made of a single file called plug.go. For external plugins (passed as a base 64 block), it is obviously mandatory that it is made of a single file.
 
+If it is a GRPC plugin, you need a small main function that uses the provided grpc package.
+
 ### Build the plugin
 
-Build the plugin is useful only to check that the plugin builds. It is up to Veradco init container to build the plugins.
+If it is a Golang plugin, build it is useful only to check that the plugin builds. It is up to Veradco init container to build the plugins.
 
 To check that your plugin builds, you can proceed as follow:
 ```sh

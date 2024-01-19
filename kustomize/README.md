@@ -9,4 +9,6 @@ Generate yaml and apply it.
 ```
 kustomize build ../../kustomize/demo/ | kubectl apply -f -
 kustomize build ../../kustomize/demo/ | kubectl delete -f -
+
+kustomize build kustomize/grpc/ | kubectl apply -f -
 ```
