@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: forbidtagplugin2
+  namespace: default
+  labels:
+    app: forbidtagplugin2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: forbidtagplugin2
+  template:
+    metadata:
+      labels:
+        app: forbidtagplugin2
+    spec:
+      containers:
+      - name: forbidtagplugin2
+        image: localhost:5001/smartduck/forbidtag-grpc-plugin:0.1
+        command: ["/app/forbidtag"]
+        args: ["-port=50052"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: forbidtagplugin2
+  namespace: default
+spec:
+  selector:
+    app: forbidtagplugin2
+  ports:
+    - port: 50053
+      targetPort: 50053

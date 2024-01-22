@@ -46,3 +46,4 @@ grpc_plugins/add_dummy_sidecar/docker/adddummysidecar
 grpc_plugins/dummy/docker/dummy
 grpc_plugins/valid/docker/valid
 grpc_plugins/implicit_proxy_cache_populator/docker/implicit_proxy_cache_populator
+grpc_plugins/forbid_tag/docker/forbidtag

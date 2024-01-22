@@ -254,9 +254,11 @@ go build -o /dev/null ../cmd/serverd/main.go
 # Connect to docker hub.
 echo $DOCKERHUBPW | sudo docker login --username smartduck --password-stdin
 # Build image.
+See docker/grpc folder instead of the below command:
 sudo docker build -t smartduck/veradco:0.1beta1 -f ../Dockerfile.golang_builder ..
 # Push image to docker hub.
-sudo docker push smartduck/veradco:0.1beta1
+sudo docker push smartduck/veradco:0.1.3
+sudo docker push smartduck/veradco_pki_manager:0.1.3
 ```
 
 # Tag release
