@@ -79,7 +79,7 @@ spec:
       serviceAccountName: veradco
       initContainers:
       - name: veradco-pki-init
-        image: localhost:5001/smartduck/veradco_pki_manager:0.1
+        image: smartduck/veradco_pki_manager:0.1.3
         imagePullPolicy: Always
         resources:
           requests:
@@ -94,13 +94,16 @@ spec:
         - name: config-volume-webhooks
           mountPath: /conf/
           readOnly: true
+        # - name: config-volume
+        #   mountPath: /conf_veradco/
+        #   readOnly: true
       containers:
       - name: veradco-server
-        image: localhost:5001/smartduck/veradco:0.1.grpc
+        image: smartduck/veradco:0.1.3
         imagePullPolicy: Always
         command: ["/app/veradcod"]
         # command: ["/bin/sh"]
-        args: ["-v=10"]
+        args: ["-v=0"]
         livenessProbe:
           httpGet:
             path: /healthz

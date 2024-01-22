@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: veradco
+  namespace: veradco
+spec:
+  template:
+    metadata:
+      labels:
+        app: veradco
+    spec:
+      initContainers:
+      - name: veradco-pki-init
+        image: localhost:5001/smartduck/veradco_pki_manager:0.1.3
+      containers:
+      - name: veradco-server
+        image: localhost:5001/smartduck/veradco:0.1.3

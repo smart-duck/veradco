@@ -403,7 +403,7 @@ func (veradcoCfg *VeradcoCfg) ProceedPlugins(body *[]byte, kobj runtime.Object, 
 	}
 
 	for _, plug := range *plugins {
-		log.V(1).Infof(">> Execute plugin %s\n", plug.Name)
+		log.Infof(">> Execute plugin %s\n", plug.Name)
 		// Execute(meta meta.TypeMeta, kobj interface{}, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
 		// veradcoPlugin.Execute(meta.TypeMeta{}, pod, r)
 		startTime := time.Now()

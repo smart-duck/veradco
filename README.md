@@ -116,9 +116,9 @@ Note: It is up to you to create the webhooks via Kustomize with your own overlay
 
 It is obviously possible to create your own installation. Typically you can create an image containing all the binaries (veradcod and plugins) in your CI and use it in your CD. In this case you don't need to have the init container (heavy) but you lost the ability to build on the fly. To build the binaries you can use the init container image which is suitable for both CD and CI use: refer to the README of the folder useful/build_plugins. 
 
-### Recommended installation
+### Recommended installation: GRPC mode supported
 
-Build your Kustomize from the grpc kustomize folder.
+Build your Kustomize from the grpc kustomize folder. Webhook shall be packaged in a config map: CA bundle is then updated by the Veradco init container at startup.
 
 ## Docker images
 
@@ -186,7 +186,7 @@ webhooks:
 ```
 
 Notes:
-- the namespaceSelector used allows not to apply this webhook to the veradco namespace resources. The Kubernetes API server sets this label on all namespaces to the name of the namespace.
+- the Namespace Selector used allows not to apply this webhook to the veradco namespace resources. The Kubernetes API server sets this label on all namespaces to the name of the namespace.
 - As it uses the /validate/pods endpoint, it is a ValidatingWebhookConfiguration resource.
 
 For the other specialized endpoints you have to do in the same way.
