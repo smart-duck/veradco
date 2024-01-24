@@ -1,0 +1,1 @@
+kustomize build ~/go/src/veradco/kustomize/grpc_test | kubectl apply -f -

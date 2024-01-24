@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: validplugin2
+  namespace: default
+  labels:
+    app: validplugin2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: validplugin2
+  template:
+    metadata:
+      labels:
+        app: validplugin2
+    spec:
+      containers:
+      - name: validplugin2
+        image: localhost:5001/smartduck/valid-grpc-plugin:0.1
+        command: ["/app/valid"]
+        args: ["-port=50052"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: validplugin2
+  namespace: default
+spec:
+  selector:
+    app: validplugin2
+  ports:
+    - port: 50053
+      targetPort: 50053

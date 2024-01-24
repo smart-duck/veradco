@@ -7,8 +7,8 @@ data:
   veradco.yaml: |
     failOnPluginLoadingFails: true
     plugins:
-    - name: "dummy-grpc"
-      path: "dummyplugin2.default.svc.cluster.local:50052"
+    - name: "forbidtagplugin2"
+      path: "forbidtagplugin2.default.svc.cluster.local:50053"
       # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
       # Except that, it works as defined in the Golang regexp package.
       # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
@@ -27,7 +27,7 @@ data:
       dryRun: false
       # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
       configuration: |
-        No configuration because of GRPC
+        tagToForbid: "(?i):latest$"
       # A regular expression that define the scope of the plugin.
       # "Validating|Mutating" fits to both scopes
       scope: "Validating"

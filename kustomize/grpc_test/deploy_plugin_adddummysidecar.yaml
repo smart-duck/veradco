@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adddummysidecarplugin2
+  namespace: default
+  labels:
+    app: adddummysidecarplugin2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adddummysidecarplugin2
+  template:
+    metadata:
+      labels:
+        app: adddummysidecarplugin2
+    spec:
+      containers:
+      - name: adddummysidecarplugin2
+        image: localhost:5001/smartduck/adddummysidecar-grpc-plugin:0.1
+        command: ["/app/adddummysidecar"]
+        args: ["-port=50052"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adddummysidecarplugin2
+  namespace: default
+spec:
+  selector:
+    app: adddummysidecarplugin2
+  ports:
+    - port: 50053
+      targetPort: 50053

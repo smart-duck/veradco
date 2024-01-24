@@ -99,7 +99,7 @@ spec:
         #   readOnly: true
       containers:
       - name: veradco-server
-        image: smartduck/veradco:0.1.3
+        image: smartduck/veradco:0.1.4
         imagePullPolicy: Always
         command: ["/app/veradcod"]
         # command: ["/bin/sh"]

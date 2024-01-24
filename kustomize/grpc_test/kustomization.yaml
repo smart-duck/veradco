@@ -3,6 +3,9 @@ kind: Kustomization
 
 resources:
 - ../grpc_base
+- deploy_plugin_adddummysidecar.yaml
+- deploy_plugin_forbidtag.yaml
+- deploy_plugin_valid.yaml
 
 patchesStrategicMerge:
 - veradco.yaml

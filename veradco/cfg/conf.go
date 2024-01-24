@@ -93,7 +93,7 @@ func (plugin *Plugin) queryGrpcPlugin(review []byte) (*pb.AdmissionResponse, err
 	var result *pb.AdmissionResponse
 	var err error
 
-	result, err = c.Execute(ctx, &pb.AdmissionReview{Review: review})
+	result, err = c.Execute(ctx, &pb.AdmissionReview{Review: review, Configuration: plugin.Configuration, DryRun: plugin.DryRun})
 
 	return result, err
 }

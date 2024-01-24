@@ -482,3 +482,13 @@ veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692245       1 server.go:5
 veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692432       1 main.go:47] >> Server running on port: 8443
 ```
 
+## Test veradco
+
+```
+cd veradco
+sudo docker build -t smartduck/veradco:0.1.4 -f Dockerfile.grpc .
+sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:0.1.4
+
+kustomize build ~/go/src/veradco/kustomize/grpc_test | kubectl apply -f -
+
+```
