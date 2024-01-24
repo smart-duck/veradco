@@ -79,7 +79,7 @@ spec:
       serviceAccountName: veradco
       initContainers:
       - name: veradco-pki-init
-        image: smartduck/veradco_pki_manager:0.1.3
+        image: smartduck/veradco_pki_manager:0.1.4
         imagePullPolicy: Always
         resources:
           requests:
