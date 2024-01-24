@@ -258,7 +258,8 @@ See docker/grpc folder instead of the below command:
 sudo docker build -t smartduck/veradco:0.1beta1 -f ../Dockerfile.golang_builder ..
 # Push image to docker hub.
 sudo docker push smartduck/veradco:0.1.4
-sudo docker push smartduck/veradco_pki_manager:0.1.3
+# sudo docker tag smartduck/veradco_pki_manager:0.1.3 smartduck/veradco_pki_manager:0.1.4
+sudo docker push smartduck/veradco_pki_manager:0.1.4
 ```
 
 # Tag release
