@@ -147,7 +147,7 @@ func (veradcoCfg *VeradcoCfg) discoverGrpcPlugins() {
 			for _, service := range services.Items {
 				_, exists := service.Labels["veradco.discover"]
 				if exists {
-					log.V(4).Infof("[Discover GRPC Plugins] Service %s as discovery label", service.Name)
+					log.V(4).Infof("[Discover GRPC Plugins] Service %s has discovery label", service.Name)
 					if strings.Index(alreadyAddedNames, service.Name + "|") < 0 {
 						log.Infof("[Discover GRPC Plugins] Retrieve configuration from service %s", service.Name)
 
