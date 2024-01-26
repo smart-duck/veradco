@@ -14,6 +14,10 @@ type Basic struct {
 	summary string
 }
 
+func (plug *Basic) Discover() ([] byte, error) {
+	return nil, fmt.Errorf("Not yet defined")
+}
+
 func (plug *Basic) Init(configFile string) error {
 	// plug.summary = fmt.Sprintf("Configuration of plugin %s is: %s", name, configFile)
 	fmt.Printf("Init GRPC plugin\n")

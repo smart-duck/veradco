@@ -11,7 +11,9 @@ spec:
     spec:
       initContainers:
       - name: veradco-pki-init
-        image: localhost:5001/smartduck/veradco_pki_manager:0.1.4
+        image: localhost:5001/smartduck/veradco_pki_manager:v0.2.0
       containers:
       - name: veradco-server
-        image: localhost:5001/smartduck/veradco:0.1.4
+        # args: ["-v=10"]
+        args: ["-v=0"]
+        image: localhost:5001/smartduck/veradco:v0.2.0

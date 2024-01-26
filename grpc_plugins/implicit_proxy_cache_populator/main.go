@@ -97,6 +97,10 @@ func (plug *ImplicitProxyCachePopulator) PullQueueConsumer() {
 	}
 }
 
+func (plug *ImplicitProxyCachePopulator) Discover() ([] byte, error) {
+	return nil, fmt.Errorf("Not yet defined")
+}
+
 func (plug *ImplicitProxyCachePopulator) Init(configFile string) error {
 	// Create map of already successfully proceeded images
 	plug.proceededImages = make(map[string]string)

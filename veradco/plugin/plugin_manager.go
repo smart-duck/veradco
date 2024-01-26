@@ -10,5 +10,6 @@ import (
 type VeradcoPlugin interface {
 	Init(configFile string) error
 	Execute(kobj runtime.Object, operation string, dryRun bool, r *admission.AdmissionRequest) (*admissioncontroller.Result, error)
+	Discover() ([] byte, error) // For GRPC only
 	Summary() string
 }

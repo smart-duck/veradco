@@ -257,23 +257,23 @@ echo $DOCKERHUBPW | sudo docker login --username smartduck --password-stdin
 See docker/grpc folder instead of the below command:
 sudo docker build -t smartduck/veradco:0.1beta1 -f ../Dockerfile.golang_builder ..
 # Push image to docker hub.
-sudo docker push smartduck/veradco:0.1.4
-# sudo docker tag smartduck/veradco_pki_manager:0.1.3 smartduck/veradco_pki_manager:0.1.4
-sudo docker push smartduck/veradco_pki_manager:0.1.4
+sudo docker push smartduck/veradco:v0.2.0
+# sudo docker tag smartduck/veradco_pki_manager:0.1.3 smartduck/veradco_pki_manager:v0.2.0
+sudo docker push smartduck/veradco_pki_manager:v0.2.0
 ```
 
 # Tag release
 
 ```
-git tag -a v0.1.4 -m "fix GRPC plugins parameters transfer"
-# remove: git tag -d v0.1.4
+git tag -a v0.2.0 -m "fix GRPC plugins parameters transfer"
+# remove: git tag -d v0.2.0
 # git push origin 0.1beta1
 git push origin --tags
 ```
 
 Delete remote tag:
 ```
-git push --delete origin v0.1.4
+git push --delete origin v0.2.0
 ```
 
 # Encountered difficulties

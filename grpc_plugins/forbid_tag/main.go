@@ -17,6 +17,10 @@ type ForbidTag struct {
 	summary string `yaml:"-"`
 }
 
+func (plug *ForbidTag) Discover() ([] byte, error) {
+	return nil, fmt.Errorf("Not yet defined")
+}
+
 func (plug *ForbidTag) Init(configFile string) error {
 	// Load configuration
 	err := yaml.Unmarshal([]byte(configFile), plug)

@@ -244,32 +244,44 @@ Note: refer to the provided examples to develop a GRPC plugin or a Golang plugin
 
 ## Configuration
 
-The configuration defines the plugins to use and their configuration. Here is an example of a ConfigMap.
+The configuration defines the plugins to use and their configuration. Here is an example of configuration.
 
 The configuation embeds some filtering fields so that your plugin is called or not. It's up to you in the code of your plugin to do the rest. It is as flexible as a Go programming code using Kubernetes API is. Filtering fields most of the time work as regular expressions.
 
 ```yaml
+# Self explanatory
+failOnPluginLoadingFails: true
+# If set to true, discover GRPC plugins in veradco-plugins namespace
+# To be handled, service that expose GRPC plugin shall have the label veradco.discover defined.
+activateDiscovery: true
 plugins:
-- name: "extplug1"
-  path: "/app/external_plugins/extplug1.so"
-  code: |
-    cGFja2FnZSBtYWluCgppbXBvcnQgKAoJLy8gbWV0YSAiazhzLmlvL2FwaW1hY2hpbmVyeS9wa2cv
-    ...ZXJhZGNvUGx1Z2luIFBsdWcx
+- name: "forbidtagplugin2"
+  path: "forbidtagplugin2.veradco-plugins.svc.cluster.local:50053"
+  # It is possible to make your regular expression act as a reverse pattern. To do so, just prefix it with (!~)
+  # Except that, it works as defined in the Golang regexp package.
+  # By example, "(!~)(?i)test" matches that the value does not contain "test" whatever the case is.
+  # A regular expression to define the kinds on which the plugin is called
   kinds: "^Pod$"
-  operations: "CREATE"
+  # A regular expression to define the operations on which the plugin is called
+  # Example: "CREATE|UPDATE"
+  # It's up to the plugin to manage different operations in its code
+  operations: "CREATE|UPDATE"
+  # A regular expression to define the namespaces in the scope of the plugin
+  # Example: "kube-system|default"
   namespaces: ".*"
-  labels:
-  - key: owner
-    value: me
-  annotations:
-  - key: owner
-    value: me
+  # Filter only on resources having some labels.
+  # Both key and value are regular expressions
+  # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
   dryRun: false
+  # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
   configuration: |
-    This plugin does not have configuration
-    That's like that!
+    tagToForbid: "(?i):latest$"
+  # A regular expression that define the scope of the plugin.
+  # "Validating|Mutating" fits to both scopes
   scope: "Validating"
   endpoints: "/validate/pods"
+  grpcAutoAccept: false
+  grpcUnallowOnFailure: true
 ```
 
 ### Field name
@@ -486,8 +498,8 @@ veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692432       1 main.go:47]
 
 ```
 cd veradco
-sudo docker build -t smartduck/veradco:0.1.4 -f Dockerfile.grpc .
-sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:0.1.4
+sudo docker build -t smartduck/veradco:v0.2.0 -f Dockerfile.grpc .
+sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:v0.2.0
 
 kustomize build ~/go/src/veradco/kustomize/grpc_test | kubectl apply -f -
 

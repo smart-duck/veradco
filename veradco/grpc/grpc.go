@@ -92,6 +92,14 @@ func (gp *GrpcPlugin) StartServer() error {
 	return nil
 }
 
+func (gp *GrpcPlugin) Discover(ctx context.Context, in *pb.Empty) (*pb.ConfigurationResponse, error) {
+	conf, err := gp.VeradcoPlugin.Discover()
+	if err != nil {
+		return nil, err
+	}
+	return &pb.ConfigurationResponse{Configuration: conf}, nil
+}
+
 func (gp *GrpcPlugin) Execute(ctx context.Context, in *pb.AdmissionReview) (*pb.AdmissionResponse, error) {
 	// log.Printf("Received: %v", in.GetReview())
 

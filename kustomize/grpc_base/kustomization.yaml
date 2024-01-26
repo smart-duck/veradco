@@ -8,3 +8,4 @@ resources:
 - veradco_ns.yaml
 - deployment.yaml
 - cmwebhooks.yaml
+- sa.yaml

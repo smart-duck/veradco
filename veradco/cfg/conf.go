@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"context"
-	"io/ioutil"
 	log "k8s.io/klog/v2"
 	"gopkg.in/yaml.v3"
 	"encoding/json"
@@ -15,11 +14,15 @@ import (
 	"regexp"
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/kubernetes"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/smart-duck/veradco/admissioncontroller"
 	"github.com/smart-duck/veradco/kres"
 	"github.com/smart-duck/veradco/monitoring"
 	"time"
 	"strings"
+	"sync"
   // "math/rand"
 
 	"google.golang.org/grpc"
@@ -30,6 +33,10 @@ import (
 
 const (
 	timeout = time.Millisecond * 500
+)
+
+var (
+	reGrpc = regexp.MustCompile(`^[^:]+:[0-9]+$`)
 )
 
 type Plugin struct {
@@ -57,13 +64,15 @@ type Plugin struct {
 
 type VeradcoCfg struct {
 	FailOnPluginLoadingFails bool `yaml:"failOnPluginLoadingFails"`
+	ActivateDiscovery bool `yaml:"activateDiscovery,omitempty"`
 	// RejectOnPluginError bool `yaml:"rejectOnPluginError"`Managed at k8s level failurePolicy
 	Plugins []*Plugin `yaml:"plugins"`
+	rwMutexPlugins sync.RWMutex `yaml:"-"`
 }
 
 func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 
-	yfile, err := ioutil.ReadFile(cfgFile)
+	yfile, err := os.ReadFile(cfgFile)
 
 	if err != nil {
 
@@ -71,6 +80,10 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 
 		return err
 	}
+
+	veradcoCfg.rwMutexPlugins.Lock()
+
+	defer veradcoCfg.rwMutexPlugins.Unlock()
 
 	err = yaml.Unmarshal(yfile, &veradcoCfg)
 
@@ -80,7 +93,130 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 		return err
 	}
 
+	if veradcoCfg.ActivateDiscovery {
+		// Launch a go routine to discover services of the veradco-plugins namespace
+		go veradcoCfg.discoverGrpcPlugins()
+	}
+
 	return nil
+}
+
+func (veradcoCfg *VeradcoCfg) loadPluginFromConf(conf []byte) (*Plugin, error) {
+
+	var plugin *Plugin
+
+	err := yaml.Unmarshal(conf, &plugin)
+
+	if err != nil {
+		log.Errorf("Failed to load plugin: %v", err)
+
+		return nil, err
+	}
+
+	return plugin, nil
+}
+
+func (veradcoCfg *VeradcoCfg) addPlugin(plugin *Plugin) {
+	veradcoCfg.rwMutexPlugins.Lock()
+
+	defer veradcoCfg.rwMutexPlugins.Unlock()
+	veradcoCfg.Plugins = append(veradcoCfg.Plugins, plugin)
+}
+
+func (veradcoCfg *VeradcoCfg) discoverGrpcPlugins() {
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		log.Errorf("[Discover GRPC Plugins] Failed to load kubeconfig: %v", err)
+		return
+	}
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		log.Errorf("[Discover GRPC Plugins] Failed to create client set: %v", err)
+		return
+	}
+
+	alreadyAddedNames := ""
+
+	time.Sleep(10 * time.Second)
+
+	for {
+		// List services
+		services, err := clientset.CoreV1().Services("veradco-plugins").List(context.TODO(), meta.ListOptions{})
+		if err == nil {
+			for _, service := range services.Items {
+				_, exists := service.Labels["veradco.discover"]
+				if exists {
+					log.V(4).Infof("[Discover GRPC Plugins] Service %s as discovery label", service.Name)
+					if strings.Index(alreadyAddedNames, service.Name + "|") < 0 {
+						log.Infof("[Discover GRPC Plugins] Retrieve configuration from service %s", service.Name)
+
+						// addr := service.Spec.ExternalName + ":" + string(service.Spec.Ports[0].Port)
+
+						addr := fmt.Sprintf("%s.%s:%d", service.Name, service.Namespace, service.Spec.Ports[0].Port)
+
+						confResp, err := veradcoCfg.queryGrpcPluginConfiguration(addr)
+
+						if err != nil {
+							log.Errorf("[Discover GRPC Plugins] Unable to retrieve configuration for service %s (addr %s): %v", service.Name, addr, err)
+							continue
+						}
+
+						rawConf := confResp.Configuration
+
+						if len(rawConf) > 0 {
+							plugin, err := veradcoCfg.loadPluginFromConf(rawConf)
+							if err != nil {
+								log.Errorf("[Discover GRPC Plugins] Unable to load configuration for service %s (addr %s): %v", service.Name, addr, err)
+								continue
+							}
+
+							_, err = veradcoCfg.loadPlugin(plugin)
+
+							if err != nil {
+								log.Errorf("[Discover GRPC Plugins] Unable to load plugin %s (addr %s): %v", service.Name, addr, err)
+								continue
+							}
+
+							plugin.Path = addr
+
+							veradcoCfg.addPlugin(plugin)
+
+							alreadyAddedNames += service.Name + "|"
+						} else {
+							log.Errorf("[Discover GRPC Plugins] Configuration for service %s (addr %s) is empty", service.Name, addr)
+							continue
+						}
+					} else {
+						log.V(4).Infof("[Discover GRPC Plugins] Service %s already discovered", service.Name)
+					}
+					// fmt.Println(service.Name)
+				}
+			}
+		}
+		time.Sleep(1 * time.Minute)
+	}
+}
+
+func (veradcoCfg *VeradcoCfg) queryGrpcPluginConfiguration(addr string) (*pb.ConfigurationResponse, error) {
+
+	clientConn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		return nil, err
+	}
+
+	c := pb.NewPluginClient(clientConn)
+
+	// Contact the server and print out its response.
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	var result *pb.ConfigurationResponse
+
+	result, err = c.Discover(ctx, &pb.Empty{})
+
+	return result, err
 }
 
 func (plugin *Plugin) queryGrpcPlugin(review []byte) (*pb.AdmissionResponse, error) {
@@ -148,77 +284,98 @@ func (plugin *Plugin) newGrpcConn(addr string) (*grpc.ClientConn, error) {
 	}
 }
 
-func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
-	numberOfPluginsLoaded := 0
-	log.Infof(">>>> Loading plugins")
+func (veradcoCfg *VeradcoCfg) loadPlugin(plugin *Plugin) (int, error) {
+	log.Infof(">> Loading plugin  %s", plugin.Name)
 
-	reGrpc := regexp.MustCompile(`^[^:]+:[0-9]+$`)
+	// Test if it is a GRPC plugin or a legacy one
+	if reGrpc.MatchString(plugin.Path) {
+		// GRPC plugin
+		conn, err := plugin.newGrpcConn(plugin.Path)
 
-	for _, plugin := range veradcoCfg.Plugins {
-		log.Infof(">> Loading plugin  %s", plugin.Name)
-
-		// Test if it is a GRPC plugin or a legacy one
-		if reGrpc.MatchString(plugin.Path) {
-			// GRPC plugin
-			conn, err := plugin.newGrpcConn(plugin.Path)
-
-			if err != nil {
-				log.Errorf("Unable to load GRPC plugin %s: %v", plugin.Name, err)
-				if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-					return numberOfPluginsLoaded, err			
-				}
+		if err != nil {
+			log.Errorf("Unable to load GRPC plugin %s: %v", plugin.Name, err)
+			if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
+				return 0, err			
 			} else {
-				// defer conn.Close(): conn never closed TODO?
-				plugin.GrpcConn = conn
-				plugin.VeradcoPluginLoaded = true
-				numberOfPluginsLoaded++
+				return 0, nil
 			}
 		} else {
-			// Legacy plugin: go plugin
+			// defer conn.Close(): conn never closed TODO?
+			plugin.GrpcConn = conn
+			plugin.VeradcoPluginLoaded = true
+			return 1, nil
+		}
+	} else {
+		// Legacy plugin: go plugin
 
-			// Try to execute plugins
-			plug, err := goplugin.Open(plugin.Path)
+		// Try to execute plugins
+		plug, err := goplugin.Open(plugin.Path)
+		if err != nil {
+			log.Errorf("Unable to load plugin %s: %v", plugin.Name, err)
+			if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
+				return 0, err			
+			} else {
+				return 0, nil
+			}
+		} else {
+			pluginHandler, err := plug.Lookup("VeradcoPlugin")
 			if err != nil {
-				log.Errorf("Unable to load plugin %s: %v", plugin.Name, err)
+				log.Errorf("Unable to find handler for plugin %s: %v", plugin.Name, err)
 				if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-					return numberOfPluginsLoaded, err			
+					return 0, err			
+				} else {
+					return 0, nil
 				}
 			} else {
-				pluginHandler, err := plug.Lookup("VeradcoPlugin")
-				if err != nil {
-					log.Errorf("Unable to find handler for plugin %s: %v", plugin.Name, err)
+				var veradcoPlugin veradcoplugin.VeradcoPlugin
+
+				veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
+				if !ok {
+					log.Errorf("Plugin %s does not implement awaited interface", plugin.Name)
 					if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-						return numberOfPluginsLoaded, err			
+						return 0, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
+					} else {
+						return 0, nil
 					}
 				} else {
-					var veradcoPlugin veradcoplugin.VeradcoPlugin
 
-					veradcoPlugin, ok := pluginHandler.(veradcoplugin.VeradcoPlugin)
-					if !ok {
-						log.Errorf("Plugin %s does not implement awaited interface", plugin.Name)
+					log.Infof(">> Init plugin %s", plugin.Name)
+					err := veradcoPlugin.Init(plugin.Configuration)
+
+					if err != nil {
+						log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
 						if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-							return numberOfPluginsLoaded, fmt.Errorf("Plugin %s does not implement awaited interface\n", plugin.Name)			
+							return 0, err			
+						} else {
+							return 0, nil
 						}
 					} else {
-
-						log.Infof(">> Init plugin %s", plugin.Name)
-						err := veradcoPlugin.Init(plugin.Configuration)
-
-						if err != nil {
-							log.Errorf("Unable to init plugin %s (skipped): %v", plugin.Name, err)
-							if ! plugin.DryRun && veradcoCfg.FailOnPluginLoadingFails {
-								return numberOfPluginsLoaded, err			
-							}
-						} else {
-							plugin.VeradcoPlugin = veradcoPlugin
-							plugin.VeradcoPluginLoaded = true
-							numberOfPluginsLoaded++
-						}
-						// log.Infof("Plugin: %v\n", plugin)
+						plugin.VeradcoPlugin = veradcoPlugin
+						plugin.VeradcoPluginLoaded = true
+						return 1, nil
 					}
+					// log.Infof("Plugin: %v\n", plugin)
 				}
 			}
 		}
+	}
+}
+
+func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
+
+	veradcoCfg.rwMutexPlugins.RLock()
+
+	defer veradcoCfg.rwMutexPlugins.RUnlock()
+
+	numberOfPluginsLoaded := 0
+	log.Infof(">>>> Loading plugins")
+
+	for _, plugin := range veradcoCfg.Plugins {
+		nb, err := veradcoCfg.loadPlugin(plugin)
+		if err != nil {
+			return numberOfPluginsLoaded, err
+		}
+		numberOfPluginsLoaded += nb
 	}
 
 	if numberOfPluginsLoaded > 0 {
@@ -231,6 +388,10 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 // func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, kind string, operation string, namespace string, labels map[string]string, annotations map[string]string, scope string) (*[]*Plugin, error) {
 func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, scope string, endpoint string) (*[]*Plugin, error) {
 	// log.Infof("Plugins: %v\n", veradcoCfg.Plugins)
+
+	veradcoCfg.rwMutexPlugins.RLock()
+
+	defer veradcoCfg.rwMutexPlugins.RUnlock()
 
 	log.V(2).Infof(">>>> GetPlugins called")
 

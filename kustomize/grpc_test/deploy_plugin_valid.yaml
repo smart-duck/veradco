@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: validplugin2
-  namespace: default
+  namespace: veradco-plugins
   labels:
     app: validplugin2
 spec:
@@ -28,7 +28,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: validplugin2
-  namespace: default
+  namespace: veradco-plugins
 spec:
   selector:
     app: validplugin2

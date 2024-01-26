@@ -79,7 +79,7 @@ spec:
       serviceAccountName: veradco
       initContainers:
       - name: veradco-pki-init
-        image: smartduck/veradco_pki_manager:0.1.4
+        image: smartduck/veradco_pki_manager:v0.2.0
         imagePullPolicy: Always
         resources:
           requests:
@@ -99,7 +99,7 @@ spec:
         #   readOnly: true
       containers:
       - name: veradco-server
-        image: smartduck/veradco:0.1.4
+        image: smartduck/veradco:v0.2.0
         imagePullPolicy: Always
         command: ["/app/veradcod"]
         # command: ["/bin/sh"]

@@ -6,6 +6,7 @@ metadata:
 data:
   veradco.yaml: |
     failOnPluginLoadingFails: true
+    activateDiscovery: false
     plugins:
     - name: "dummy-grpc"
       path: "dummyplugin2.default.svc.cluster.local:50052"
