@@ -382,7 +382,10 @@ func (veradcoCfg *VeradcoCfg) LoadPlugins() (int, error) {
 		log.Infof(">> %d plugins loaded over %d", numberOfPluginsLoaded, len(veradcoCfg.Plugins))
 		return numberOfPluginsLoaded, nil
 	}
-	return numberOfPluginsLoaded, fmt.Errorf("No plugin loaded")
+	
+	// Not an error to load 0 plugin because GRPC plugins can all be discovered
+	return numberOfPluginsLoaded, nil
+	// return numberOfPluginsLoaded, fmt.Errorf("No plugin loaded")
 }
 
 // func (veradcoCfg *VeradcoCfg) GetPlugins(r *admission.AdmissionRequest, kind string, operation string, namespace string, labels map[string]string, annotations map[string]string, scope string) (*[]*Plugin, error) {

@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"regexp"
 	"github.com/smart-duck/veradco/grpc"
+	"os"
 	// meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -18,7 +19,18 @@ type ForbidTag struct {
 }
 
 func (plug *ForbidTag) Discover() ([] byte, error) {
-	return nil, fmt.Errorf("Not yet defined")
+	confFile := os.Getenv("PLUGIN_CONF_FILE")
+
+	yfile, err := os.ReadFile(confFile)
+
+	if err != nil {
+
+		fmt.Errorf("Failed to read configuration %s: %v", confFile, err)
+
+		return nil, err
+	}
+
+	return yfile, nil
 }
 
 func (plug *ForbidTag) Init(configFile string) error {

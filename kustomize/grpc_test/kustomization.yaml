@@ -8,6 +8,7 @@ resources:
 - deploy_plugin_valid.yaml
 - plugins_ns.yaml
 
-patchesStrategicMerge:
-- veradco.yaml
-- veradco_conf.yaml
+patches:
+- path: veradco.yaml
+- path: veradco_conf.yaml
+- path: cmwebhooks.yaml
