@@ -17,6 +17,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/kubernetes"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"github.com/smart-duck/veradco/admissioncontroller"
 	"github.com/smart-duck/veradco/kres"
 	"github.com/smart-duck/veradco/monitoring"
@@ -68,6 +70,8 @@ type VeradcoCfg struct {
 	// RejectOnPluginError bool `yaml:"rejectOnPluginError"`Managed at k8s level failurePolicy
 	Plugins []*Plugin `yaml:"plugins"`
 	rwMutexPlugins sync.RWMutex `yaml:"-"`
+	mutexCR sync.Mutex `yaml:"-"`
+	alreadyAddedCR string  `yaml:"-"`
 }
 
 func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
@@ -92,6 +96,8 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 
 		return err
 	}
+
+	go veradcoCfg.DiscoverGrpcPluginsCR()
 
 	if veradcoCfg.ActivateDiscovery {
 		// Launch a go routine to discover services of the veradco-plugins namespace
@@ -121,6 +127,106 @@ func (veradcoCfg *VeradcoCfg) addPlugin(plugin *Plugin) {
 
 	defer veradcoCfg.rwMutexPlugins.Unlock()
 	veradcoCfg.Plugins = append(veradcoCfg.Plugins, plugin)
+}
+
+func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
+
+	veradcoCfg.mutexCR.Lock()
+	defer veradcoCfg.mutexCR.Unlock()
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		log.Errorf("[Discover GRPC Plugins CR] Failed to load kubeconfig: %v", err)
+		return
+	}
+	
+
+	// Create a dynamic client
+	client, err := dynamic.NewForConfig(config)
+	if err != nil {
+		log.Errorf("[Discover GRPC Plugins CR] Failed to dynamic client: %v", err)
+		return
+	}
+
+	// Define the API group, version, and resource type of your custom resource
+	groupVersionResource := schema.GroupVersionResource{
+		Group:    "smartduck.ovh",
+		Version:  "v1",
+		Resource: "veradcoplugins",
+	}
+
+	// Retrieve the content of the custom resource
+	result, err := client.Resource(groupVersionResource).Namespace("veradco-plugins").List(context.TODO(), meta.ListOptions{})
+	if err != nil {
+		log.Errorf("[Discover GRPC Plugins CR] Failed to create client set: %v", err)
+		return
+	} else {
+		for _, cr := range result.Items {
+
+			var name string
+
+			metadata, ok := cr.Object["metadata"]
+			// If the key exists
+			if ok {
+				// Do something
+				meta, ok := metadata.(map[string]interface{})
+				if ok {
+					name, ok = meta["name"].(string)
+					// fmt.Println(plugin["plugin"])
+					if ok {
+						fmt.Println(name)
+					} else {
+						continue
+					}
+				} else {
+					continue
+				}
+			} else {
+				continue
+			}
+
+			if strings.Index(veradcoCfg.alreadyAddedCR, name + "|") < 0 {
+
+				spec, ok := cr.Object["spec"]
+				// If the key exists
+				if ok {
+					// Do something
+					plugin, ok := spec.(map[string]interface{})
+					if ok {
+						conf, ok := plugin["plugin"].(string)
+						// fmt.Println(plugin["plugin"])
+						if ok {
+							// fmt.Println(conf)
+
+							plugin, err := veradcoCfg.loadPluginFromConf([]byte(conf))
+							if err != nil {
+								log.Errorf("[Discover GRPC Plugins CR] Unable to load configuration for service %s: %v", name, err)
+								continue
+							}
+
+							_, err = veradcoCfg.loadPlugin(plugin)
+
+							if err != nil {
+								log.Errorf("[Discover GRPC Plugins CR] Unable to load plugin %s : %v", name, err)
+								continue
+							}
+
+							veradcoCfg.addPlugin(plugin)
+
+							veradcoCfg.alreadyAddedCR += name + "|"
+						} else {
+							continue
+						}
+					} else {
+						continue
+					}
+				} else {
+					continue
+				}
+			}
+
+		}
+	}
 }
 
 func (veradcoCfg *VeradcoCfg) discoverGrpcPlugins() {

@@ -60,6 +60,13 @@ func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string
 			return &admissioncontroller.Result{Msg: err.Error()}, nil
 		}
 
+		// >>>> others / CREATE operation, Kind: VeradcoPlugin, Version: v1, Group: smartduck.ovh, Name: dummyplugin, Namespace: default
+		// custom resource (CR) handling
+		if r.Kind.Kind == "VeradcoPlugin" {
+			veradcoCfg.DiscoverGrpcPluginsCR()
+			return nil, nil
+		}
+
 		// Apply the plugins
 		return veradcoCfg.ProceedPlugins(body, other, r, scope, endpoint)
 	}

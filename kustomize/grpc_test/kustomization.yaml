@@ -6,6 +6,7 @@ resources:
 - deploy_plugin_adddummysidecar.yaml
 - deploy_plugin_forbidtag.yaml
 - deploy_plugin_valid.yaml
+- deploy_plugin_enforcelabels.yaml
 - plugins_ns.yaml
 
 patches:

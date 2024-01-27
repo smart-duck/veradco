@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enforcelabelsplugin2
+  namespace: default
+  labels:
+    app: enforcelabelsplugin2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enforcelabelsplugin2
+  template:
+    metadata:
+      labels:
+        app: enforcelabelsplugin2
+    spec:
+      containers:
+      - name: enforcelabelsplugin2
+        image: localhost:5001/smartduck/enforcelabels-grpc-plugin:0.1
+        command: ["/app/enforcelabels"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enforcelabelsplugin2
+  namespace: default
+spec:
+  selector:
+    app: enforcelabelsplugin2
+  ports:
+    - port: 50053
+      targetPort: 50053

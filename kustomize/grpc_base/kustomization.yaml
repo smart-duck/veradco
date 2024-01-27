@@ -9,3 +9,4 @@ resources:
 - deployment.yaml
 - cmwebhooks.yaml
 - sa.yaml
+- grpc-plugin-crd.yaml

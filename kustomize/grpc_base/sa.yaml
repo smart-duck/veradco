@@ -7,6 +7,9 @@ rules:
 - apiGroups: [""]
   resources: ["services"]
   verbs: ["get", "list", "watch"]
+- apiGroups: ["smartduck.ovh"]
+  resources: ["veradcoplugins"]
+  verbs: ["get", "list", "watch"]
 # ---
 # apiVersion: v1
 # kind: ServiceAccount

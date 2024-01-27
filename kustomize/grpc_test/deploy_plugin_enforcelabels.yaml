@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enforcelabelsplugin2
+  namespace: veradco-plugins
+  labels:
+    app: enforcelabelsplugin2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enforcelabelsplugin2
+  template:
+    metadata:
+      labels:
+        app: enforcelabelsplugin2
+    spec:
+      containers:
+      - name: enforcelabelsplugin2
+        image: localhost:5001/smartduck/enforcelabels-grpc-plugin:0.1
+        command: ["/app/enforcelabels"]
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 50053
+        env:
+        - name: PLUGIN_CONF_FILE
+          value: "/conf/plugin.yaml"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /conf/
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: enforcelabelsplugin2
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enforcelabelsplugin2
+  namespace: veradco-plugins
+data:
+  plugin.yaml: |
+    name: "EnforceLabels"
+    # The path of the plugin.
+    # If the plugin needs to be build from the parameter plug.go (below), it is MANDATORY that is path is /app/external_plugins. It will be built by the Init Container.
+    # For a built-in plugin the path is /app/plugins
+    # For a plugin you built yourself the path is as you want. We advise you to build your plugin by using the init container docker image to avoid infrequent issues with Golang plugins compatibility. TODO: documentation.
+    path: "enforcelabelsplugin2.veradco-plugins.svc.cluster.local:50053"
+    # A regular expression to define the kinds on which the plugin is called
+    kinds: "(?i)^(Pod|Secret|namespace|ServiceAccount|Service|DaemonSet|Deployment|ReplicaSet|DaemonSet|StatefulSet|Rollout|CronJob|Job)$"
+    # A regular expression to define the operations on which the plugin is called
+    # Example: "CREATE|UPDATE"
+    # It's up to the plugin to manage different operations in its code
+    operations: "CREATE"
+    # A regular expression to define the namespaces in the scope of the plugin
+    # Example: "kube-system|default"
+    namespaces: "(!~)kube-system|kube-public"
+    # Filter only on resources having some labels.
+    # Both key and value are regular expressions
+    # Filter only on resources having some labels.
+    # Both key and value are regular expressions
+    # This parameter is used together with the one of the AdmissionRequest: dryRun = dryRun || AdmissionRequest.DryRun
+    dryRun: true
+    # The configuration of the plugin. Passed to the plugin via the Init function of the plugin.
+    configuration: |
+      annotations: 
+        owner: ^to.+
+      labels: 
+        nodegp: ^ng-.+
+    # A regular expression that define the scope of the plugin.
+    # "Validating|Mutating" fits to both scopes
+    scope: "Validating"
+    endpoints: "/validate/pods"
+    grpcAutoAccept: false
+    grpcUnallowOnFailure: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enforcelabelsplugin2
+  namespace: veradco-plugins
+  labels:
+    veradco.discover: "just_need_to_be_defined"
+spec:
+  selector:
+    app: enforcelabelsplugin2
+  ports:
+    - port: 50053
+      targetPort: 50053

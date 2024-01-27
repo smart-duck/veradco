@@ -66,27 +66,40 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 			return
 		}
 
+		var msgResult string
+		var allowResult bool
+
+		if result == nil {
+			msgResult = ""
+			allowResult = true
+		} else {
+			msgResult = result.Msg
+			allowResult = result.Allowed
+		}
+
 		admissionResponse := admission.AdmissionReview{
 			TypeMeta: meta.TypeMeta{APIVersion: "admission.k8s.io/v1", Kind: "AdmissionReview"},
 			Response: &admission.AdmissionResponse{
 				UID:     review.Request.UID,
-				Allowed: result.Allowed,
-				Result:  &meta.Status{Message: result.Msg},
+				Allowed: allowResult,
+				Result:  &meta.Status{Message: msgResult},
 			},
 		}
 
-		// set the patch operations for mutating admission
-		if len(result.PatchOps) > 0 {
-			log.V(2).Infof("Set patch operations: %v", result.PatchOps)
-			patchBytes, err := json.Marshal(result.PatchOps)
-			if err != nil {
-				log.Error(err)
-				http.Error(w, fmt.Sprintf("could not marshal JSON patch: %v", err), http.StatusInternalServerError)
+		if result != nil {
+			// set the patch operations for mutating admission
+			if len(result.PatchOps) > 0 {
+				log.V(2).Infof("Set patch operations: %v", result.PatchOps)
+				patchBytes, err := json.Marshal(result.PatchOps)
+				if err != nil {
+					log.Error(err)
+					http.Error(w, fmt.Sprintf("could not marshal JSON patch: %v", err), http.StatusInternalServerError)
+				}
+				admissionResponse.Response.Patch = patchBytes
+				v1JSONPatch := admission.PatchTypeJSONPatch
+				admissionResponse.Response.PatchType = &v1JSONPatch
+				log.V(3).Infof("admissionResponse.Response.Patch: %s", string(admissionResponse.Response.Patch))
 			}
-			admissionResponse.Response.Patch = patchBytes
-			v1JSONPatch := admission.PatchTypeJSONPatch
-			admissionResponse.Response.PatchType = &v1JSONPatch
-			log.V(3).Infof("admissionResponse.Response.Patch: %s", string(admissionResponse.Response.Patch))
 		}
 
 		res, err := json.Marshal(admissionResponse)
@@ -98,7 +111,7 @@ func (h *admissionHandler) Serve(hook admissioncontroller.Hook) http.HandlerFunc
 
 		log.V(4).Infof("Webhook %s response: %c", r.URL.Path, res)
 
-		log.V(1).Infof("Webhook [%s - %s] - Allowed: %t", r.URL.Path, review.Request.Operation, result.Allowed)
+		log.V(1).Infof("Webhook [%s - %s] - Allowed: %t", r.URL.Path, review.Request.Operation, allowResult)
 		w.WriteHeader(http.StatusOK)
 		w.Write(res)
 	}
