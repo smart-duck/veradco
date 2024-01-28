@@ -67,6 +67,7 @@ type Plugin struct {
 type VeradcoCfg struct {
 	FailOnPluginLoadingFails bool `yaml:"failOnPluginLoadingFails"`
 	ActivateDiscovery bool `yaml:"activateDiscovery,omitempty"`
+	ActivateCRD bool `yaml:"activateCRD,omitempty"`
 	// RejectOnPluginError bool `yaml:"rejectOnPluginError"`Managed at k8s level failurePolicy
 	Plugins []*Plugin `yaml:"plugins"`
 	rwMutexPlugins sync.RWMutex `yaml:"-"`
@@ -97,7 +98,11 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 		return err
 	}
 
-	go veradcoCfg.DiscoverGrpcPluginsCR()
+	go func() {
+		// Wait for the CR to be applied
+		time.Sleep(15 * time.Second)
+		veradcoCfg.DiscoverGrpcPluginsCR(nil)
+	}()
 
 	if veradcoCfg.ActivateDiscovery {
 		// Launch a go routine to discover services of the veradco-plugins namespace
@@ -129,7 +134,11 @@ func (veradcoCfg *VeradcoCfg) addPlugin(plugin *Plugin) {
 	veradcoCfg.Plugins = append(veradcoCfg.Plugins, plugin)
 }
 
-func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
+func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR(r *admission.AdmissionRequest) {
+
+	if !veradcoCfg.ActivateCRD {
+		return
+	}
 
 	veradcoCfg.mutexCR.Lock()
 	defer veradcoCfg.mutexCR.Unlock()
@@ -144,11 +153,11 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
 	// Create a dynamic client
 	client, err := dynamic.NewForConfig(config)
 	if err != nil {
-		log.Errorf("[Discover GRPC Plugins CR] Failed to dynamic client: %v", err)
+		log.Errorf("[Discover GRPC Plugins CR] Failed to create dynamic client: %v", err)
 		return
 	}
 
-	// Define the API group, version, and resource type of your custom resource
+	// Define the API group, version, and resource type of the VeradcoPlugin CR
 	groupVersionResource := schema.GroupVersionResource{
 		Group:    "smartduck.ovh",
 		Version:  "v1",
@@ -161,6 +170,7 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
 		log.Errorf("[Discover GRPC Plugins CR] Failed to create client set: %v", err)
 		return
 	} else {
+		log.V(4).Infof("[Discover GRPC Plugins CR] Number of CR found %d", len(result.Items))
 		for _, cr := range result.Items {
 
 			var name string
@@ -174,14 +184,17 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
 					name, ok = meta["name"].(string)
 					// fmt.Println(plugin["plugin"])
 					if ok {
-						fmt.Println(name)
+						log.V(4).Infof("[Discover GRPC Plugins CR] Discover CR %s", name)
 					} else {
+						log.V(4).Infof("[Discover GRPC Plugins CR] continue metadata3")
 						continue
 					}
 				} else {
+					log.V(4).Infof("[Discover GRPC Plugins CR] continue metadata4")
 					continue
 				}
 			} else {
+				log.V(4).Infof("[Discover GRPC Plugins CR] continue metadata5")
 				continue
 			}
 
@@ -191,9 +204,9 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
 				// If the key exists
 				if ok {
 					// Do something
-					plugin, ok := spec.(map[string]interface{})
+					pluginConf, ok := spec.(map[string]interface{})
 					if ok {
-						conf, ok := plugin["plugin"].(string)
+						conf, ok := pluginConf["plugin"].(string)
 						// fmt.Println(plugin["plugin"])
 						if ok {
 							// fmt.Println(conf)
@@ -215,14 +228,19 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR() {
 
 							veradcoCfg.alreadyAddedCR += name + "|"
 						} else {
+							log.V(4).Infof("[Discover GRPC Plugins CR] continue plugin3")
 							continue
 						}
 					} else {
+						log.V(4).Infof("[Discover GRPC Plugins CR] continue plugin2")
 						continue
 					}
 				} else {
+					log.V(4).Infof("[Discover GRPC Plugins CR] continue plugin1")
 					continue
 				}
+			} else {
+				log.V(4).Infof("[Discover GRPC Plugins CR] CR %s already encountered", name)
 			}
 
 		}

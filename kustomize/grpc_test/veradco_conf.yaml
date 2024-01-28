@@ -7,6 +7,7 @@ data:
   veradco.yaml: |
     failOnPluginLoadingFails: true
     activateDiscovery: true
+    activateCRD: true
     plugins:
     # NO PLUGIN: only auto discovery
     # - name: "forbidtagplugin2"

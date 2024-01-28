@@ -8,6 +8,7 @@ resources:
 - deploy_plugin_valid.yaml
 - deploy_plugin_enforcelabels.yaml
 - plugins_ns.yaml
+- grpc-plugin-cr-example.yaml
 
 patches:
 - path: veradco.yaml

@@ -12,6 +12,8 @@ import (
 	admission "k8s.io/api/admission/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"time"
 )
 
 func validateCreate(veradcoCfg *conf.VeradcoCfg, endpoint string) admissioncontroller.AdmitFunc {
@@ -63,7 +65,12 @@ func operation(op admission.Operation, veradcoCfg *conf.VeradcoCfg, scope string
 		// >>>> others / CREATE operation, Kind: VeradcoPlugin, Version: v1, Group: smartduck.ovh, Name: dummyplugin, Namespace: default
 		// custom resource (CR) handling
 		if r.Kind.Kind == "VeradcoPlugin" {
-			veradcoCfg.DiscoverGrpcPluginsCR()
+			log.V(2).Infof("GRPC plugin CR event")
+			go func() {
+				// Wait for the CR to be applied
+				time.Sleep(5 * time.Second)
+				veradcoCfg.DiscoverGrpcPluginsCR(r)
+			}()
 			return nil, nil
 		}
 

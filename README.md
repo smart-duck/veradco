@@ -498,9 +498,22 @@ veradco-d959655c6-crwrd veradco-server I0926 12:26:37.692432       1 main.go:47]
 
 ```
 cd veradco
-sudo docker build -t smartduck/veradco:v0.2.0 -f Dockerfile.grpc .
-sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:v0.2.0
+# Check it builds:
+go build -o demo/grpc/veradcod cmd/serverd/main.go
 
+# Build docker image and deploy for test purpose:
+cd demo/grpc/;sudo docker build -t smartduck/veradco:v0.2.0 -f Dockerfile .;cd ../..
+sudo ~/go/src/veradco/veradco/demo/local_registry/push_local_image_to_local_registry.sh smartduck/veradco:v0.2.0
 kustomize build ~/go/src/veradco/kustomize/grpc_test | kubectl apply -f -
 
+# Build docker image for docker hub:
+sudo docker build -t smartduck/veradco:v0.2.0 -f Dockerfile.grpc .
+
+```
+
+## Kept
+
+remove untagged docker images:
+```
+for img in $(sudo docker images | grep -E "^<none>" | sed -E "s/ +/ /g" | cut -d" " -f3); do sudo docker rmi $img; done
 ```

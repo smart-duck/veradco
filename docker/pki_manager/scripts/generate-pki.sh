@@ -73,6 +73,33 @@ if [[ -f /conf/webhooks.yaml ]]; then
     exit 2
   fi
 
+# Create CR webhook
+cat <<EOF | kubectl apply -f -
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: veradco-crs
+  labels:
+    createByVeradco: "true"
+webhooks:
+- name: veradco-crs.default.svc
+  sideEffects: None
+  admissionReviewVersions: ["v1"]
+  clientConfig:
+    service:
+      name: veradco
+      namespace: veradco
+      path: "/validate/others"
+    caBundle: "${CA_BUNDLE}"
+  rules:
+    - operations: ["CREATE", "DELETE"]
+      apiGroups: ["smartduck.ovh"]
+      apiVersions: ["v1"]
+      resources: ["veradcoplugins"]
+  failurePolicy: Ignore
+EOF
+
+
   # COUNTER=0
   # while true; do
   #   CREATE_WEBHOOK=$(kubectl apply -f /tmp/webhooks.yaml)
