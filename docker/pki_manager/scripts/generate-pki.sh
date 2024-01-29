@@ -92,7 +92,7 @@ webhooks:
       path: "/validate/others"
     caBundle: "${CA_BUNDLE}"
   rules:
-    - operations: ["CREATE", "DELETE"]
+    - operations: ["CREATE", "UPDATE", "DELETE"]
       apiGroups: ["smartduck.ovh"]
       apiVersions: ["v1"]
       resources: ["veradcoplugins"]

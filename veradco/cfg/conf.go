@@ -19,6 +19,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"github.com/smart-duck/veradco/admissioncontroller"
 	"github.com/smart-duck/veradco/kres"
 	"github.com/smart-duck/veradco/monitoring"
@@ -72,7 +73,8 @@ type VeradcoCfg struct {
 	Plugins []*Plugin `yaml:"plugins"`
 	rwMutexPlugins sync.RWMutex `yaml:"-"`
 	mutexCR sync.Mutex `yaml:"-"`
-	alreadyAddedCR string  `yaml:"-"`
+	// alreadyAddedCR string  `yaml:"-"`
+	currentCR map[string]*Plugin `yaml:"-"`
 }
 
 func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
@@ -97,6 +99,8 @@ func (veradcoCfg *VeradcoCfg) ReadConf(cfgFile string) error {
 
 		return err
 	}
+
+	veradcoCfg.currentCR = make(map[string]*Plugin)
 
 	go func() {
 		// Wait for the CR to be applied
@@ -131,17 +135,77 @@ func (veradcoCfg *VeradcoCfg) addPlugin(plugin *Plugin) {
 	veradcoCfg.rwMutexPlugins.Lock()
 
 	defer veradcoCfg.rwMutexPlugins.Unlock()
+
+	log.Infof("Add plugin %s", plugin.Name)
+
 	veradcoCfg.Plugins = append(veradcoCfg.Plugins, plugin)
+}
+
+func (veradcoCfg *VeradcoCfg) removePlugin(plugin *Plugin) {
+	veradcoCfg.rwMutexPlugins.Lock()
+
+	defer veradcoCfg.rwMutexPlugins.Unlock()
+
+	for index, currPlug := range veradcoCfg.Plugins {
+		if currPlug == plugin {
+			log.Infof("Delete plugin %s", plugin.Name)
+			veradcoCfg.Plugins = append(veradcoCfg.Plugins[:index], veradcoCfg.Plugins[index+1:]...)
+		}
+	}
 }
 
 func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR(r *admission.AdmissionRequest) {
 
+	getInfoFromCR := func(cr unstructured.Unstructured) (string, string, error) {
+		var name string
+
+		metadata, ok := cr.Object["metadata"]
+		// If the key exists
+		if ok {
+			// Do something
+			meta, ok := metadata.(map[string]interface{})
+			if ok {
+				name, ok = meta["name"].(string)
+				// fmt.Println(plugin["plugin"])
+				if ok {
+					log.V(4).Infof("[Discover GRPC Plugins CR] Discover CR %s", name)
+				} else {
+					return "", "", fmt.Errorf("metadata name not found in CR")
+				}
+			} else {
+				return "", "", fmt.Errorf("metadata name not found in CR")
+			}
+		} else {
+			return "", "", fmt.Errorf("metadata name not found in CR")
+		}
+
+		var confPlugin string
+
+		spec, ok := cr.Object["spec"]
+		// If the key exists
+		if ok {
+			// Do something
+			pluginMap, ok := spec.(map[string]interface{})
+			if ok {
+				confPlugin, ok = pluginMap["plugin"].(string)
+				// fmt.Println(plugin["plugin"])
+				if !ok {
+					return "", "", fmt.Errorf("plugin conf not found in CR")
+				}
+			} else {
+				return "", "", fmt.Errorf("plugin conf not found in CR")
+			}
+		} else {
+			return "", "", fmt.Errorf("plugin conf not found in CR")
+		}
+
+		return name, confPlugin, nil
+		
+	}
+
 	if !veradcoCfg.ActivateCRD {
 		return
 	}
-
-	veradcoCfg.mutexCR.Lock()
-	defer veradcoCfg.mutexCR.Unlock()
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -164,6 +228,29 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR(r *admission.AdmissionReques
 		Resource: "veradcoplugins",
 	}
 
+	veradcoCfg.mutexCR.Lock()
+	defer veradcoCfg.mutexCR.Unlock()
+
+	operation := "CREATE"
+	resName := ""
+	
+	if r != nil {
+		operation = string(r.Operation)
+		resName = r.Name
+	}
+
+	log.V(4).Infof("[Discover GRPC Plugins CR] Operation: %s", operation)
+
+	if operation == "DELETE" {
+		// Manage plugin deletion
+		plugin, exists := veradcoCfg.currentCR[resName]
+		if exists {
+			veradcoCfg.removePlugin(plugin)
+			delete(veradcoCfg.currentCR, resName)
+		}
+		return
+	}
+
 	// Retrieve the content of the custom resource
 	result, err := client.Resource(groupVersionResource).Namespace("veradco-plugins").List(context.TODO(), meta.ListOptions{})
 	if err != nil {
@@ -173,76 +260,64 @@ func (veradcoCfg *VeradcoCfg) DiscoverGrpcPluginsCR(r *admission.AdmissionReques
 		log.V(4).Infof("[Discover GRPC Plugins CR] Number of CR found %d", len(result.Items))
 		for _, cr := range result.Items {
 
-			var name string
+			name, conf, err := getInfoFromCR(cr)
 
-			metadata, ok := cr.Object["metadata"]
-			// If the key exists
-			if ok {
-				// Do something
-				meta, ok := metadata.(map[string]interface{})
-				if ok {
-					name, ok = meta["name"].(string)
-					// fmt.Println(plugin["plugin"])
-					if ok {
-						log.V(4).Infof("[Discover GRPC Plugins CR] Discover CR %s", name)
-					} else {
-						log.V(4).Infof("[Discover GRPC Plugins CR] continue metadata3")
-						continue
-					}
-				} else {
-					log.V(4).Infof("[Discover GRPC Plugins CR] continue metadata4")
-					continue
-				}
-			} else {
-				log.V(4).Infof("[Discover GRPC Plugins CR] continue metadata5")
+			if err != nil {
+				log.Errorf("[Discover GRPC Plugins CR] Unable to parse CR: %v", err)
 				continue
 			}
 
-			if strings.Index(veradcoCfg.alreadyAddedCR, name + "|") < 0 {
+			currPlug, exists := veradcoCfg.currentCR[name]
 
-				spec, ok := cr.Object["spec"]
-				// If the key exists
-				if ok {
-					// Do something
-					pluginConf, ok := spec.(map[string]interface{})
-					if ok {
-						conf, ok := pluginConf["plugin"].(string)
-						// fmt.Println(plugin["plugin"])
-						if ok {
-							// fmt.Println(conf)
+			if !exists {
 
-							plugin, err := veradcoCfg.loadPluginFromConf([]byte(conf))
-							if err != nil {
-								log.Errorf("[Discover GRPC Plugins CR] Unable to load configuration for service %s: %v", name, err)
-								continue
-							}
-
-							_, err = veradcoCfg.loadPlugin(plugin)
-
-							if err != nil {
-								log.Errorf("[Discover GRPC Plugins CR] Unable to load plugin %s : %v", name, err)
-								continue
-							}
-
-							veradcoCfg.addPlugin(plugin)
-
-							veradcoCfg.alreadyAddedCR += name + "|"
-						} else {
-							log.V(4).Infof("[Discover GRPC Plugins CR] continue plugin3")
-							continue
-						}
-					} else {
-						log.V(4).Infof("[Discover GRPC Plugins CR] continue plugin2")
-						continue
-					}
-				} else {
-					log.V(4).Infof("[Discover GRPC Plugins CR] continue plugin1")
+				plugin, err := veradcoCfg.loadPluginFromConf([]byte(conf))
+				if err != nil {
+					log.Errorf("[Discover GRPC Plugins CR] Unable to load configuration for service %s: %v", name, err)
 					continue
 				}
-			} else {
-				log.V(4).Infof("[Discover GRPC Plugins CR] CR %s already encountered", name)
-			}
 
+				_, err = veradcoCfg.loadPlugin(plugin)
+
+				if err != nil {
+					log.Errorf("[Discover GRPC Plugins CR] Unable to load plugin %s: %v", name, err)
+				}
+
+				veradcoCfg.addPlugin(plugin)
+
+
+				veradcoCfg.currentCR[name] = plugin
+
+			} else {
+				if operation == "UPDATE" {
+					// Manage plugin update (recreate)
+
+					if resName == name {
+
+						plugin, err := veradcoCfg.loadPluginFromConf([]byte(conf))
+						if err != nil {
+							log.Errorf("[Discover GRPC Plugins CR] Unable to load configuration for service %s (UPDATE): %v", name, err)
+							continue
+						}
+
+						_, err = veradcoCfg.loadPlugin(plugin)
+
+						if err != nil {
+							log.Errorf("[Discover GRPC Plugins CR] Unable to load plugin %s (UPDATE): %v", name, err)
+						}
+
+						veradcoCfg.removePlugin(currPlug)
+
+						veradcoCfg.addPlugin(plugin)
+
+						veradcoCfg.currentCR[name] = plugin
+					} else {
+						log.V(4).Infof("[Discover GRPC Plugins CR] CR %s already encountered", name)
+					}
+				} else {
+					log.V(4).Infof("[Discover GRPC Plugins CR] CR %s already encountered", name)
+				}
+			}
 		}
 	}
 }
@@ -260,7 +335,7 @@ func (veradcoCfg *VeradcoCfg) discoverGrpcPlugins() {
 		return
 	}
 
-	alreadyAddedNames := ""
+	alreadyAddedNames := make(map[string]*Plugin)
 
 	time.Sleep(10 * time.Second)
 
@@ -268,11 +343,33 @@ func (veradcoCfg *VeradcoCfg) discoverGrpcPlugins() {
 		// List services
 		services, err := clientset.CoreV1().Services("veradco-plugins").List(context.TODO(), meta.ListOptions{})
 		if err == nil {
+			
+			// First remove no more existing services
+			for name, currPlug := range alreadyAddedNames {
+				svcThere := false
+				for _, service := range services.Items {
+					if service.Name == name {
+						svcThere = true
+						continue
+					}
+				}
+				if !svcThere {
+					// Remove plugin
+					veradcoCfg.removePlugin(currPlug)
+					delete(alreadyAddedNames, name)
+					log.Infof("[Discover GRPC Plugins] Service %s has been removed from plugins", name)
+				}
+			}
+
+			// Add new plugins
 			for _, service := range services.Items {
 				_, exists := service.Labels["veradco.discover"]
 				if exists {
 					log.V(4).Infof("[Discover GRPC Plugins] Service %s has discovery label", service.Name)
-					if strings.Index(alreadyAddedNames, service.Name + "|") < 0 {
+
+					_, exists := alreadyAddedNames[service.Name]
+
+					if !exists {
 						log.Infof("[Discover GRPC Plugins] Retrieve configuration from service %s", service.Name)
 
 						// addr := service.Spec.ExternalName + ":" + string(service.Spec.Ports[0].Port)
@@ -306,7 +403,7 @@ func (veradcoCfg *VeradcoCfg) discoverGrpcPlugins() {
 
 							veradcoCfg.addPlugin(plugin)
 
-							alreadyAddedNames += service.Name + "|"
+							alreadyAddedNames[service.Name] = plugin
 						} else {
 							log.Errorf("[Discover GRPC Plugins] Configuration for service %s (addr %s) is empty", service.Name, addr)
 							continue
