@@ -265,7 +265,7 @@ sudo docker push smartduck/veradco_pki_manager:v0.2.0
 # Tag release
 
 ```
-git tag -a v0.2.0 -m "Auto discovery of GRPC plugins"
+git tag -a v0.2.0 -m "Auto discovery of GRPC plugins + CR"
 # remove: git tag -d v0.2.0
 # git push origin 0.1beta1
 git push origin --tags
