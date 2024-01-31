@@ -63,8 +63,8 @@ plugins:
 
 As explained in the Veradco documentation, you can proceed as follow:
 ```sh
-go mod init github.com/smart-duck/veradco/implicit_proxy_cache_populator
-go mod edit -replace github.com/smart-duck/veradco=../../veradco
+go mod init github.com/smart-duck/veradco/veradco/implicit_proxy_cache_populator
+go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
 go mod tidy
 go build -buildmode=plugin -o /dev/null plug.go
 ```

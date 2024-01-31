@@ -3,12 +3,12 @@ package main
 import (
 	admission "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"github.com/smart-duck/veradco/admissioncontroller"
-	"github.com/smart-duck/veradco/kres"
+	"github.com/smart-duck/veradco/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/kres"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"regexp"
-	"github.com/smart-duck/veradco/grpc"
+	"github.com/smart-duck/veradco/veradco/grpc"
 	"os"
 	// meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

@@ -48,8 +48,8 @@ for folder in $(ls -d $PLUGINS_PATH/*/); do
     set +e
     rm go.mod go.sum
     set -e
-    go mod init "github.com/smart-duck/veradco/$plugin_name"
-    go mod edit -replace github.com/smart-duck/veradco=../../veradco
+    go mod init "github.com/smart-duck/veradco/veradco/$plugin_name"
+    go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
     go mod tidy
     echo "$plugin_name go.mod:"
     cat go.mod

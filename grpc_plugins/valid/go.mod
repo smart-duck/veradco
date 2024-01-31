@@ -1,14 +1,14 @@
 module basic
 
-replace github.com/smart-duck/veradco => ../../veradco
+replace github.com/smart-duck/veradco/veradco => ../../veradco
 
-// replace github.com/smart-duck/veradco/grpc => ../../veradco/grpc
-// replace github.com/smart-duck/veradco/admissioncontroller => ../../veradco/admissioncontroller
+// replace github.com/smart-duck/veradco/veradco/grpc => ../../veradco/grpc
+// replace github.com/smart-duck/veradco/veradco/admissioncontroller => ../../veradco/admissioncontroller
 
 go 1.19
 
 require (
-	github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
+	github.com/smart-duck/veradco/veradco v0.0.0-00010101000000-000000000000
 	k8s.io/api v0.29.0
 	k8s.io/apimachinery v0.29.0
 )

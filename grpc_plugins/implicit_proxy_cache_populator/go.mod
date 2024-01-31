@@ -1,6 +1,6 @@
 module implicit_proxy_cache_populator
 
-replace github.com/smart-duck/veradco => ../../veradco
+replace github.com/smart-duck/veradco/veradco => ../../veradco
 
 go 1.19
 
@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.26.4
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.24.7
 	github.com/regclient/regclient v0.5.6
-	github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
+	github.com/smart-duck/veradco/veradco v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.29.1
 	k8s.io/apimachinery v0.29.1

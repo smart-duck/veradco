@@ -37,7 +37,7 @@ go work init
 cd /go/src/veradco
 rm go.mod go.sum || true
 
-go mod init github.com/smart-duck/veradco
+go mod init github.com/smart-duck/veradco/veradco
 go mod tidy
 
 go work use .
@@ -58,8 +58,8 @@ for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
     mkdir -p $folder
     cd $folder
     echo $plug_go | base64 -d > $folder/plug.go
-    go mod init "github.com/smart-duck/veradco/$id_plugin"
-    go mod edit -replace github.com/smart-duck/veradco=../../veradco
+    go mod init "github.com/smart-duck/veradco/veradco/$id_plugin"
+    go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
     go mod tidy
 
     go work use .
@@ -85,9 +85,9 @@ for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
     echo "Prepare built-in plugin $name"
 
     rm go.mod go.sum || true
-    go mod init "github.com/smart-duck/veradco/$plugin_name"
+    go mod init "github.com/smart-duck/veradco/veradco/$plugin_name"
 
-    go mod edit -replace github.com/smart-duck/veradco=../../veradco
+    go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
     go mod tidy
 
     go work use .
@@ -125,8 +125,8 @@ ls -l /app/veradcod
 
 # echo "Building plugin $plugin_name"
 # rm go.mod go.sum || true
-# go mod init "github.com/smart-duck/veradco/$plugin_name"
-# go mod edit -replace github.com/smart-duck/veradco=../../veradco
+# go mod init "github.com/smart-duck/veradco/veradco/$plugin_name"
+# go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
 # go mod tidy
 
 # go work use .

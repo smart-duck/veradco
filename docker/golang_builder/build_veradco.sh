@@ -7,7 +7,7 @@ rm go.mod go.sum
 
 set -e
 
-go mod init github.com/smart-duck/veradco
+go mod init github.com/smart-duck/veradco/veradco
 go mod tidy
 
 echo "veradco go.mod:"

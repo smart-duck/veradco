@@ -2,13 +2,13 @@ module compile_it
 
 go 1.19
 
-replace github.com/smart-duck/veradco => ../veradco/veradco
+replace github.com/smart-duck/veradco/veradco => ../veradco/veradco
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.43
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.20.0
 	github.com/regclient/regclient v0.5.2
-	github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
+	github.com/smart-duck/veradco/veradco v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.2
 	k8s.io/apimachinery v0.28.2

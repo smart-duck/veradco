@@ -2,12 +2,12 @@ module explugin
 
 go 1.19
 
-replace github.com/smart-duck/veradco/protoc => ../veradco/protoc
-replace github.com/smart-duck/veradco/admissioncontroller => ../veradco/admissioncontroller
-replace github.com/smart-duck/veradco/kres => ../veradco/kres
+replace github.com/smart-duck/veradco/veradco/protoc => ../veradco/protoc
+replace github.com/smart-duck/veradco/veradco/admissioncontroller => ../veradco/admissioncontroller
+replace github.com/smart-duck/veradco/veradco/kres => ../veradco/kres
 
 require (
-	github.com/smart-duck/veradco/grpc v0.0.0-00010101000000-000000000000
+	github.com/smart-duck/veradco/veradco/grpc v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.60.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.29.0

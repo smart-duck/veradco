@@ -400,9 +400,9 @@ If it is a Golang plugin, build it is useful only to check that the plugin build
 
 To check that your plugin builds, you can proceed as follow:
 ```sh
-go mod init github.com/smart-duck/veradco/my-plugin
+go mod init github.com/smart-duck/veradco/veradco/my-plugin
 # Optionally if you pulled the veradco code, you can point to it.
-go mod edit -replace github.com/smart-duck/veradco=[Veradco repository]/veradco
+go mod edit -replace github.com/smart-duck/veradco/veradco=[Veradco repository]/veradco
 go mod tidy
 go build -buildmode=plugin -o /dev/null plug.go
 ```
@@ -451,7 +451,7 @@ veradco-d959655c6-crwrd veradco-plugins-init List of built plugins:
 veradco-d959655c6-crwrd veradco-plugins-init BUILD EXTERNAL plugins
 veradco-d959655c6-crwrd veradco-plugins-init Copy veradcod to /app, also plugins folder
 veradco-d959655c6-crwrd veradco-plugins-init File /app/external_plugins/harbor_proxy_cache_populator.so does not exist. Build plugin...
-veradco-d959655c6-crwrd veradco-plugins-init go: creating new go.mod: module github.com/smart-duck/veradco/20220926122555
+veradco-d959655c6-crwrd veradco-plugins-init go: creating new go.mod: module github.com/smart-duck/veradco/veradco/20220926122555
 veradco-d959655c6-crwrd veradco-plugins-init go: to add module requirements and sums:
 veradco-d959655c6-crwrd veradco-plugins-init 	go mod tidy
 veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package gopkg.in/yaml.v3
@@ -459,8 +459,8 @@ veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.
 veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/api/core/v1
 veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/apimachinery/pkg/runtime
 veradco-d959655c6-crwrd veradco-plugins-init go: finding module for package k8s.io/klog/v2
-veradco-d959655c6-crwrd veradco-plugins-init go: found github.com/smart-duck/veradco in github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
-veradco-d959655c6-crwrd veradco-plugins-init go: found github.com/smart-duck/veradco/kres in github.com/smart-duck/veradco v0.0.0-00010101000000-000000000000
+veradco-d959655c6-crwrd veradco-plugins-init go: found github.com/smart-duck/veradco/veradco in github.com/smart-duck/veradco/veradco v0.0.0-00010101000000-000000000000
+veradco-d959655c6-crwrd veradco-plugins-init go: found github.com/smart-duck/veradco/veradco/kres in github.com/smart-duck/veradco/veradco v0.0.0-00010101000000-000000000000
 veradco-d959655c6-crwrd veradco-plugins-init go: found gopkg.in/yaml.v3 in gopkg.in/yaml.v3 v3.0.1
 veradco-d959655c6-crwrd veradco-plugins-init go: found k8s.io/api/admission/v1 in k8s.io/api v0.25.2
 veradco-d959655c6-crwrd veradco-plugins-init go: found k8s.io/api/core/v1 in k8s.io/api v0.25.2

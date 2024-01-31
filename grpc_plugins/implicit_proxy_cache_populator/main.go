@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	admissioncontroller "github.com/smart-duck/veradco/admissioncontroller"
-	"github.com/smart-duck/veradco/grpc"
-	"github.com/smart-duck/veradco/kres"
+	admissioncontroller "github.com/smart-duck/veradco/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/grpc"
+	"github.com/smart-duck/veradco/veradco/kres"
 	"gopkg.in/yaml.v3"
 	admission "k8s.io/api/admission/v1"
 	v1 "k8s.io/api/core/v1"

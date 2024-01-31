@@ -35,8 +35,8 @@ for plugin in $(cat $VERADCO_CONF | yq '.plugins[].name'); do
 	go_file="$plugin_folder/plug.go"
 	echo $plug_go | base64 -d > $go_file
 	cd "$plugin_folder"
-	go mod init "github.com/smart-duck/veradco/$id_plugin"
-	go mod edit -replace github.com/smart-duck/veradco=../../veradco
+	go mod init "github.com/smart-duck/veradco/veradco/$id_plugin"
+	go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
 	go mod tidy
 	go build -buildmode=plugin -o "$path" plug.go
   fi

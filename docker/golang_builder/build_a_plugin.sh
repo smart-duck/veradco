@@ -18,8 +18,8 @@ if [ ! -f "go.mod" ] || [ "$PRESERVE_GO_MOD" != "true" ]; then
   set +e
   rm go.mod go.sum
   set -e
-  go mod init "github.com/smart-duck/veradco/$plugin_name"
-  go mod edit -replace github.com/smart-duck/veradco=../../veradco
+  go mod init "github.com/smart-duck/veradco/veradco/$plugin_name"
+  go mod edit -replace github.com/smart-duck/veradco/veradco=../../veradco
   go mod tidy
 fi
 
