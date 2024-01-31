@@ -1,4 +1,4 @@
-module github.com/smart-duck/veradco
+module github.com/smart-duck/veradco/veradco
 
 go 1.19
 

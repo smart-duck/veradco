@@ -155,7 +155,7 @@ There are 2 scopes: Validating and Mutating.
 ## Setup go environment
 
 ```
-go mod init github.com/smart-duck/veradco
+go mod init github.com/smart-duck/veradco/veradco
 go mod tidy
 ```
 
@@ -215,13 +215,13 @@ plugin.lookup(...)
         /usr/local/go/src/plugin/plugin_dlopen.go:138
 plugin.(*Plugin).Lookup(...)
         /usr/local/go/src/plugin/plugin.go:40
-github.com/smart-duck/veradco/pods.validateCreate.func1(0xc0002b4000)
+github.com/smart-duck/veradco/veradco/pods.validateCreate.func1(0xc0002b4000)
         /app/pods/create.go:44 +0x13a
-github.com/smart-duck/veradco.wrapperExecution(0x3?, 0xc0001009b0?)
+github.com/smart-duck/veradco/veradco.wrapperExecution(0x3?, 0xc0001009b0?)
         /app/hook.go:48 +0x28
-github.com/smart-duck/veradco.(*Hook).Execute(0x7f2d286b3bd8?, 0xc0002ad000?)
+github.com/smart-duck/veradco/veradco.(*Hook).Execute(0x7f2d286b3bd8?, 0xc0002ad000?)
         /app/hook.go:31 +0x45
-github.com/smart-duck/veradco/http.(*admissionHandler).Serve.func1({0x10ef5a0, 0xc0000b8460}, 0xc0000c1000)
+github.com/smart-duck/veradco/veradco/http.(*admissionHandler).Serve.func1({0x10ef5a0, 0xc0000b8460}, 0xc0000c1000)
         /app/http/handlers.go:62 +0x3e5
 net/http.HandlerFunc.ServeHTTP(0xc0000b8460?, {0x10ef5a0?, 0xc0000b8460?}, 0xfa267e?)
         /usr/local/go/src/net/http/server.go:2109 +0x2f

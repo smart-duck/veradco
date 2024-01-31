@@ -8,7 +8,7 @@ import (
 	log "k8s.io/klog/v2"
 	"gopkg.in/yaml.v3"
 	"encoding/json"
-	veradcoplugin "github.com/smart-duck/veradco/plugin"
+	veradcoplugin "github.com/smart-duck/veradco/veradco/plugin"
 	goplugin "plugin"
 	"fmt"
 	"regexp"
@@ -20,9 +20,9 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"github.com/smart-duck/veradco/admissioncontroller"
-	"github.com/smart-duck/veradco/kres"
-	"github.com/smart-duck/veradco/monitoring"
+	"github.com/smart-duck/veradco/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/kres"
+	"github.com/smart-duck/veradco/veradco/monitoring"
 	"time"
 	"strings"
 	"sync"
@@ -31,7 +31,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
-	pb "github.com/smart-duck/veradco/protoc"
+	pb "github.com/smart-duck/veradco/veradco/protoc"
 )
 
 const (

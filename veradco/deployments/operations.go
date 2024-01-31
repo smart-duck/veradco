@@ -1,11 +1,11 @@
 package deployments
 
 import (
-	"github.com/smart-duck/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/admissioncontroller"
 
-	"github.com/smart-duck/veradco/kres"
+	"github.com/smart-duck/veradco/veradco/kres"
 
-	"github.com/smart-duck/veradco/cfg"
+	"github.com/smart-duck/veradco/veradco/cfg"
 
 	log "k8s.io/klog/v2"
 

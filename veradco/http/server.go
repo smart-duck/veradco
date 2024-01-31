@@ -7,17 +7,17 @@ import (
 
 	log "k8s.io/klog/v2"
 
-	// "github.com/smart-duck/veradco/deployments"
-	"github.com/smart-duck/veradco/pods"
+	// "github.com/smart-duck/veradco/veradco/deployments"
+	"github.com/smart-duck/veradco/veradco/pods"
 
-	"github.com/smart-duck/veradco/deployments"
+	"github.com/smart-duck/veradco/veradco/deployments"
 
-	"github.com/smart-duck/veradco/daemonsets"
+	"github.com/smart-duck/veradco/veradco/daemonsets"
 
-	"github.com/smart-duck/veradco/statefulsets"
+	"github.com/smart-duck/veradco/veradco/statefulsets"
 	
-	"github.com/smart-duck/veradco/others"
-	"github.com/smart-duck/veradco/cfg"
+	"github.com/smart-duck/veradco/veradco/others"
+	"github.com/smart-duck/veradco/veradco/cfg"
 )
 
 const (

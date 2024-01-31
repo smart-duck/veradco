@@ -1,9 +1,9 @@
 package daemonsets
 
 import (
-	"github.com/smart-duck/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/admissioncontroller"
 
-	"github.com/smart-duck/veradco/cfg"
+	"github.com/smart-duck/veradco/veradco/cfg"
 )
 
 // NewValidationHook creates a new instance of others validation hook

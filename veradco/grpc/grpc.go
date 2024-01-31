@@ -16,11 +16,11 @@ import (
 	// "google.golang.org/grpc/credentials/alts"
 
 	// pb "google.golang.org/grpc/examples/helloworld/helloworld"
-	pb "github.com/smart-duck/veradco/protoc"
+	pb "github.com/smart-duck/veradco/veradco/protoc"
 
-	"github.com/smart-duck/veradco/kres"
-	"github.com/smart-duck/veradco/plugin"
-	"github.com/smart-duck/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/kres"
+	"github.com/smart-duck/veradco/veradco/plugin"
+	"github.com/smart-duck/veradco/veradco/admissioncontroller"
 
 	// "gopkg.in/yaml.v2"
 	// v1 "k8s.io/api/core/v1"

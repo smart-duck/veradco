@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/smart-duck/veradco/http"
-	"github.com/smart-duck/veradco/monitoring"
+	"github.com/smart-duck/veradco/veradco/http"
+	"github.com/smart-duck/veradco/veradco/monitoring"
 
 	log "k8s.io/klog/v2"
 )

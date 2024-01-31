@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/smart-duck/veradco/admissioncontroller"
+	"github.com/smart-duck/veradco/veradco/admissioncontroller"
 
 	// "k8s.io/api/admission/v1beta1"
 	admission "k8s.io/api/admission/v1"
